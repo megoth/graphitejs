@@ -1,0 +1,22 @@
+{
+    "name": "Graphite.JS",
+    "version": "0.0.1",
+    "description": "Javascript library for using data from Semantic Web through abstractions",
+    "homepage": "https://github.com/megoth/graphitejs",
+    "author": { "name": "Arne Hassel" },
+    "contributors": [{
+        "name": "Arne Hassel",
+        "email": "arne.hassel@gmail.com",
+        "url": "http://icanhasweb.wordpress.com"
+    }],
+    "main": "./src/main",
+    "repository": "git://github.com/megoth/graphitejs.git",
+    "license": {
+        "type": "MIT",
+        "url": "http://www.opensource.org/licenses/mit-license.php"
+    },
+    "dependencies": {
+        "buster": "",
+        "sinon": ""
+    }
+}
