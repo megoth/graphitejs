@@ -1,0 +1,21 @@
+{
+  "@context": {
+    "canSee": "http://example.org/vocab#canSee"
+  },
+  "@graph": [
+    {
+      "@id": "looker",
+      "canSee": [
+        {
+          "@id": "forgotten"
+        },
+        {
+          "@id": "spotted"
+        }
+      ]
+    },
+    {
+      "@id": "spotted"
+    }
+  ]
+}

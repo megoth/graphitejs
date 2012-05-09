@@ -1,0 +1,5 @@
+{
+    "@id": "http://example.com/people/manu",
+    "http://xmlns.com/foaf/spec/name": "Manu Sporny",
+    "http://xmlns.com/foaf/spec/age": 42
+}

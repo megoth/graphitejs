@@ -1,0 +1,28 @@
+[
+  {
+    "@context": {
+      "canSee": "http://example.org/vocab#canSee"
+    },
+    "@id": "looker",
+    "canSee": [
+      {
+        "@id": "forgotten"
+      },
+      {
+        "@id": "spotted"
+      }
+    ]
+  },
+  {
+    "@context": {
+      "canSee": "http://example.org/vocab#canSee"
+    },
+    "@id": "forgotten"
+  },
+  {
+    "@context": {
+      "canSee": "http://example.org/vocab#canSee"
+    },
+    "@id": "spotted"
+  }
+]

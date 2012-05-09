@@ -1,0 +1,6 @@
+{
+    "@context": {
+        "@id": "http://example.com/people/arne",
+        "name": "http://xmlns.com/foaf/spec/name"
+    }
+}

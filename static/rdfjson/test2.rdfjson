@@ -1,0 +1,13 @@
+{
+  "http://example.com/people/arne": {
+    "http://xmlns.com/foaf/spec/age": [{
+        "datatype": "http://www.w3.org/TR/xmlschema-2/#integer",
+        "type": "literal",
+        "value": 27
+    }],
+    "http://xmlns.com/foaf/spec/name2": [{
+        "type": "literal",
+        "value": "Arne Hassel"
+    }]
+  }
+}

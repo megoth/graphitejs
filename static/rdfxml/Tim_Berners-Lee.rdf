@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rdf:RDF
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+	xmlns:owl="http://www.w3.org/2002/07/owl#"
+	xmlns:foaf="http://xmlns.com/foaf/0.1/"
+	xmlns:dbpedia-owl="http://dbpedia.org/ontology/"
+	xmlns:dcterms="http://purl.org/dc/terms/"
+	xmlns:dbpprop="http://dbpedia.org/property/" >
+  <rdf:Description rdf:about="http://dbpedia.org/resource/TBL">
+    <dbpedia-owl:wikiPageDisambiguates rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Mary_Lee_Woods">
+    <dbpedia-owl:child rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+    <dbpprop:children rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/TimBL">
+    <dbpedia-owl:wikiPageRedirects rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Weaving_the_Web:_The_Original_Design_and_Ultimate_Destiny_of_the_World_Wide_Web_by_its_inventor">
+    <dbpedia-owl:author rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+    <dbpprop:author rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Sir_Tim_Berners-Lee">
+    <dbpedia-owl:wikiPageRedirects rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Tim_Bernes_Lee">
+    <dbpedia-owl:wikiPageRedirects rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/World_Wide_Web_Consortium">
+    <dbpprop:leaderName rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Berners-Lee">
+    <dbpedia-owl:wikiPageDisambiguates rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www4.wiwiss.fu-berlin.de/flickrwrappr/photos/Tim_Berners-Lee">
+    <owl:sameAs rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Libwww">
+    <dbpprop:author rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Timothy_John_Berners-Lee">
+    <dbpedia-owl:wikiPageRedirects rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Tim_Berners-Lee">
+    <rdf:type rdf:resource="http://dbpedia.org/class/yago/Person100007846" />
+    <rdf:type rdf:resource="http://dbpedia.org/ontology/Person" />
+    <rdf:type rdf:resource="http://dbpedia.org/class/yago/EnglishInventors" />
+    <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person" />
+    <rdf:type rdf:resource="http://dbpedia.org/class/yago/PeopleFromLondon" />
+    <rdf:type rdf:resource="http://dbpedia.org/class/yago/ComputerPioneers" />
+    <rdf:type rdf:resource="http://dbpedia.org/class/yago/LivingPeople" />
+    <rdf:type rdf:resource="http://schema.org/Person" />
+    <rdf:type rdf:resource="http://dbpedia.org/class/yago/EnglishComputerScientists" />
+    <rdf:type rdf:resource="http://dbpedia.org/class/yago/FellowsOfTheRoyalAcademyOfEngineering" />
+    <rdf:type rdf:resource="http://dbpedia.org/class/yago/FellowsOfTheRoyalSociety" />
+    <rdf:type rdf:resource="http://dbpedia.org/class/yago/JapanPrizeLaureates" />
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Thing" />
+    <rdf:type rdf:resource="http://dbpedia.org/class/yago/FellowsOfTheRoyalSocietyOfArts" />
+    <rdf:type rdf:resource="http://dbpedia.org/class/yago/EnglishExpatriatesInTheUnitedStates" />
+    <rdf:type rdf:resource="http://dbpedia.org/class/yago/PeopleFromBarnes" />
+    <rdf:type rdf:resource="http://dbpedia.org/class/yago/MacArthurFellows" />
+    <rdf:type rdf:resource="http://dbpedia.org/class/yago/AlumniOfTheQuEEn%27sCollege,Oxford" />
+    <rdf:type rdf:resource="http://umbel.org/umbel/rc/PersonWithOccupation" />
+    <rdf:type rdf:resource="http://dbpedia.org/class/yago/FellowsOfTheBritishComputerSociety" />
+    <owl:sameAs rdf:resource="http://www4.wiwiss.fu-berlin.de/dblp/resource/person/100007" />
+    <owl:sameAs rdf:resource="http://rdf.freebase.com/ns/m/07d5b" />
+    <owl:sameAs rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+    <rdfs:comment xml:lang="en">Sir Timothy John &quot;Tim&quot; Berners-Lee, OM, KBE, FRS, FREng, FRSA (born 8 June 1955), also known as &quot;TimBL&quot;, is a British physicist, computer scientist and MIT professor, credited for his invention of the World Wide Web, (not the internet) making the first proposal for it in March 1989. On 25 December 1990, with the help of Robert Cailliau and a young student at CERN, he implemented the first successful communication between a Hypertext Transfer Protocol (HTTP) client and server via the Internet.</rdfs:comment>
+    <rdfs:comment xml:lang="fr">Tim Berners-Lee est un citoyen britannique surtout connu comme le principal inventeur du World Wide Web. En juillet 2004, il est anobli par la reine Elizabeth II pour ce travail et son nom officiel devient Sir Timothy John Berners-Lee. Depuis 1994, il préside le World Wide Web Consortium (W3C), organisme qu&#39;il a fondé.</rdfs:comment>
+    <rdfs:comment xml:lang="zh">蒂莫西·约翰·&quot;蒂姆&quot;·伯纳斯-李爵士，OM，KBE，FRS，FREng，FRSA（Sir Timothy John &quot;Tim&quot; Berners-Lee，Template:Bd），生於英國倫敦，是万维网的发明者，現任麻省理工學院正教授。1990年12月25日，在罗伯特·卡里奥与CERN的一名年轻学生的帮助下，他成功地通过Internet实现了HTTP代理与服务器的第一次通讯。他是监视万维网发展的万维网联盟（總部位於麻省理工學院）的主席。2009年4月，他在华盛顿成为美国国家科学院院士。</rdfs:comment>
+    <rdfs:comment xml:lang="ja">サー・ティモシー・ジョン・バーナーズ＝リー（Sir Timothy John Berners-Lee, OM, KBE, FRS, FREng, FRSA、1955年6月8日 - ）は、イギリスの計算機科学者。ロバート・カイリューとともに、World Wide Web（WWW）のハイパーテキストシステムを考案・開発した人物である。URL、HTTP、HTML の最初の設計は彼によるもの。</rdfs:comment>
+    <rdfs:comment xml:lang="sv">Sir Timothy &quot;Tim&quot; John Berners–Lee, KBE, FRS, född 8 juni 1955 i London i England, är skaparen av World Wide Web, en teknik som skapade förutsättningar för en bredare användning av Internet, och chef för World Wide Web Consortium.</rdfs:comment>
+    <rdfs:comment xml:lang="de">Sir Timothy John Berners-Lee, OM, KBE, FRS ist ein britischer Physiker und Informatiker. Er ist der Erfinder der HTML (Hypertext Markup Language) und der Begründer des World Wide Web. Heute steht er dem World Wide Web Consortium (W3C) vor, ist Professor am Massachusetts Institute of Technology (MIT) und hat seit 2004 einen Lehrstuhl an der Universität Southampton inne.</rdfs:comment>
+    <rdfs:comment xml:lang="nl">Sir Tim Berners-Lee is de bedenker en grondlegger van het World Wide Web (WWW), samen met zijn toenmalig manager, de Belg Robert Cailliau. Dit gebeurde in zijn tijd als consultant software engineer bij CERN in Zwitserland in de periode van juni tot en met december 1980. Als directeur van het World Wide Web Consortium houdt hij toezicht op de ontwikkeling van webtalen en -protocollen als HTML, XML, CSS en HTTP. Berners-Lee schreef de eerste webbrowser en de eerste webserver.</rdfs:comment>
+    <rdfs:comment xml:lang="pl">Sir Timothy Berners-Lee – fizyk, programista, współtwórca i jeden z pionierów usługi WWW, obecnie jednej z najpopularniejszych usług internetowych. Od roku 1994 jest Przewodniczącym Konsorcjum W3C.</rdfs:comment>
+    <rdfs:comment xml:lang="ru">Бернерс-Ли, Тим style=&quot;background:transparent&quot; |&amp;lt;imagemap&amp;gt;Image:United-kingdom548. gif|border|60px|Орден Британской империи default Орден Британской империи desc none&amp;lt;/imagemap&amp;gt;||&amp;lt;imagemap&amp;gt;Image:United-kingdom336.</rdfs:comment>
+    <rdfs:comment xml:lang="pt">Sir Timothy John Berners-Lee KBE, OM, FRS (TimBL ou TBL) é um físico britânico e cientista da computação e professor do MIT, a quem é creditada a invenção do World Wide Web, fazendo a primeira proposta para sua criação em março de 1989. Em 25 de dezembro de 1990, com a ajuda de Robert Cailliau e um jovem estudante do CERN, implementou a primeira comunicação bem-sucedida entre um cliente HTTP e o servidor através da internet.</rdfs:comment>
+    <rdfs:comment xml:lang="fi">Sir Timothy &quot;Tim&quot; John Berners-Lee on WWW:n kehittäjä. Keksinnöstään hänet on palkittu useita kertoja. Hän vastaanotti 15. kesäkuuta 2004 miljoonan euron suuruisen Millennium-palkinnon. Tim Berners-Lee sai myös toisen merkittävän kunniapalkinnon, kun 16. heinäkuuta 2004 kuningatar Elisabet II aateloi hänet myöntämällä hänelle Brittiläisen imperiumin ritarikunnan komentajan arvon.</rdfs:comment>
+    <rdfs:comment xml:lang="es">Sir Timothy &quot;Tim&quot; John Berners-Lee, OM, KBE (TimBL o TBL) nació el 8 de junio de 1955 en Londres, Reino Unido, se licenció en Física en 1976 en el Queen&#39;s College de la Universidad de Oxford. Es considerado el padre de la web. Ante la necesidad de distribuir e intercambiar información acerca de sus investigaciones de una manera más efectiva, Berners-Lee desarrolló las ideas fundamentales que estructuran la web.</rdfs:comment>
+    <rdfs:comment xml:lang="no">Timothy John Berners-Lee er en britisk data-oppfinner. Han er mest kjent for å ha oppfunnet World Wide Web og er i dag leder av World Wide Web Consortium, som står for den nåværende utviklingen av WWW.</rdfs:comment>
+    <rdfs:label xml:lang="de">Tim Berners-Lee</rdfs:label>
+    <rdfs:label xml:lang="en">Tim Berners-Lee</rdfs:label>
+    <rdfs:label xml:lang="no">Tim Berners-Lee</rdfs:label>
+    <rdfs:label xml:lang="es">Tim Berners-Lee</rdfs:label>
+    <rdfs:label xml:lang="fr">Tim Berners-Lee</rdfs:label>
+    <rdfs:label xml:lang="pl">Tim Berners-Lee</rdfs:label>
+    <rdfs:label xml:lang="ru">Бернерс-Ли, Тим</rdfs:label>
+    <rdfs:label xml:lang="ja">ティム・バーナーズ＝リー</rdfs:label>
+    <rdfs:label xml:lang="pt">Tim Berners-Lee</rdfs:label>
+    <rdfs:label xml:lang="zh">蒂姆·伯纳斯-李</rdfs:label>
+    <rdfs:label xml:lang="fi">Tim Berners-Lee</rdfs:label>
+    <rdfs:label xml:lang="sv">Tim Berners-Lee</rdfs:label>
+    <rdfs:label xml:lang="it">Tim Berners-Lee</rdfs:label>
+    <rdfs:label xml:lang="nl">Tim Berners-Lee</rdfs:label>
+    <foaf:name xml:lang="en">Tim Berners-Lee</foaf:name>
+    <foaf:name xml:lang="en">Sir Tim Berners-Lee</foaf:name>
+    <dbpedia-owl:abstract xml:lang="es">Sir Timothy &quot;Tim&quot; John Berners-Lee, OM, KBE (TimBL o TBL) nació el 8 de junio de 1955 en Londres, Reino Unido, se licenció en Física en 1976 en el Queen&#39;s College de la Universidad de Oxford. Es considerado el padre de la web. Ante la necesidad de distribuir e intercambiar información acerca de sus investigaciones de una manera más efectiva, Berners-Lee desarrolló las ideas fundamentales que estructuran la web. Él y su grupo crearon lo que por sus siglas en inglés se denomina Lenguaje HTML (HyperText Markup Language) o lenguaje de etiquetas de hipertexto, el protocolo HTTP (HyperText Transfer Protocol) y el sistema de localización de objetos en la web URL (Uniform Resource Locator). Es posible encontrar muchas de las ideas plasmadas por Berners-Lee en el proyecto Xanadu y el memex.</dbpedia-owl:abstract>
+    <dbpedia-owl:abstract xml:lang="pt">Sir Timothy John Berners-Lee KBE, OM, FRS (TimBL ou TBL) é um físico britânico e cientista da computação e professor do MIT, a quem é creditada a invenção do World Wide Web, fazendo a primeira proposta para sua criação em março de 1989. Em 25 de dezembro de 1990, com a ajuda de Robert Cailliau e um jovem estudante do CERN, implementou a primeira comunicação bem-sucedida entre um cliente HTTP e o servidor através da internet. Berners-Lee é o diretor do World Wide Web Consortium (W3C), que supervisiona o desenvolvimento continuado da web. Também é o fundador da Fundação World Wide Web e é um pesquisador sênior e titular e fundador da cadeira de 3Com no Laboratório de Inteligência Artificial e Ciência da Computação do MIT (CSAIL). É um diretor da The Web Science Research Initiative (WSRI) e um membro do conselho consultivo do Centro de Inteligência Coletiva do MIT. Em abril de 2009, foi eleito como membro da Academia Nacional de Ciências dos Estados Unidos, sediada em Washington, D.C. Em 2004, Timothy venceu o Millennium Technology Prize, o que lhe rendeu um milhão de euros.</dbpedia-owl:abstract>
+    <dbpedia-owl:abstract xml:lang="en">Sir Timothy John &quot;Tim&quot; Berners-Lee, OM, KBE, FRS, FREng, FRSA (born 8 June 1955), also known as &quot;TimBL&quot;, is a British physicist, computer scientist and MIT professor, credited for his invention of the World Wide Web, (not the internet) making the first proposal for it in March 1989. On 25 December 1990, with the help of Robert Cailliau and a young student at CERN, he implemented the first successful communication between a Hypertext Transfer Protocol (HTTP) client and server via the Internet. Berners-Lee is the director of the World Wide Web Consortium (W3C), which oversaw the Web&#39;s continued development. He is also the founder of the World Wide Web Foundation, and is a senior researcher and holder of the 3Com Founders Chair at the MIT Computer Science and Artificial Intelligence Laboratory (CSAIL). He is a director of The Web Science Research Initiative (WSRI), and a member of the advisory board of the MIT Center for Collective Intelligence. In 2004, Berners-Lee was knighted by Queen Elizabeth II for his pioneering work. In April 2009, he was elected as a member of the United States National Academy of Sciences, based in Washington, D.C.</dbpedia-owl:abstract>
+    <dbpedia-owl:abstract xml:lang="no">Timothy John Berners-Lee er en britisk data-oppfinner. Han er mest kjent for å ha oppfunnet World Wide Web og er i dag leder av World Wide Web Consortium, som står for den nåværende utviklingen av WWW.</dbpedia-owl:abstract>
+    <dbpedia-owl:abstract xml:lang="pl">Sir Timothy Berners-Lee – fizyk, programista, współtwórca i jeden z pionierów usługi WWW, obecnie jednej z najpopularniejszych usług internetowych. Od roku 1994 jest Przewodniczącym Konsorcjum W3C.</dbpedia-owl:abstract>
+    <dbpedia-owl:abstract xml:lang="zh">蒂莫西·约翰·&quot;蒂姆&quot;·伯纳斯-李爵士，OM，KBE，FRS，FREng，FRSA（Sir Timothy John &quot;Tim&quot; Berners-Lee，Template:Bd），生於英國倫敦，是万维网的发明者，現任麻省理工學院正教授。1990年12月25日，在罗伯特·卡里奥与CERN的一名年轻学生的帮助下，他成功地通过Internet实现了HTTP代理与服务器的第一次通讯。他是监视万维网发展的万维网联盟（總部位於麻省理工學院）的主席。2009年4月，他在华盛顿成为美国国家科学院院士。</dbpedia-owl:abstract>
+    <dbpedia-owl:abstract xml:lang="ja">サー・ティモシー・ジョン・バーナーズ＝リー（Sir Timothy John Berners-Lee, OM, KBE, FRS, FREng, FRSA、1955年6月8日 - ）は、イギリスの計算機科学者。ロバート・カイリューとともに、World Wide Web（WWW）のハイパーテキストシステムを考案・開発した人物である。URL、HTTP、HTML の最初の設計は彼によるもの。</dbpedia-owl:abstract>
+    <dbpedia-owl:abstract xml:lang="ru">Бернерс-Ли, Тим style=&quot;background:transparent&quot; |&amp;lt;imagemap&amp;gt;Image:United-kingdom548. gif|border|60px|Орден Британской империи default Орден Британской империи desc none&amp;lt;/imagemap&amp;gt;||&amp;lt;imagemap&amp;gt;Image:United-kingdom336. gif|border|60px|Орден Заслуг default Орден Заслуг (Великобритания) desc none&amp;lt;/imagemap&amp;gt; |} |Роспись = |Ширина росписи = |Сайт = Tim Berners-Lee }} Сэр Тимоти Джон Бернерс-Ли OM, KBE — британский учёный, изобретатель URI, URL, HTTP, HTML, изобретатель Всемирной паутины и действующий глава Консорциума Всемирной паутины. Автор концепции семантической паутины. Автор множества других разработок в области информационных технологий.</dbpedia-owl:abstract>
+    <dbpedia-owl:abstract xml:lang="nl">Sir Tim Berners-Lee is de bedenker en grondlegger van het World Wide Web (WWW), samen met zijn toenmalig manager, de Belg Robert Cailliau. Dit gebeurde in zijn tijd als consultant software engineer bij CERN in Zwitserland in de periode van juni tot en met december 1980. Als directeur van het World Wide Web Consortium houdt hij toezicht op de ontwikkeling van webtalen en -protocollen als HTML, XML, CSS en HTTP. Berners-Lee schreef de eerste webbrowser en de eerste webserver. In 1999 publiceerde hij Weaving the Web, een boek over het ontstaan van het web. Het werd in het Nederlands vertaald als De wereld van het World Wide Web. Berners-Lee streeft naar het semantisch web, dat wil zeggen, een World Wide Web waarin informatie inhoudelijk benoemd en ingedeeld is op een voor computers verwerkbare manier. Hoewel er in de academische wereld veel aandacht voor is, is het nog onduidelijk of het semantisch web eenzelfde succes zal worden als het WWW. Berners-Lee heeft voor zijn werk verschillende prijzen gewonnen: de Japanprijs 2002 de Millennium Technology Prize 2004 een koninklijke onderscheiding: op 16 juli 2004 is hij tot ridder geslagen door Koningin Elizabeth II. Hij kreeg hierbij de titel van Knight Commander, de op een na hoogste rang in de Orde van het Britse Rijk. Op 20 oktober 2009 is hem een eredoctoraat toegekend door de Vrije Universiteit Amsterdam, voor zijn &quot;essentiële bijdrage aan de ontwikkeling, introductie en groei van het worldwide web, dat diepgaande invloed heeft op het sociale, economische, culturele en publieke leven&quot;. Hetzelfde jaar werd hij eredoctor van de Universiteit van Luik, samen met Robert Cailliau. In 2009 werd Berners-Lee door de Britse overheid ingehuurd om toezicht te houden over een nieuw project: een website met daarin publiek beschikbare Britse data. Op 21 januari 2010 heeft Berners-Lee de site geopend. De site, data. gov. uk, bevat onder meer gegevens over verkeer, criminaliteit, de gezondheidszorg, huizenprijzen, werkgelegenheid en belastingen. In totaal staan er meer dan 3.000 datasets op de site. De data mag door iedereen worden gebruikt voor commerciële en niet-commerciële toepassingen. Op de site staan enkele applicaties die gebruikmaken van de data. Gebruikers kunnen bijvoorbeeld een iPhone-app downloaden om de dichtstbijzijnde apotheek te bezoeken. Er is ook een programma gemaakt voor mensen die op zoek zijn naar een baan bij de overheid. Zodra er ergens een vacature verschijnt, krijgen ze bericht per e-mail. Wie niet zelf kan programmeren, kan ideeën voor programma&#39;s op de site achterlaten.</dbpedia-owl:abstract>
+    <dbpedia-owl:abstract xml:lang="de">Sir Timothy John Berners-Lee, OM, KBE, FRS ist ein britischer Physiker und Informatiker. Er ist der Erfinder der HTML (Hypertext Markup Language) und der Begründer des World Wide Web. Heute steht er dem World Wide Web Consortium (W3C) vor, ist Professor am Massachusetts Institute of Technology (MIT) und hat seit 2004 einen Lehrstuhl an der Universität Southampton inne.</dbpedia-owl:abstract>
+    <dbpedia-owl:abstract xml:lang="sv">Sir Timothy &quot;Tim&quot; John Berners–Lee, KBE, FRS, född 8 juni 1955 i London i England, är skaparen av World Wide Web, en teknik som skapade förutsättningar för en bredare användning av Internet, och chef för World Wide Web Consortium.</dbpedia-owl:abstract>
+    <dbpedia-owl:abstract xml:lang="fi">Sir Timothy &quot;Tim&quot; John Berners-Lee on WWW:n kehittäjä. Keksinnöstään hänet on palkittu useita kertoja. Hän vastaanotti 15. kesäkuuta 2004 miljoonan euron suuruisen Millennium-palkinnon. Tim Berners-Lee sai myös toisen merkittävän kunniapalkinnon, kun 16. heinäkuuta 2004 kuningatar Elisabet II aateloi hänet myöntämällä hänelle Brittiläisen imperiumin ritarikunnan komentajan arvon. Berners-Lee työskentelee nykyään Massachusetts Institute of Technologyn yhteydessä toimivan World Wide Web Consortiumin johtajana. Berners-Lee on koulutustaustaltaan fyysikko, mutta työskennellyt jo ennen WWW:n kehittämistä lähinnä tietotekniikan parissa. Vuonna 2009 Berners-Lee pyysi anteeksi internetosoitteiden kauttaviivojen internetinkäyttäjille aiheuttamaa vaivaa ja ylimääräisten viivojen kuluttaman paperin ja musteen määrää.</dbpedia-owl:abstract>
+    <dbpedia-owl:abstract xml:lang="fr">Tim Berners-Lee est un citoyen britannique surtout connu comme le principal inventeur du World Wide Web. En juillet 2004, il est anobli par la reine Elizabeth II pour ce travail et son nom officiel devient Sir Timothy John Berners-Lee. Depuis 1994, il préside le World Wide Web Consortium (W3C), organisme qu&#39;il a fondé.</dbpedia-owl:abstract>
+    <dbpedia-owl:employer rdf:resource="http://dbpedia.org/resource/University_of_Southampton" />
+    <dbpedia-owl:employer rdf:resource="http://dbpedia.org/resource/World_Wide_Web_Consortium" />
+    <dbpedia-owl:knownFor rdf:resource="http://dbpedia.org/resource/World_Wide_Web" />
+    <dbpedia-owl:personFunction rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee__1" />
+    <dbpedia-owl:religion rdf:resource="http://dbpedia.org/resource/Unitarian_Universalism" />
+    <dbpedia-owl:parent rdf:resource="http://dbpedia.org/resource/Conway_Berners-Lee" />
+    <dbpedia-owl:parent rdf:resource="http://dbpedia.org/resource/Mary_Lee_Woods" />
+    <dbpedia-owl:wikiPageExternalLink rdf:resource="http://www.scientificamerican.com/article.cfm?id=long-live-the-web&amp;print=yes" />
+    <dbpedia-owl:wikiPageExternalLink rdf:resource="http://info.cern.ch/hypertext/WWW/TheProject.html," />
+    <dbpedia-owl:wikiPageExternalLink rdf:resource="http://www.sciam.com/article.cfm?id=the-semantic-web&amp;print=true" />
+    <dbpedia-owl:wikiPageExternalLink rdf:resource="http://www.w3.org/History/19921103-hypertext/hypertext/WWW/TheProject.html" />
+    <dbpedia-owl:wikiPageExternalLink rdf:resource="http://identi.ca/timbl" />
+    <dbpedia-owl:wikiPageExternalLink rdf:resource="http://www.ecs.soton.ac.uk/" />
+    <dbpedia-owl:wikiPageExternalLink rdf:resource="http://www.technologyreview.com/Infotech/13784/" />
+    <dbpedia-owl:wikiPageExternalLink rdf:resource="http://www.w3.org/People/Berners-Lee/" />
+    <dbpedia-owl:wikiPageExternalLink rdf:resource="http://news.bbc.co.uk/2/hi/technology/4132752.stm" />
+    <dbpedia-owl:education rdf:resource="http://dbpedia.org/resource/The_Queen%27s_College,_Oxford" />
+    <dbpedia-owl:birthYear rdf:datatype="http://www.w3.org/2001/XMLSchema#gYear">1955-01-01T00:00:00-04:00</dbpedia-owl:birthYear>
+    <dbpedia-owl:birthPlace rdf:resource="http://dbpedia.org/resource/London,_England" />
+    <dbpedia-owl:birthPlace rdf:resource="http://dbpedia.org/resource/United_Kingdom" />
+    <dbpedia-owl:birthPlace rdf:resource="http://dbpedia.org/resource/London" />
+    <dbpedia-owl:residence rdf:resource="http://dbpedia.org/resource/Massachusetts" />
+    <dbpedia-owl:birthDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1955-06-08</dbpedia-owl:birthDate>
+    <dbpedia-owl:occupation rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee__2" />
+    <dbpedia-owl:occupation rdf:resource="http://dbpedia.org/resource/Computer_scientist" />
+    <dbpedia-owl:thumbnail rdf:resource="http://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/TimBernersLee-2009.jpg/200px-TimBernersLee-2009.jpg" />
+    <dbpedia-owl:title xml:lang="en">Professor, Knight</dbpedia-owl:title>
+    <foaf:homepage rdf:resource="http://www.w3.org/People/Berners-Lee/" />
+    <dbpedia-owl:nationality rdf:resource="http://dbpedia.org/resource/British_people" />
+    <dbpedia-owl:stateOfOrigin rdf:resource="http://dbpedia.org/resource/British_people" />
+    <foaf:depiction rdf:resource="http://upload.wikimedia.org/wikipedia/commons/e/e4/TimBernersLee-2009.jpg" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:English_Unitarians" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Members_of_the_Order_of_Merit" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:World_Wide_Web_Consortium" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:English_expatriates_in_the_United_States" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:MacArthur_Fellows" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:English_inventors" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Fellows_of_the_American_Academy_of_Arts_and_Sciences" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:1955_births" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:HTTP" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Fellows_of_the_Royal_Society" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:People_educated_at_Emanuel_School" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Computer_pioneers" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:People_from_Barnes,_London" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Japan_Prize_laureates" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Internet_pioneers" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:People_from_London" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Fellows_of_the_British_Computer_Society" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Living_people" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Members_of_the_United_States_National_Academy_of_Engineering" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Alumni_of_The_Queen%27s_College,_Oxford" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Fellows_of_the_Royal_Academy_of_Engineering" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:English_computer_scientists" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Knights_Commander_of_the_Order_of_the_British_Empire" />
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Royal_Medal_winners" />
+    <dbpprop:religion rdf:resource="http://dbpedia.org/resource/Unitarian_Universalism" />
+    <dbpprop:knownFor xml:lang="en">Inventing the World Wide Web Commonly known as WWW.</dbpprop:knownFor>
+    <dbpprop:before xml:lang="en">First recipient</dbpprop:before>
+    <dbpprop:employer xml:lang="en">World Wide Web Consortium and University of Southampton</dbpprop:employer>
+    <dbpprop:placeOfBirth rdf:resource="http://dbpedia.org/resource/London" />
+    <dbpprop:nationality rdf:resource="http://dbpedia.org/resource/British_people" />
+    <dbpprop:wikiPageUsesTemplate rdf:resource="http://dbpedia.org/resource/Template:Succession_box" />
+    <dbpprop:wikiPageUsesTemplate rdf:resource="http://dbpedia.org/resource/Template:Persondata" />
+    <dbpprop:wikiPageUsesTemplate rdf:resource="http://dbpedia.org/resource/Template:Infobox_person" />
+    <dbpprop:name xml:lang="en">Berners-Lee, Tim</dbpprop:name>
+    <dbpprop:name xml:lang="en">Sir Tim Berners-Lee</dbpprop:name>
+    <dbpprop:years rdf:datatype="http://www.w3.org/2001/XMLSchema#int">2004</dbpprop:years>
+    <dbpprop:birthPlace rdf:resource="http://dbpedia.org/resource/United_Kingdom" />
+    <dbpprop:birthPlace rdf:resource="http://dbpedia.org/resource/London" />
+    <dbpprop:imageSize rdf:datatype="http://www.w3.org/2001/XMLSchema#int">230</dbpprop:imageSize>
+    <dbpprop:occupation rdf:resource="http://dbpedia.org/resource/Computer_scientist" />
+    <dbpprop:residence xml:lang="en">Massachusetts, U.S.</dbpprop:residence>
+    <dbpprop:footnotes xml:lang="en">Holder of the 3Com Founders Chair at MIT&#39;s Computer Science and Artificial Intelligence Laboratory</dbpprop:footnotes>
+    <dbpprop:after rdf:resource="http://dbpedia.org/resource/Shuji_Nakamura" />
+    <dbpprop:education rdf:resource="http://dbpedia.org/resource/The_Queen%27s_College,_Oxford" />
+    <dbpprop:title xml:lang="en">Professor, Knight</dbpprop:title>
+    <dbpprop:title xml:lang="en">Millennium Technology Prize winner</dbpprop:title>
+    <dbpprop:birthDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1955-06-08</dbpprop:birthDate>
+    <dbpprop:parents rdf:resource="http://dbpedia.org/resource/Conway_Berners-Lee" />
+    <dbpprop:parents xml:lang="en">Mary Lee Woods</dbpprop:parents>
+    <dbpprop:caption xml:lang="en">Berners-Lee at the TED 2009 Conference in Long Beach, California</dbpprop:caption>
+    <dbpprop:dateOfBirth rdf:datatype="http://www.w3.org/2001/XMLSchema#int">8</dbpprop:dateOfBirth>
+    <foaf:page rdf:resource="http://en.wikipedia.org/wiki/Tim_Berners-Lee" />
+    <foaf:surname xml:lang="en">Berners-Lee</foaf:surname>
+    <foaf:givenName xml:lang="en">Tim</foaf:givenName>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/World_Wide_Web">
+    <dbpprop:inventor rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/WorldWideWeb">
+    <dbpedia-owl:developer rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Notation3">
+    <dbpprop:owner rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Paul_Otlet">
+    <dbpedia-owl:influenced rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+    <dbpprop:influenced rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Tabulator">
+    <dbpedia-owl:author rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+    <dbpprop:author rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Tim_berners-lee">
+    <dbpedia-owl:wikiPageRedirects rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Timothy_Berners-Lee">
+    <dbpedia-owl:wikiPageRedirects rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Tim_Burners_Lee">
+    <dbpedia-owl:wikiPageRedirects rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Conway_Berners-Lee">
+    <dbpedia-owl:child rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+    <dbpprop:children rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Shuji_Nakamura">
+    <dbpprop:before rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Line_Mode_Browser">
+    <dbpprop:author rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Tim-Berners_Lee">
+    <dbpedia-owl:wikiPageRedirects rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/ENQUIRE">
+    <dbpprop:inventor rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Dr._Tim_Berners-Lee">
+    <dbpedia-owl:wikiPageRedirects rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/World_Wide_Web_Foundation">
+    <dbpedia-owl:keyPerson rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+    <dbpedia-owl:foundedBy rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+    <dbpprop:keyPeople rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+    <dbpprop:founder rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Timbl">
+    <dbpedia-owl:wikiPageRedirects rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/13926_Berners-Lee">
+    <dbpprop:namedAfter rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Tim_Berners_Lee">
+    <dbpedia-owl:wikiPageRedirects rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Sir_Timothy_John_Berners-Lee">
+    <dbpedia-owl:wikiPageRedirects rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Sir_Timothy_John_Berners-Lee,_OM,_KBE,_FRS,_FREng,_FRSA">
+    <dbpedia-owl:wikiPageRedirects rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Tim_Bernes-Lee">
+    <dbpedia-owl:wikiPageRedirects rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/Sir_Tim_Berners_Lee">
+    <dbpedia-owl:wikiPageRedirects rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://dbpedia.org/resource/World_Wide_Web_Consortium__2">
+    <dbpedia-owl:person rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://en.wikipedia.org/wiki/Tim_Berners-Lee">
+    <foaf:primaryTopic rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+  <rdf:Description rdf:about="http://mpii.de/yago/resource/Tim_Berners-Lee">
+    <owl:sameAs rdf:resource="http://dbpedia.org/resource/Tim_Berners-Lee" />
+  </rdf:Description>
+</rdf:RDF>

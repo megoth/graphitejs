@@ -1,0 +1,13 @@
+{
+  "http://example.com/people/manu": {
+    "http://xmlns.com/foaf/spec/age": [{
+        "datatype": "http://www.w3.org/TR/xmlschema-2/#integer",
+        "type": "literal",
+        "value": 42
+    }],
+    "http://xmlns.com/foaf/spec/name": [{
+        "type": "literal",
+        "value": "Manu Sporny"
+    }]
+  }
+}
