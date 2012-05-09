@@ -228,7 +228,7 @@ define([
         str = str.replace(/\n/g, '\\n');    // escape newlines
         str = '"' + str + '"';  //';
         if (this.datatype){
-            //buster.log("DATATYPE", this.datatype, this.datatype.toNT);
+            buster.log("DATATYPE", this.datatype, this.datatype.toNT);
             str = str + '^^' + this.datatype.toNT();
         }
         if (this.lang) {

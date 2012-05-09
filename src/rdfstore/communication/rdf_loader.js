@@ -13,6 +13,7 @@ define([
 
     var RDFLoader = {};
     RDFLoader.RDFLoader = function (params) {
+        var that = this;
         this.precedences = ["text/turtle", "text/n3", "application/json"];
         this.parsers = {
             "text/turtle": N3Parser.parser,
@@ -20,17 +21,17 @@ define([
             "application/json": JSONLDParser.parser
         };
         if (params != null) {
-            for (var mime in params["parsers"]) {
-                this.parsers[mime] = params["parsers"][mime];
-            }
+            Utils.each(params["parsers"], function (mime) {
+                that.parsers[mime] = params["parsers"][mime];
+            });
         }
         if (params && params["precedences"] != null) {
             this.precedences = params["precedences"];
-            for (var mime in params["parsers"]) {
-                if (!Utils.include(this.precedences, mime)) {
-                    this.precedences.push(mime);
+            Utils.each(params["parsers"], function (mime) {
+                if (!Utils.include(that.precedences, mime)) {
+                    that.precedences.push(mime);
                 }
-            }
+            });
         }
         this.acceptHeaderValue = "";
         for (var i = 0; i < this.precedences.length; i++) {
@@ -41,6 +42,7 @@ define([
             }
         }
     };
+    /*
     RDFLoader.RDFLoader.prototype.registerParser = function(mediaType, parser) {
         this.parsers[mediaType] = parser;
         this.precedences.push(mediaType);
@@ -59,8 +61,8 @@ define([
     RDFLoader.RDFLoader.prototype.setAcceptHeaderPrecedence = function(mediaTypes) {
         this.precedences = mediaTypes;
     };
+     */
     RDFLoader.RDFLoader.prototype.load = function(uri, graph, callback) {
-        var that = this;
         Loader({
             uri: uri,
             accept: this.acceptHeaderValue,
@@ -76,7 +78,7 @@ define([
                         graph: graph
                     }, function (graph) {
                         //buster.log("GRAPH", graph, graph.toQuads);
-                        callback(true, graph.toQuads());
+                        callback(true, graph);
                     });
                 } else {
                     callback(false, "Network error");

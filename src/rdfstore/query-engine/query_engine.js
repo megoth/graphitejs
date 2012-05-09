@@ -1295,7 +1295,7 @@ define([
                         console.log(result);
                         callback(false, "error batch loading quads");
                     } else {
-                        var result = that.batchLoad(result);
+                        that.batchLoad(result.toQuads());
                         callback(result!=null, result||"error batch loading quads");
                     }
                 });

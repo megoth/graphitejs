@@ -9,14 +9,14 @@ define([
             success: callback
         });
     };
-    Utils.parseJsonFile = function (pathToFile, parser, callback) {
+    Utils.parseJsonFile = function (pathToFile, parser, options, callback) {
         Utils.openFile(pathToFile, function (err, data) {
-            parser(JSON.parse(data), {}, callback);
+            parser(JSON.parse(data), options, callback);
         });
     };
-    Utils.parseFile = function (pathToFile, parser, callback) {
+    Utils.parseFile = function (pathToFile, parser, options, callback) {
         Utils.openFile(pathToFile, function (err, data) {
-            parser(data, {}, callback);
+            parser(data, options, callback);
         });
     };
     return Utils;

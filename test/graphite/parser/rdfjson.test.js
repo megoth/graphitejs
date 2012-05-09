@@ -37,7 +37,7 @@ define([
                     sub,
                     pre,
                     obj;
-                TestUtils.parseJsonFile(this.rdfjson, Parser, done(function (graph) {
+                TestUtils.parseJsonFile(this.rdfjson, Parser, {}, done(function (graph) {
                     tester.graph = graph;
                 }));
             },

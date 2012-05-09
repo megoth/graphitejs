@@ -243,7 +243,7 @@ define([
             "load": function (promise, options) {
                 var query;
                 return function (success, results) {
-                    buster.log("RESULTS", results);
+                    buster.log("RESULTS", results, results.toNT);
                     query = "INSERT DATA " + results.toNT();
                     options.graph.clone().then(function (g) {
                         //buster.log("ONCOMPLETE QUERY", query);
