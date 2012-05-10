@@ -58,93 +58,36 @@ define([
                 });
             });
         },
-        "Function .addStatement": {
-            "Adding a triple, returns a statement": function () {
-                var triple = this.g.addStatement(this.subJohn, this.preName, this.objJohnName);
-                assert.equals(triple.subject, this.subJohn);
-                assert.equals(triple.predicate, this.preName);
-                assert.equals(triple.object, this.objJohnName);
-            },
-            "Adding a triple fires a callback": function () {
-                var spy = sinon.spy();
-                this.g.addStatement(this.subJohn, this.preName, this.objJohnName, spy);
-                assert(spy.calledOnce);
-            },
-            "Adding a triple fires a callback which contains a statement": function (done) {
-                var that = this;
-                this.g.addStatement(this.subJohn, this.preName, this.objJohnName, done(function (s) {
-                    assert.equals(s.subject, that.subJohn);
-                    assert.equals(s.predicate, that.preName);
-                    assert.equals(s.object, that.objJohnName);
-                }));
-            },
-            "Adding a blank node": function () {
-                var that = this;
-                this.g.addStatement(this.blank1, this.preName, this.objJohnName);
-                this.g.listStatements(function (predicate, object) {
-                    assert.equals(predicate, that.preName.value);
-                    assert.equals(object, that.objJohnName.value);
+        "Function .clone": function (done) {
+            var g1 = this.g,
+                g2,
+                g3,
+                g4,
+                g1Size = this.g.size(),
+                g2Size = When.defer(),
+                g3Size = When.defer(),
+                g4Size = When.defer();
+            g1.clone().then(function (graph) {
+                g2 = graph;
+                g2Size = graph.size();
+            });
+            Graph(this.graph1).then(function (graph) {
+                g3 = graph;
+                g3Size = g3.size();
+                g3.clone().then(function (graph) {
+                    g4 = graph;
+                    g4Size = g4.size();
                 });
-            },
-            "//Adding multiple triples with same subject": function () {
-                this.g.addStatement(this.subTim, this.preName, this.objTimName);
-                this.g.addStatement(this.subTim, this.preHomepage, this.objTimHomepage);
-                //this.g.execute("SELECT ?s WHERE { ?s ?p ?o } GROUP BY ?s", spy);
-                //assert.equals(list[0].subject, list[1].subject);
-                //refute.equals(list[0].predicate, list[1].predicate);
-                //refute.equals(list[0].object, list[1].object);
-            },
-            "//Adding multiple triples with same subject and predicate": function () {
-                var list;
-                this.g.addStatement(this.subJohn, this.preName, "Something");
-                this.g.addStatement(this.subJohn, this.preName, "Something else");
-                list = this.g.listStatements();
-                assert.equals(list[0].subject, list[1].subject);
-                assert.equals(list[0].predicate, list[1].predicate);
-                refute.equals(list[0].object, list[1].object);
-            },
-            "//Typing": {
-                "Default types": function () {
-                    "use strict";
-                    this.g.addStatement(null, this.preName, this.objJohnName);
-                    this.g.addStatement(this.subJohn, this.preName, this.objJohnName);
-                    var list = this.g.listStatements();
-                    assert.equals(list[0].subject.token, "uri");
-                    assert.equals(list[0].predicate.token, "uri");
-                    assert.equals(list[0].object.token, "literal");
-                    assert.equals(list[1].subject.token, "uri");
-                    assert.equals(list[1].predicate.token, "uri");
-                    assert.equals(list[1].object.token, "literal");
-                },
-                "Explicitly typed": function () {
-                    "use strict";
-                    var list;
-                    this.g.addStatement({
-                        value: this.subJohn,
-                        token: "uri"
-                    }, this.preName, {
-                        value: 12,
-                        token: "literal",
-                        datatype: this.uriInteger
-                    });
-                    this.g.addStatement.call(this.g, {
-                        value: "http://dbpedia.org/resource/Sean_Taro_Ono_Lennon",
-                        token: "uri"
-                    }, this.preName, {
-                        value: "小野 太郎",
-                        token: "literal",
-                        lang: "jp"
-                    });
-                    list = this.g.listStatements();
-                    assert.equals(list[0].subject.value, this.subJohn);
-                    assert.equals(list[0].subject.token, "uri");
-                    assert.equals(list[0].object.value, 12);
-                    assert.equals(list[0].object.token, "literal");
-                    assert.equals(list[1].object.value, "小野 太郎");
-                    assert.equals(list[1].object.token, "literal");
-                    assert.equals(list[1].object.lang, "jp");
-                }
-            }
+            });
+            When.all([ g1Size, g2Size, g3Size, g4Size ]).then(done(function (sizes) {
+                buster.log(sizes);
+                refute.same(g1, g2);
+                refute.same(g3, g4);
+                assert.equals(sizes[0], 0);
+                assert.equals(sizes[1], 0);
+                assert.equals(sizes[2], 4);
+                assert.equals(sizes[3], 4);
+            }));
         },
         "Function .execute": {
             "ASK query": function (done) {
@@ -315,59 +258,23 @@ define([
                 }));
             }
         },
-        "Function .clone": function (done) {
-            var g1 = this.g,
-                g2,
-                g3,
-                g4,
-                g1Size = this.g.size(),
-                g2Size = When.defer(),
-                g3Size = When.defer(),
-                g4Size = When.defer();
-            g1.clone().then(function (graph) {
-                g2 = graph;
-                g2Size = graph.size();
-            });
-            Graph(this.graph1).then(function (graph) {
-                g3 = graph;
-                g3Size = g3.size();
-                g3.clone().then(function (graph) {
-                    g4 = graph;
-                    g4Size = g4.size();
+        "Function .size": function (done) {
+            var that = this,
+                size1 = this.g.size(),
+                size2 = When.defer(),
+                size3 = When.defer();
+            Graph(this.graph1).then(function (g) {
+                size2 = g.size();
+                g.execute("INSERT DATA" + that.graph2.toNT()).then(function (g) {
+                    size3 = g.size();
                 });
             });
-            When.all([ g1Size, g2Size, g3Size, g4Size ]).then(done(function (sizes) {
-                buster.log(sizes);
-                refute.same(g1, g2);
-                refute.same(g3, g4);
+            When.all([ size1, size2, size3 ]).then(done(function (sizes) {
+                buster.log("SIZES", sizes);
                 assert.equals(sizes[0], 0);
-                assert.equals(sizes[1], 0);
-                assert.equals(sizes[2], 4);
-                assert.equals(sizes[3], 4);
+                assert.equals(sizes[1], 4);
+                assert.equals(sizes[2], 5);
             }));
-        },
-        "Function .size": function (done) {
-            var promises = [];
-            promises.push(this.g.size());
-            this.g.addStatement(this.subJohn, this.preName, this.objJohnName);
-            promises.push(this.g.size());
-            this.g.addStatement(this.subJohn, this.preKnows, this.subTim);
-            promises.push(this.g.size());
-            this.g.addStatement(this.subJohn, this.preKnows, this.subTim);
-            promises.push(this.g.size());
-            When.all(promises).then(done(function (results) {
-                assert.equals(results[0], 0);
-                assert.equals(results[1], 1);
-                assert.equals(results[2], 2);
-                assert.equals(results[3], 2);
-            }));
-        },
-        "Function .triples": function (done) {
-            Graph(this.graph1).then(function (graph) {
-                graph.triples().then(done(function (g) {
-                    assert.equals(g.statements.length, 4);
-                }));
-            });
         }
     });
 });

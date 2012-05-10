@@ -43,18 +43,9 @@ define([
             });
             return deferred;
         },
-        addStatement: function (subject, predicate, object, callback) {
-            var triple = Dictionary.Statement(subject, predicate, object);
-            this.engine.execute('INSERT DATA { ' + triple.toNT() + ' }', function () {
-                if (callback) {
-                    callback(triple);
-                }
-            });
-            return triple;
-        },
         clone: function () {
             var deferred = When.defer();
-            this.triples().then(function (triples) {
+            getTriples(this).then(function (triples) {
                 //buster.log("PRECLONE", triples.toNT);
                 //buster.log("CLONE", triples.toNT());
                 graph(triples).then(function (g) {
@@ -134,40 +125,6 @@ define([
             this.engine.execute("SELECT * WHERE { ?s ?p ?o }", function (success, results) {
                 deferred.resolve(results.length);
                 //buster.log("IN SIZE QUERY", results.length, results);
-            });
-            return deferred;
-        },
-        triples: function () {
-            var deferred = When.defer(),
-                graph = Dictionary.Formula(),
-                subject,
-                predicate,
-                object;
-            this.engine.execute("SELECT * WHERE { ?s ?p ?o }", function (success, results) {
-                Utils.each(results, function (t) {
-                    subject = t.s.token === "blank" ?
-                        Dictionary.BlankNode(t.s.value) :
-                        Dictionary.Symbol(t.s.value);
-                    predicate = Dictionary.Symbol(t.p.value);
-                    if (t.o.token === "literal") {
-                        var dt,
-                            val = t.o.value;
-                        if ((''+val).indexOf('e')>=0) {
-                            dt = Dictionary.Symbol.prototype.XSDfloat;
-                        } else if ((''+val).indexOf('.')>=0) {
-                            dt = Dictionary.Symbol.prototype.XSDdecimal;
-                        } else {
-                            dt = Dictionary.Symbol.prototype.XSDinteger;
-                        }
-                        object = Dictionary.Literal(t.o.value, t.o.lang, dt);
-                    } else if (t.o.token === "blank") {
-                        object = Dictionary.BlankNode(t.o.value);
-                    } else {
-                        object = Dictionary.Symbol(t.o.value);
-                    }
-                    graph.add(subject, predicate, object);
-                });
-                deferred.resolve(graph);
             });
             return deferred;
         }
@@ -285,6 +242,40 @@ define([
             }
         };
         return execute[queryKind];
+    }
+    function getTriples (that) {
+        var deferred = When.defer(),
+            graph = Dictionary.Formula(),
+            subject,
+            predicate,
+            object;
+        that.engine.execute("SELECT * WHERE { ?s ?p ?o }", function (success, results) {
+            Utils.each(results, function (t) {
+                subject = t.s.token === "blank" ?
+                    Dictionary.BlankNode(t.s.value) :
+                    Dictionary.Symbol(t.s.value);
+                predicate = Dictionary.Symbol(t.p.value);
+                if (t.o.token === "literal") {
+                    var dt,
+                        val = t.o.value;
+                    if ((''+val).indexOf('e')>=0) {
+                        dt = Dictionary.Symbol.prototype.XSDfloat;
+                    } else if ((''+val).indexOf('.')>=0) {
+                        dt = Dictionary.Symbol.prototype.XSDdecimal;
+                    } else {
+                        dt = Dictionary.Symbol.prototype.XSDinteger;
+                    }
+                    object = Dictionary.Literal(t.o.value, t.o.lang, dt);
+                } else if (t.o.token === "blank") {
+                    object = Dictionary.BlankNode(t.o.value);
+                } else {
+                    object = Dictionary.Symbol(t.o.value);
+                }
+                graph.add(subject, predicate, object);
+            });
+            deferred.resolve(graph);
+        });
+        return deferred;
     }
     function getQueryKind(query) {
         var kind = null,

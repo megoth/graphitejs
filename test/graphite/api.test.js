@@ -15,6 +15,94 @@ define([
             assert.defined(API);
             assert.isFunction(API);
         },
+        "//Function .addStatement": {
+            "Adding a triple, returns a statement": function () {
+                var triple = this.g.addStatement(this.subJohn, this.preName, this.objJohnName);
+                assert.equals(triple.subject, this.subJohn);
+                assert.equals(triple.predicate, this.preName);
+                assert.equals(triple.object, this.objJohnName);
+            },
+            "Adding a triple fires a callback": function () {
+                var spy = sinon.spy();
+                this.g.addStatement(this.subJohn, this.preName, this.objJohnName, spy);
+                assert(spy.calledOnce);
+            },
+            "Adding a triple fires a callback which contains a statement": function (done) {
+                var that = this;
+                this.g.addStatement(this.subJohn, this.preName, this.objJohnName, done(function (s) {
+                    assert.equals(s.subject, that.subJohn);
+                    assert.equals(s.predicate, that.preName);
+                    assert.equals(s.object, that.objJohnName);
+                }));
+            },
+            "Adding a blank node": function () {
+                var that = this;
+                this.g.addStatement(this.blank1, this.preName, this.objJohnName);
+                this.g.listStatements(function (predicate, object) {
+                    assert.equals(predicate, that.preName.value);
+                    assert.equals(object, that.objJohnName.value);
+                });
+            },
+            "//Adding multiple triples with same subject": function () {
+                this.g.addStatement(this.subTim, this.preName, this.objTimName);
+                this.g.addStatement(this.subTim, this.preHomepage, this.objTimHomepage);
+                //this.g.execute("SELECT ?s WHERE { ?s ?p ?o } GROUP BY ?s", spy);
+                //assert.equals(list[0].subject, list[1].subject);
+                //refute.equals(list[0].predicate, list[1].predicate);
+                //refute.equals(list[0].object, list[1].object);
+            },
+            "//Adding multiple triples with same subject and predicate": function () {
+                var list;
+                this.g.addStatement(this.subJohn, this.preName, "Something");
+                this.g.addStatement(this.subJohn, this.preName, "Something else");
+                list = this.g.listStatements();
+                assert.equals(list[0].subject, list[1].subject);
+                assert.equals(list[0].predicate, list[1].predicate);
+                refute.equals(list[0].object, list[1].object);
+            },
+            "//Typing": {
+                "Default types": function () {
+                    "use strict";
+                    this.g.addStatement(null, this.preName, this.objJohnName);
+                    this.g.addStatement(this.subJohn, this.preName, this.objJohnName);
+                    var list = this.g.listStatements();
+                    assert.equals(list[0].subject.token, "uri");
+                    assert.equals(list[0].predicate.token, "uri");
+                    assert.equals(list[0].object.token, "literal");
+                    assert.equals(list[1].subject.token, "uri");
+                    assert.equals(list[1].predicate.token, "uri");
+                    assert.equals(list[1].object.token, "literal");
+                },
+                "Explicitly typed": function () {
+                    "use strict";
+                    var list;
+                    this.g.addStatement({
+                        value: this.subJohn,
+                        token: "uri"
+                    }, this.preName, {
+                        value: 12,
+                        token: "literal",
+                        datatype: this.uriInteger
+                    });
+                    this.g.addStatement.call(this.g, {
+                        value: "http://dbpedia.org/resource/Sean_Taro_Ono_Lennon",
+                        token: "uri"
+                    }, this.preName, {
+                        value: "小野 太郎",
+                        token: "literal",
+                        lang: "jp"
+                    });
+                    list = this.g.listStatements();
+                    assert.equals(list[0].subject.value, this.subJohn);
+                    assert.equals(list[0].subject.token, "uri");
+                    assert.equals(list[0].object.value, 12);
+                    assert.equals(list[0].object.token, "literal");
+                    assert.equals(list[1].object.value, "小野 太郎");
+                    assert.equals(list[1].object.token, "literal");
+                    assert.equals(list[1].object.lang, "jp");
+                }
+            }
+        },
         "//Function .listStatement": {
             setUp: function () {
                 "use strict";
