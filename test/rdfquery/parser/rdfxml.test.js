@@ -4,28 +4,35 @@ define([
     "src/graphite/when",
     "../../utils"
 ], function (Parser, Utils, When, TestUtils) {
+    function badAssertion (results) {
+        buster.log("RESULTS", results);
+        Utils.each(results, function (r) {
+            assert(r);
+        });
+    }
     function badGroup(group, tests, callback) {
         var promises = [];
         Utils.each(tests, function (filePath) {
             promises.push(badTest(group + '/' + filePath));
         });
-        When.all(promises).then(function () {
-            callback();
-        });
+        When.all(promises).then(callback);
     }
     function badTest(filePath) {
         var deferred = When.defer();
         TestUtils.openFile("http://localhost:8088/rdfxml/" + filePath + ".rdf", function (err, data) {
             try {
                 Parser(data, {}, function () {});
-                assert(false);
                 deferred.resolve(false);
             } catch (e) {
-                assert(true);
-                deferred.resolve(e);
+                deferred.resolve(true);
             }
         });
         return deferred;
+    }
+    function goodAssertion (results) {
+        Utils.each(results, function (r) {
+            assert.equals(r.counted, r.expected);
+        });
     }
     function goodGroup(group, tests, callback) {
         var promises = [];
@@ -39,9 +46,9 @@ define([
     function goodTest(filePath, numTriples) {
         var deferred = When.defer();
         TestUtils.openFile("http://localhost:8088/rdfxml/" + filePath + ".rdf", function (err, data) {
-            Parser(data, {}, function (triples) {
+            Parser(data, {}, function (graph) {
                 deferred.resolve({
-                    counted: triples.length,
+                    counted: graph.statements.length,
                     expected: numTriples
                 });
             });
@@ -54,30 +61,14 @@ define([
             assert.defined(Parser);
             assert.isFunction(Parser);
         },
-        "Bad tests (56 of 57 are faulty)": {
-            "datatypes": function (done) {
-                badGroup("datatypes",
-                    [
-                        "test002"
-                    ],
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
-            },
+        "Bad tests (56 of 56 are faulty)": {
             "//rdf-charmod-literals": function (done) {
                 badGroup("rdf-charmod-literals",
                     [
                         //"rdf-charmod-literals/error001",
                         //"rdf-charmod-literals/error002",
-                        //"error001",
                     ],
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(badAssertion));
             },
             "//rdf-containers-syntax-vs-schema": function (done) {
                 badGroup("rdf-containers-syntax-vs-schema",
@@ -85,11 +76,7 @@ define([
                         //"error001",
                         //"error002",
                     ],
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(badAssertion));
             },
             "//rdf-ns-prefix-confusion": function (done) {
                 badGroup("rdf-ns-prefix-confusion",
@@ -104,11 +91,7 @@ define([
                         //"error0008",
                         //"error0009",
                     ],
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(badAssertion));
             },
             "//rdfms-abouteach": function (done) {
                 badGroup("rdfms-abouteach",
@@ -116,22 +99,14 @@ define([
                         //"rdfms-abouteach/error001",
                         //"rdfms-abouteach/error002",
                     ],
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(badAssertion));
             },
             "//rdfms-difference-between-ID-and-about": function (done) {
                 badGroup("rdfms-abouteach",
                     [
                         //"error1",
                     ],
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(badAssertion));
             },
             "//rdfms-empty-property-elements": function (done) {
                 badGroup("rdfms-abouteach",
@@ -140,11 +115,7 @@ define([
                         //"error002",
                         //"error003,
                     ],
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(badAssertion));
             },
             "//rdfms-parseType": function (done) {
                 badGroup("rdfms-parseType",
@@ -153,11 +124,7 @@ define([
                         //"rdfms-parseType/error002",
                         //"rdfms-parseType/error003",
                     ],
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(badAssertion));
             },
             "//rdfms-rdf-id": function (done) {
                 badGroup("rdfms-rdf-id",
@@ -170,11 +137,7 @@ define([
                         //"rdfms-rdf-id/error006",
                         //"rdfms-rdf-id/error007",
                     ],
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(badAssertion));
             },
             "//rdfms-rdf-names-use": function (done) {
                 badGroup("rdfms-rdf-names-use",
@@ -200,11 +163,7 @@ define([
                         //"error-019",
                         //"error-020",
                     ],
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(badAssertion));
             },
             "//rdfms-syntax-incomplete": function (done) {
                 badGroup("rdfms-syntax-incomplete",
@@ -216,11 +175,7 @@ define([
                         //"error005",
                         //"error006",
                     ],
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(badAssertion));
             },
             "//xmlbase": function (done) {
                 badGroup("xmlbase",
@@ -228,35 +183,24 @@ define([
                         //"error001",
                         //"te1st012"
                     ],
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(badAssertion));
             }
         },
-        "Good tests (36 of 168 are faulty)": {
+        "Good tests (36 of 169 are faulty)": {
             "amp-in-url": function (done) {
                 goodGroup("amp-in-url",
                     {
                         "test001": 1
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "datatypes": function (done) {
                 goodGroup("datatypes",
                     {
-                        "test001": 2
+                        "test001": 2,
+                        "test002": 1
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "horst-01": function (done) {
                 goodGroup("horst-01",
@@ -266,22 +210,14 @@ define([
                         "test003": 4,
                         "test004": 2
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdf-charmod-literals": function (done) {
                 goodGroup("rdf-charmod-literals",
                     {
                         "test001": 2
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdf-charmod-uris": function (done) {
                 goodGroup("rdf-charmod-uris",
@@ -289,11 +225,7 @@ define([
                         "test001": 1,
                         "test002": 1
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdf-containers-syntax-vs-schema": function (done) {
                 goodGroup("rdf-containers-syntax-vs-schema",
@@ -306,22 +238,14 @@ define([
                         "test007": 4,
                         "test008": 2
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "//test001": function (done) {
                 goodGroup("test001",
                     {
                         //"test001": 2 //NOT AGGREABLE WITH http://www.w3.org/RDF/Validator/
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdf-ns-prefix-confusion": function (done) {
                 goodGroup("rdf-ns-prefix-confusion",
@@ -341,11 +265,7 @@ define([
                         "test0013": 2,
                         "test0014": 2
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdfms-difference-between-ID-and-about": function (done) {
                 goodGroup("rdfms-difference-between-ID-and-about",
@@ -354,22 +274,14 @@ define([
                         "test2": 1,
                         "test3": 1
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdfms-duplicate-member-props": function (done) {
                 goodGroup("rdfms-duplicate-member-props",
                     {
                         "test001": 3
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdfms-empty-property-elements": function (done) {
                 goodGroup("rdfms-empty-property-elements",
@@ -392,11 +304,7 @@ define([
                         "test016": 1,
                         "test017": 1
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdfms-identity-anon-resources": function (done) {
                 goodGroup("rdfms-identity-anon-resources",
@@ -407,11 +315,7 @@ define([
                         "test004": 2,
                         "test005": 1
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdfms-literal-is-xml-structure": function (done) {
                 goodGroup("rdfms-literal-is-xml-structure",
@@ -422,11 +326,7 @@ define([
                         "test004": 1
                         //"test005": 1,
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "//rdfms-nested-bagIDs": function (done) {
                 goodGroup("rdfms-nested-bagIDs",
@@ -443,11 +343,7 @@ define([
                         //"test011": 25, //NOT AGGREABLE WITH http://www.w3.org/RDF/Validator/
                         //"test012": 14 //NOT AGGREABLE WITH http://www.w3.org/RDF/Validator/
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "//rdfms-not-id-and-resource-attr": function (done) {
                 goodGroup("rdfms-not-id-and-resource-attr",
@@ -458,22 +354,14 @@ define([
                         //"test004": 5,
                         //"test005": 6,
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "//rdfms-para196": function (done) {
                 goodGroup("rdfms-para196",
                     {
                         //"test001": 1,
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdfms-rdf-names-use": function (done) {
                 goodGroup("rdfms-rdf-names-use",
@@ -519,33 +407,21 @@ define([
                         "warn-002": 1
                         //"warn-003": 1,
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdfms-reification-required": function (done) {
                 goodGroup("rdfms-reification-required",
                     {
                         "test001": 1
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdfms-seq-representation": function (done) {
                 goodGroup("rdfms-seq-representation",
                     {
                         "test001": 6
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdfms-syntax-incomplete": function (done) {
                 goodGroup("rdfms-syntax-incomplete",
@@ -555,22 +431,14 @@ define([
                         "test003": 1
                         //"test004": 6,
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdfms-uri-substructure": function (done) {
                 goodGroup("rdfms-uri-substructure",
                     {
                         "test001": 1
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdfms-xml-literal-namespaces": function (done) {
                 goodGroup("rdfms-xml-literal-namespaces",
@@ -578,11 +446,7 @@ define([
                         "test001": 1,
                         "test002": 2
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdfms-xmllang": function (done) {
                 goodGroup("rdfms-xmllang",
@@ -594,11 +458,7 @@ define([
                         "test005": 1,
                         "test006": 1
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdfs-container-membership-superProperty": function (done) {
                 goodGroup("rdfs-container-membership-superProperty",
@@ -606,11 +466,7 @@ define([
                         "not1C": 1,
                         "not1P": 1
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdfs-domain-and-range": function (done) {
                 goodGroup("rdfs-domain-and-range",
@@ -624,33 +480,21 @@ define([
                         "premises005": 5,
                         "premises006": 5
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdfs-no-cycles-in-subClassOf": function (done) {
                 goodGroup("rdfs-no-cycles-in-subClassOf",
                     {
                         "test001": 3
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "rdfs-no-cycles-in-subPropertyOf": function (done) {
                 goodGroup("rdfs-no-cycles-in-subPropertyOf",
                     {
                         "test001": 3
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "tex-01": function (done) {
                 goodGroup("tex-01",
@@ -658,11 +502,7 @@ define([
                         "test001": 1,
                         "test002": 1
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "unrecognised-xml-attributes": function (done) {
                 goodGroup("unrecognised-xml-attributes",
@@ -670,22 +510,14 @@ define([
                         "test001": 2,
                         "test002": 1
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "xml-canon": function (done) {
                 goodGroup("xml-canon",
                     {
                         "test001": 1
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "xmlbase": function (done) {
                 goodGroup("xmlbase",
@@ -706,11 +538,7 @@ define([
                         "test015": 1,
                         "test016": 1
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             },
             "xmlsch-02": function (done) {
                 goodGroup("xmlsch-02",
@@ -719,11 +547,7 @@ define([
                         "test002": 1,
                         "test003": 2
                     },
-                    done(function (results) {
-                        Utils.each(results, function (r) {
-                            assert.equals(r.counted, r.expected);
-                        });
-                    }));
+                    done(goodAssertion));
             }
         }
     });

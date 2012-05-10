@@ -31,7 +31,6 @@ define([
     function goodTest(testSuitePath, parser, num, numOfStatement) {
         var deferred = When.defer();
         TestUtils.parseFile(testSuitePath + "test-" + num + ".ttl", parser, {}, function (graph) {
-            buster.log("GRAPH", graph);
             deferred.resolve({
                 counted: graph.statements.length,
                 description: "test " + num,
