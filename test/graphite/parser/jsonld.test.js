@@ -1,12 +1,8 @@
-/*global assert, buster, graphite, module, require*/
-if (typeof module === "object" && typeof require === "function") {
-    var buster = require("buster");
-    var sinon = require("sinon");
-}
-
+/*global assert, buster, refute*/
 define([
-    "src/graphite/parser/jsonld"
-], function (Parser) {
+    "src/graphite/parser/jsonld",
+    "src/graphite/utils"
+], function (Parser, Utils) {
     buster.testCase("Graphite parser (JSON-LD)", {
         setUp: function () {
             this.uriTwitterManusporny = "http://twitter.com/manusporny";
@@ -48,22 +44,24 @@ define([
                 "http://xmlns.com/foaf/spec/age": 42
             }, {}, function (graph) {
                 assert.equals(graph.statements.length, 2);
+                assert.equals(graph.statements[0].subject, graph.statements[1].subject);
             });
         },
-        "//Multiple objects": {
+        "Multiple objects": {
             "Different subjects": function () {
-                "use strict";
-                Parser([{
-                    "http://xmlns.com/foaf/spec/name": "Manu Sporny"
-                }, {
-                    "@id": "http://example.com/people/manu",
-                    "http://xmlns.com/foaf/spec/name": "Manu Sporny"
-                }], {}, function (triples) {
-                    assert.equals(triples.length, 2);
+                Parser([
+                    {
+                        "http://xmlns.com/foaf/spec/name": "Manu Sporny"
+                    }, {
+                        "@id": "http://example.com/people/manu",
+                        "http://xmlns.com/foaf/spec/name": "Manu Sporny"
+                    }
+                ], {}, function (graph) {
+                    assert.equals(graph.statements.length, 2);
+                    refute.equals(graph.statements[0].subject, graph.statements[1].subject);
                 });
             },
             "Same subjects": function () {
-                "use strict";
                 Parser([
                     {
                         "@id": "http://example.com/people/manu",
@@ -73,48 +71,45 @@ define([
                         "@id": "http://example.com/people/manu",
                         "http://xmlns.com/foaf/spec/age": 12
                     }
-                ], {}, function (triples) {
-                    assert.equals(triples.length, 2);
+                ], {}, function (graph) {
+                    assert.equals(graph.statements.length, 2);
+                    assert.equals(graph.statements[0].subject, graph.statements[1].subject);
                 });
             }
         },
-        "//String as @context": {
+        "String as @context": {
             "Single request": function (done) {
-                "use strict";
                 Parser({
                     "@context": "http://localhost:8088/json-ld/people/manu.jsonld",
                     "name": "Manu Sporny"
-                }, {}, done(function (triples) {
-                    assert.equals(triples.length, 1);
+                }, {}, done(function (graph) {
+                    assert.equals(graph.statements.length, 1);
                 }));
             },
             "Multiple requests": function (done) {
-                "use strict";
                 Parser([{
                     "@context": "http://localhost:8088/json-ld/people/manu.jsonld",
                     "name": "Manu Sporny"
                 }, {
                     "@context": "http://localhost:8088/json-ld/people/arne.jsonld",
                     "name": "Arne Hassel"
-                }], {}, done(function (triples) {
-                    assert.equals(triples.length, 2);
+                }], {}, done(function (graph) {
+                    assert.equals(graph.statements.length, 2);
                 }));
             }
         },
-        "//Object as @context": {
+        "Object as @context": {
             "Single-level @context": function () {
-                "use strict";
                 Parser({
                     "@context": {
                         "name": "http://xmlns.com/foaf/0.1/name"
                     },
                     "name": "Manu Sporny"
-                }, {}, function (triples) {
-                    assert.equals(triples.length, 1);
+                }, {}, function (graph) {
+                    assert.equals(graph.statements.length, 1);
                 });
             },
             "Objects within objects": function () {
-                "use strict";
                 Parser({
                     "@context": {
                         "depiction": {
@@ -124,25 +119,23 @@ define([
                     },
                     "depiction": this.uriTwitterManusporny,
                     "homepage": "http://manu.sporny.org/"
-                }, {}, function (triples) {
-                    assert.equals(triples.length, 2);
+                }, {}, function (graph) {
+                    assert.equals(graph.statements.length, 2);
                 });
             },
             "Predicate defined in @context twice, last one valid": function () {
-                "use strict";
                 Parser({
                     "@context": {
                         "test": "http://xmlns.com/foaf/0.1/depiction"
                     },
                     "test": "test"
-                }, {}, function (triples) {
-                    assert.equals(triples.length, 1);
+                }, {}, function (graph) {
+                    assert.equals(graph.statements.length, 1);
                 });
             }
         },
-        "//Array as @context": {
+        "Array as @context": {
             "No conflict": function (done) {
-                "use strict";
                 Parser({
                     "@context": [
                         "http://localhost:8088/json-ld/people/manu.jsonld",
@@ -151,12 +144,11 @@ define([
                         }
                     ],
                     "pic": this.uriTwitterManusporny
-                }, {}, done(function (triples) {
-                    assert.equals(triples.length, 1);
+                }, {}, done(function (graph) {
+                    assert.equals(graph.statements.length, 1);
                 }));
             },
             "Conflict, should prefer the latest": function (done) {
-                "use strict";
                 Parser({
                     "@context": [
                         "http://localhost:8088/json-ld/people/manu.jsonld",
@@ -166,15 +158,14 @@ define([
                         }
                     ],
                     "pic": this.uriTwitterManusporny
-                }, {}, done(function (triples) {
-                    assert.equals(triples.length, 1);
+                }, {}, done(function (graph) {
+                    assert.equals(graph.statements.length, 1);
+                    assert.equals(graph.statements[0].subject.value, "http://example.com/people/arne");
                 }));
             }
         },
-        "//Use of CURIEs": {
+        "Use of CURIEs": {
             "In graph": function () {
-                "use strict";
-                var statements;
                 Parser({
                     "@context": {
                         "foaf": "http://xmlns.com/foaf/0.1/",
@@ -188,13 +179,16 @@ define([
                     "age": 42,
                     "homepage": "http://example.com/",
                     "test": "test"
-                }, {}, function (triples) {
-                    assert.equals(triples.length, 5);
+                }, {}, function (graph) {
+                    buster.log(graph);
+                    assert.equals(graph.statements.length, 5);
+                    assert.equals(graph.statements[0].predicate.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+                    assert.equals(graph.statements[0].object.value, "http://xmlns.com/foaf/0.1/test");
+                    assert.equals(graph.statements[2].predicate.value, "http://xmlns.com/foaf/0.1/age");
+                    assert.equals(graph.statements[4].predicate.value, "http://example.com/test");
                 });
             },
             "CURIEs in @context are applied to graphs prefixes": function () {
-                "use strict";
-                var subject;
                 Parser({
                     "@context": {
                         "testA": "http://example.com/",
@@ -205,33 +199,39 @@ define([
                     "@id": "Arne",
                     "testA:test": "TestA",
                     "testB:test": "TestB"
-                }, {}, function (triples) {
-                    assert.equals(triples.length, 2);
+                }, {}, function (graph) {
+                    buster.log(graph);
+                    assert.equals(graph.statements.length, 2);
+                    assert.equals(graph.statements[0].predicate.value, "http://example.com/test");
+                    assert.equals(graph.statements[1].predicate.value, "http://exampleB.com/test");
                 });
             }
         },
-        "//Triple within a triple within a triple": function () {
+        "Triple within a triple within a triple": function () {
             Parser({
                 "http://xmlns.com/foaf/spec/knows": {
                     "http://xmlns.com/foaf/spec/knows": {
                         "http://xmlns.com/foaf/spec/name": "Manu Sporny"
                     }
                 }
-            }, {}, function (triples) {
-                assert.equals(triples.length, 3);
+            }, {}, function (graph) {
+                buster.log(graph);
+                assert.equals(graph.statements.length, 3);
+                assert.equals(graph.statements[1].object, graph.statements[0].subject);
+                assert.equals(graph.statements[2].object, graph.statements[1].subject);
             });
         },
-        "//Array as objects": {
+        "Array as objects": {
             "Literal values": function () {
-                "use strict";
                 Parser({
                     "http://xmlns.com/foaf/spec/nick": [ "test", "test2" ]
-                }, {}, function (triples) {
-                    assert.equals(triples.length, 2);
+                }, {}, function (graph) {
+                    assert.equals(graph.statements.length, 2);
+                    assert.equals(graph.statements[0].object.value, "test");
+                    assert.equals(graph.statements[1].object.value, "test2");
                 });
             },
             "Complex values": function () {
-                "use strict";
                 Parser({
                     "http://xmlns.com/foaf/spec/nick": [{
                         "@value": "Das Kapital",
@@ -240,25 +240,26 @@ define([
                         "@value": "Capital",
                         "@language": "en"
                     }]
-                }, {}, function (triples) {
-                    assert.equals(triples.length, 2);
+                }, {}, function (graph) {
+                    assert.equals(graph.statements.length, 2);
+                    assert.equals(graph.statements[0].object.value, "Das Kapital");
+                    assert.equals(graph.statements[1].object.value, "Capital");
                 });
             }
         },
-        "//Language": {
+        "Language": {
             "String internationalization": function () {
-                "use strict";
                 Parser({
                     "http://xmlns.com/foaf/spec/nick": {
                         "@value": "花澄",
                         "@language": "ja"
                     }
-                }, {}, function (triples) {
-                    assert.equals(triples.length, 1);
+                }, {}, function (graph) {
+                    assert.equals(graph.statements.length, 1);
+                    assert.equals(graph.statements[0].object.lang, "ja");
                 });
             },
             "Default language": function () {
-                "use strict";
                 Parser({
                     "@context": {
                         "@language": "ja"
@@ -273,19 +274,44 @@ define([
                             "@value": "科学者"
                         }
                     ]
-                }, {}, function (triples) {
-                    assert.equals(triples.length, 3);
+                }, {}, function (graph) {
+                    assert.equals(graph.statements.length, 3);
+                    assert.equals(graph.statements[0].object.lang, "ja");
+                    assert.equals(graph.statements[1].object.lang, "en");
+                    assert.equals(graph.statements[2].object.lang, "ja");
                 });
             }
         },
-        "//Lists": function () {
-            var statements;
+        "Lists": function () {
             Parser({
                 "http://xmlns.com/foaf/spec/nick": {
                     "@list": [ "joe", "bob", "jaybee" ]
                 }
-            }, {}, function (triples) {
-                assert.equals(triples.length, 13);
+            }, {}, function (graph) {
+                buster.log(graph);
+                Utils.each(graph.statements, function (s, i) {
+                    buster.log(i, s);
+                });
+                assert.equals(graph.statements.length, 10);
+                assert.equals(graph.statements[0].predicate.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#first");
+                assert.equals(graph.statements[0].object.value, "jaybee");
+                assert.equals(graph.statements[1].predicate.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest");
+                assert.equals(graph.statements[1].object.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil");
+                assert.equals(graph.statements[2].predicate.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+                assert.equals(graph.statements[2].object.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#List");
+                assert.equals(graph.statements[3].predicate.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#first");
+                assert.equals(graph.statements[3].object.value, "bob");
+                assert.equals(graph.statements[4].predicate.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest");
+                assert.equals(graph.statements[4].object, graph.statements[0].subject);
+                assert.equals(graph.statements[5].predicate.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+                assert.equals(graph.statements[5].object.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#List");
+                assert.equals(graph.statements[6].predicate.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#first");
+                assert.equals(graph.statements[6].object.value, "joe");
+                assert.equals(graph.statements[7].predicate.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest");
+                assert.equals(graph.statements[7].object, graph.statements[4].subject);
+                assert.equals(graph.statements[8].predicate.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+                assert.equals(graph.statements[8].object.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#List");
+                assert.equals(graph.statements[9].object, graph.statements[8].subject);
             });
         }
     });

@@ -28,7 +28,11 @@ define([
             callback(pg.assembleTriples());
         });
     };
-
+    /**
+     *
+     * @return {ContextLoader.prototype.init}
+     * @constructor
+     */
     var ContextLoader = function () {
         return new ContextLoader.prototype.init();
     };
@@ -69,7 +73,12 @@ define([
     ContextLoader.prototype.init.prototype = ContextLoader.prototype;
     /**
      *
-     * @type {Object}
+     * @param pseudoGraph
+     * @param properties
+     * @param contexts
+     * @param options
+     * @return {Node.prototype.init}
+     * @constructor
      */
     var Node = function (pseudoGraph, properties, contexts, options) {
         return new Node.prototype.init(pseudoGraph, properties, contexts, options);
@@ -120,7 +129,7 @@ define([
                     rest = node.subject;
                 });
                 Utils.extend(this, node);
-                return undefined;
+                return undefined
             }
             this.subject = Utils.extract(properties, "@id");
             if(Utils.size(properties) > 0) {
@@ -132,10 +141,11 @@ define([
             }
             this.triples = [];
             for(var i = 0, len = predicates.length; i < len; i++) {
+                //buster.log("TRIPLE", i, predicates[i], objects[i]);
                 this.triples.push([this.subject, predicates[i], objects[i]]);
             }
+            return this;
         },
-
         /**
          * Add properties to given arrays
          *
@@ -163,7 +173,6 @@ define([
                 }
             }
         },
-
         /**
          * Add the contained triples to the given graph
          *
@@ -174,12 +183,13 @@ define([
                 subject,
                 predicate,
                 object;
-            //buster.log("TRIPLES", this.triples);
-            Utils.each(this.triples, function (triple) {
+            //buster.log("TRIPLES ASSEMBLING", this.triples);
+            Utils.each(this.triples, function (triple, i) {
+                //buster.log("TRIPLE ASSEMBLING", i, triple);
                 subject = node.getSubject(triple[0]);
-                subject = subject[0] === "_" ?
+                subject = subject || (subject[0] === "_" ?
                     Dictionary.BlankNode(subject) :
-                    Dictionary.Symbol(subject);
+                    Dictionary.Symbol(subject));
                 predicate = node.getPredicate(triple[1]);
                 predicate = Dictionary.Symbol(predicate);
                 object = node.getObject(triple[2], predicate);
@@ -194,7 +204,6 @@ define([
                 graph.add(subject, predicate, object);
             });
         },
-
         /**
          * Derive contexts
          *
@@ -206,7 +215,6 @@ define([
                 Utils.extend(node.context, contexts[num]);
             });
         },
-
         /**
          * In case of dereferencing the loader is handy
          *
@@ -222,7 +230,6 @@ define([
             }
             return loader;
         },
-
         /**
          * Get the expanded version of the object
          *
@@ -267,7 +274,6 @@ define([
             }
             return object;
         },
-
         /**
          * Get the expanded version of the predicate
          *
@@ -282,7 +288,6 @@ define([
             }
             return predicate;
         },
-
         /**
          * Construct a promise based on the type of object passed
          *
@@ -318,7 +323,6 @@ define([
             }
             return deferred;
         },
-
         /**
          * Get the expanded subject
          *
@@ -344,6 +348,12 @@ define([
         }
     };
     Node.prototype.init.prototype = Node.prototype;
+    /**
+     *
+     * @param options
+     * @return {PseudoGraph.prototype.init}
+     * @constructor
+     */
     var PseudoGraph = function (options) {
         return new PseudoGraph.prototype.init(options);
     };
@@ -367,7 +377,8 @@ define([
         assembleTriples: function () {
             var graph = Dictionary.Formula(this.options.graph),
                 cl = this.contextLoader;
-            Utils.each(this.nodes, function (node) {
+            Utils.each(this.nodes, function (node, i) {
+                //buster.log("NODE ASSEMBLING", i, node);
                 node.deriveContexts(cl.contexts);
                 node.addTriples(graph);
             });
@@ -397,10 +408,11 @@ define([
                 });
                 return undefined;
             }
-
-            var node = Node(this, nodes, contexts, this.options);
-            this.nodes.push(node);
-            return node;
+            var n = Node(this, nodes, contexts, this.options);
+            if (!n.hasOwnProperty("deriveContexts")) {
+                this.nodes.push(n);
+            }
+            return n;
         }
     };
     PseudoGraph.prototype.init.prototype = PseudoGraph.prototype;
