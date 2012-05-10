@@ -38,7 +38,8 @@ define(["src/graphite/loader/proxy"], function (Proxy) {
                     assert.equals(client.getResponseHeader("Content-Type"), "text/plain");
                 })
             });
-        },
+        }
+        /*
         "//Calling a non-CORS-friend url": function (done) {
             "use strict";
             Proxy({
@@ -52,5 +53,6 @@ define(["src/graphite/loader/proxy"], function (Proxy) {
                 })
             });
         }
+        */
     });
 });

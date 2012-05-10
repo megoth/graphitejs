@@ -1,25 +1,7 @@
 define([
     "./utils"
 ], function (Utils) {
-    var Dictionary = {
-        createStatement: function (subject, predicate, object) {
-            subject = Utils.isUri(subject) ? Dictionary.Symbol(subject) : Dictionary.BlankNode(subject.substr(2));
-            buster.log("SUBJECT", subject.value);
-            predicate = Dictionary.Symbol(predicate);
-            if (Utils.isString(object)) {
-                if (Utils.isUri(object)) {
-                    object = Dictionary.Symbol(object);
-                } else if (object[0] === "_") {
-                    object = Dictionary.BlankNode(object.substr(2));
-                } else {
-                    object = Dictionary.Literal(object);
-                }
-            } else {
-                object = Dictionary.Literal(object);
-            }
-            return Dictionary.Statement(subject, predicate, object);
-        }
-    };
+    var Dictionary = {};
     //	Blank Node
     if (typeof Dictionary.NextId != 'undefined') {
         Dictionary.log.error('Attempt to re-zero existing blank node id counter at '+Dictionary.NextId);

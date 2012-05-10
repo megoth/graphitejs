@@ -1,4 +1,19 @@
 /*
+ "//dumping the result of a query": function () {
+ var rdf = RDF()
+ .prefix('dc', this.ns.dc)
+ .prefix('foaf', this.ns.foaf)
+ .add('<photo1.jpg> dc:creator <http://www.blogger.com/profile/1109404> .')
+ .add('<http://www.blogger.com/profile/1109404> foaf:img <photo1.jpg> .')
+ .add('<photo2.jpg> dc:creator <http://www.blogger.com/profile/1109404> .')
+ .add('<http://www.blogger.com/profile/1109404> foaf:img <photo2.jpg> .')
+ .about('<http://www.blogger.com/profile/1109404>'),
+ dump;
+ assert.equals(rdf.length, 2, "there are two triples about <http://www.blogger.com/profile/1109404>");
+ dump = rdf.dump();
+ assert.defined(dump['http://www.blogger.com/profile/1109404'], 'there should be a property for the subject');
+ assert.equals(dump['http://www.blogger.com/profile/1109404'][this.ns.foaf + 'img'].length, 2);
+ }
 "//Dumping Databanks": {
     "dumping in RDF/XML a triple whose subject is a blank node": function () {
         var namespaces = { foaf: this.ns.foaf },
