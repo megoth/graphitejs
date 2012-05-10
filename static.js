@@ -1,22 +1,18 @@
 /**
  * Code found at http://blog.rassemblr.com/2011/04/a-working-static-file-server-using-node-js/
  */
-
-var libpath = require('path'),
-    http = require("http"),
-    fs = require('fs'),
-    url = require("url"),
-    mime = require('mime');
-
-var path = "./static";
-var port = 8088;
-
-http.createServer(function (request, response) {
+var nodePath = require('path'),
+    nodeHttp = require("http"),
+    nodeFs = require('fs'),
+    nodeUrl = require("url"),
+    mime = require('mime'),
+    path = "./static",
+    port = 8088;
+nodeHttp.createServer(function (request, response) {
     console.log("request from", request.headers.host);
-    var uri = url.parse(request.url).pathname;
-    var filename = libpath.join(path, uri);
-
-    libpath.exists(filename, function (exists) {
+    var uri = nodeUrl.parse(request.url).pathname;
+    var filename = nodePath.join(path, uri);
+    nodeFs.exists(filename, function (exists) {
         if (!exists) {
             response.writeHead(404, {
                 "Access-Control-Allow-Origin": "*",
@@ -26,12 +22,10 @@ http.createServer(function (request, response) {
             response.end();
             return;
         }
-
-        if (fs.statSync(filename).isDirectory()) {
+        if (nodeFs.statSync(filename).isDirectory()) {
             filename += '/index.html';
         }
-
-        fs.readFile(filename, "binary", function (err, file) {
+        nodeFs.readFile(filename, "binary", function (err, file) {
             if (err) {
                 response.writeHead(500, {
                     "Access-Control-Allow-Origin": "*",
@@ -41,11 +35,10 @@ http.createServer(function (request, response) {
                 response.end();
                 return;
             }
-            
             var type = mime.lookup(filename);
             var header = {
                 "Content-Type": type
-            }
+            };
             if (filename !== "static/nocors.txt") {
             	header["Access-Control-Allow-Origin"] = "*";
             }
