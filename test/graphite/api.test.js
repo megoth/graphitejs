@@ -1,4 +1,4 @@
-/*global assert, module, require*/
+/*global assert, buster, refute*/
 if (typeof module === "object" && typeof require === "function") {
     var buster = require("buster");
 }
@@ -6,28 +6,39 @@ if (typeof module === "object" && typeof require === "function") {
 define([
     "src/graphite/api"
 ], function(API) {
+    "use strict";
     buster.testCase("Graphite API", {
         setUp: function () {
-            "use strict";
+            this.subJohn = "http://dbpedia.org/resource/John_Lennon";
+            this.preName = "http://xmlns.com/foaf/0.1/name";
+            this.preHomepage = "http://xmlns.com/foaf/0.1/homepage";
+            this.objJohnName = "John Lennon";
+            this.subTim = "http://dbpedia.org/resource/Tim_B_Lee";
+            this.objTimName = "Tim Berners-Lee";
+            this.objTimHomepage = "http://www.w3.org/People/Berners-Lee/";
+            this.uriInteger = "http://www.w3.org/2001/XMLSchema#integer";
+            this.preKnows = "http://xmlns.com/foaf/0.1/knows";
+            this.api = API();
         },
         "Default return the API object": function () {
-            "use strict";
             assert.defined(API);
             assert.isFunction(API);
         },
-        "//Function .addStatement": {
-            "Adding a triple, returns a statement": function () {
-                var triple = this.g.addStatement(this.subJohn, this.preName, this.objJohnName);
-                assert.equals(triple.subject, this.subJohn);
-                assert.equals(triple.predicate, this.preName);
-                assert.equals(triple.object, this.objJohnName);
+        "Function .addStatement": {
+            "Adding a triple, returns the modified object": function (done) {
+                this.api
+                    .addStatement(this.subJohn, this.preName, this.objJohnName)
+                    .size()
+                    .then(done(function (size) {
+                        assert.equals(size, 1);
+                    }));
             },
-            "Adding a triple fires a callback": function () {
+            "//Adding a triple fires a callback": function () {
                 var spy = sinon.spy();
                 this.g.addStatement(this.subJohn, this.preName, this.objJohnName, spy);
                 assert(spy.calledOnce);
             },
-            "Adding a triple fires a callback which contains a statement": function (done) {
+            "//Adding a triple fires a callback which contains a statement": function (done) {
                 var that = this;
                 this.g.addStatement(this.subJohn, this.preName, this.objJohnName, done(function (s) {
                     assert.equals(s.subject, that.subJohn);
@@ -35,7 +46,7 @@ define([
                     assert.equals(s.object, that.objJohnName);
                 }));
             },
-            "Adding a blank node": function () {
+            "//Adding a blank node": function () {
                 var that = this;
                 this.g.addStatement(this.blank1, this.preName, this.objJohnName);
                 this.g.listStatements(function (predicate, object) {
@@ -62,7 +73,6 @@ define([
             },
             "//Typing": {
                 "Default types": function () {
-                    "use strict";
                     this.g.addStatement(null, this.preName, this.objJohnName);
                     this.g.addStatement(this.subJohn, this.preName, this.objJohnName);
                     var list = this.g.listStatements();
@@ -74,7 +84,6 @@ define([
                     assert.equals(list[1].object.token, "literal");
                 },
                 "Explicitly typed": function () {
-                    "use strict";
                     var list;
                     this.g.addStatement({
                         value: this.subJohn,
@@ -170,6 +179,14 @@ define([
                 assert(spy.calledOnce);
             }
         },
+        "Function .load": function (done) {
+            this.api
+                .load("http://localhost:8088/json-ld/simple.jsonld")
+                .size()
+                .then(done(function(size) {
+                    assert.equals(size, 2);
+                }));
+        },
         "//Function .removeStatement": {
             setUp: function () {
                 "use strict";
@@ -252,6 +269,12 @@ define([
                 assert.equals(this.g.listStatements().length, 2);
                 assert(spy.calledTwice);
             }
+        },
+        "Function .size": function (done) {
+            this.api.size().then(done(function (size) {
+                buster.log("IN API TEST, SIZE", size);
+                assert.equals(size, 0);
+            }));
         }
     });
 });

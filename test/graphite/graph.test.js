@@ -69,12 +69,12 @@ define([
                 g4Size = When.defer();
             g1.clone().then(function (graph) {
                 g2 = graph;
-                g2Size = graph.size();
+                g2Size = g2.size();
             });
             Graph(this.graph1).then(function (graph) {
                 g3 = graph;
                 g3Size = g3.size();
-                g3.clone().then(function (graph) {
+                g3.clone().then(function (g4) {
                     g4 = graph;
                     g4Size = g4.size();
                 });
@@ -170,29 +170,34 @@ define([
                     g2Size = When.defer(),
                     g3Size = When.defer(),
                     g4Size = When.defer();
-                this.g.execute('LOAD <http://localhost:8088/rdfjson/test.rdfjson>', function (g1) {
+                this.g.execute('LOAD <http://localhost:8088/rdfjson/manu.rdfjson>', function (g1) {
                     g1.size().then(function (size) {
+                        buster.log("G1 SIZE", size);
                         g1Size.resolve(size);
                     });
                 }).then(function (g2) {
                         g2.size().then(function (size) {
+                            buster.log("G2 SIZE", size);
                             g2Size.resolve(size);
                         });
-                        g2.execute('LOAD <http://localhost:8088/rdfjson/test2.rdfjson>', function (g3) {
+                        g2.execute('LOAD <http://localhost:8088/rdfjson/arne.rdfjson>', function (g3) {
                             g3.size().then(function (size) {
+                                buster.log("G3 SIZE", size);
                                 g3Size.resolve(size);
                             });
                         }).then(function (g4) {
                                 g4.size().then(function (size) {
+                                    buster.log("G4 SIZE", size);
                                     g4Size.resolve(size);
                                 })
                             });
                     });
                 When.all([ g1Size, g2Size, g3Size, g4Size ]).then(done(function (sizes) {
+                    buster.log("SIZES", sizes);
                     assert.equals(sizes[0], 2);
                     assert.equals(sizes[1], 2);
-                    assert.equals(sizes[2], 2);
-                    assert.equals(sizes[3], 4);
+                    assert.equals(sizes[2], 1);
+                    assert.equals(sizes[3], 3);
                 }));
             },
             "SELECT query": function (done) {

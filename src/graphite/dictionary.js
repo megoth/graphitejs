@@ -1,7 +1,73 @@
 define([
+    "./../rdfquery/uri",
     "./utils"
-], function (Utils) {
-    var Dictionary = {};
+], function (Uri, Utils) {
+    var Dictionary = {
+        /**
+         *
+         * @param [object]
+         * @param [options]
+         * @return {*}
+         */
+        createObject: function (object, options) {
+            options = options || {};
+            if (object && !Utils.isString(object)) {
+                if (options.base) {
+                    return this.Symbol(Uri('' + object, options.base));
+                }
+                if (options.isBlankNode) {
+                    return this.BlankNode(object);
+                }
+                return this.Literal(object);
+            }
+            if (object && options.base) {
+                return this.Symbol(Uri(object, options.base));
+            }
+            if (object && Utils.isUri(object)) {
+                return this.Symbol(object);
+            }
+            if (object) {
+                return this.Literal(object);
+            }
+            return this.BlankNode();
+        },
+        /**
+         *
+         * @param predicate
+         * @param [base]
+         * @return {*}
+         */
+        createPredicate: function (predicate, base) {
+            return this.Symbol(Uri(predicate, base));
+        },
+        /**
+         *
+         * @param parts
+         * @return {*}
+         */
+        createStatement: function (parts) {
+            var subject = this.createSubject(parts.subject),
+                predicate = this.createPredicate(parts.predicate),
+                object = this.createObject(parts.object);
+            return Dictionary.Statement(subject, predicate, object);
+        },
+        /**
+         *
+         * @param [subject]
+         * @param [base]
+         * @return {*}
+         */
+        createSubject: function (subject, base) {
+            var uri;
+            if (subject) {
+                if (!Utils.isString(subject)) {
+                    return this.BlankNode(subject);
+                }
+                return this.Symbol(Uri(subject, base).toString());
+            }
+            return this.BlankNode();
+        }
+    };
     //	Blank Node
     if (typeof Dictionary.NextId != 'undefined') {
         Dictionary.log.error('Attempt to re-zero existing blank node id counter at '+Dictionary.NextId);
@@ -210,7 +276,7 @@ define([
         str = str.replace(/\n/g, '\\n');    // escape newlines
         str = '"' + str + '"';  //';
         if (this.datatype){
-            buster.log("DATATYPE", this.datatype, this.datatype.toNT);
+            //buster.log("DATATYPE", this.datatype, this.datatype.toNT);
             str = str + '^^' + this.datatype.toNT();
         }
         if (this.lang) {

@@ -30,6 +30,7 @@ define([
             if (m === null) {
                 throw "Malformed URI: " + u;
             }
+            //buster.log("PARSED URI, the match", m);
             return {
                 scheme: m[1] ? m[2].toLowerCase() : undefined,
                 authority: m[3] ? m[4] : undefined,
@@ -72,7 +73,6 @@ define([
             }
         },
         uri;
-
     /**
      * Creates a new jQuery.uri object. This should be invoked as a method rather than constructed using new.
      * @class Represents a URI
@@ -91,7 +91,7 @@ define([
         if (typeof base === 'string') {
             base = uri.absolute(base);
         }
-        u = new uri.fn.init(relative, base);
+        u = new uri.prototype.init(relative, base);
         if (mem[u]) {
             return mem[u];
         } else {
@@ -99,8 +99,7 @@ define([
             return u;
         }
     };
-
-    uri.fn = uri.prototype = {
+    uri.prototype = {
         /**
          * The scheme used in the URI
          * @type String
@@ -126,11 +125,12 @@ define([
          * @type String
          */
         fragment: undefined,
-
         init: function (relative, base) {
+            //buster.log("IN URI", relative, base);
             var r = {};
             base = base || {};
             Utils.extend(this, parseURI(relative));
+            //buster.log("URI PARSED");
             if (this.scheme === undefined) {
                 this.scheme = base.scheme;
                 if (this.authority !== undefined) {
@@ -155,7 +155,6 @@ define([
             }
             return this;
         },
-
         /**
          * Resolves a relative URI relative to this URI
          * @param {String} relative
@@ -164,7 +163,6 @@ define([
         resolve: function (relative) {
             return uri(relative, this);
         },
-
         /**
          * Creates a relative URI giving the path from this URI to the absolute URI passed as a parameter
          * @param {String|jQuery.uri} absolute
@@ -209,7 +207,6 @@ define([
             }
             return '';
         },
-
         /**
          * Returns the URI as an absolute string
          * @returns String
@@ -228,11 +225,8 @@ define([
                 return result;
             }
         }
-
     };
-
-    uri.fn.init.prototype = uri.fn;
-
+    uri.prototype.init.prototype = uri.prototype;
     /**
      * Creates a {@link jQuery.uri} from a known-to-be-absolute URI
      * @param {String}
@@ -241,7 +235,6 @@ define([
     uri.absolute = function (u) {
         return uri(u, {});
     };
-
     /**
      * Returns the base URI of the page
      * TODO: This must be handled in a correct manner
@@ -252,7 +245,6 @@ define([
             ? global.document.location.href
             : "http://example.com/";
     };
-
     /**
      * Creates a {@link jQuery.uri} from a relative URI and an optional base URI
      * @returns {jQuery.uri}
@@ -261,7 +253,6 @@ define([
     uri.resolve = function (relative, base) {
         return uri(relative, base);
     };
-
     /**
      * Creates a string giving the relative path from a base URI to an absolute URI
      * @param {String} absolute

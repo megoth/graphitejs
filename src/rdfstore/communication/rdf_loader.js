@@ -67,6 +67,7 @@ define([
             uri: uri,
             accept: this.acceptHeaderValue,
             success: function (err, data, status, xhr) {
+                buster.log("RDFLOADER LOAD", data);
                 if(!err) {
                     //buster.log("DATA RETRIEVED");
                     var mime = getMime(xhr.getResponseHeader("Content-Type") || xhr.getResponseHeader("content-type"));

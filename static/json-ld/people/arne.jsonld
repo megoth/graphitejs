@@ -1,6 +1,9 @@
 {
     "@context": {
         "@id": "http://example.com/people/arne",
-        "name": "http://xmlns.com/foaf/spec/name"
-    }
+        "name": "http://xmlns.com/foaf/spec/name",
+        "age": "http://xmlns.com/foaf/spec/age"
+    },
+    "name": "Arne Hassel",
+    "age": 22
 }

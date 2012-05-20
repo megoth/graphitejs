@@ -1,5 +1,5 @@
 define([
-    "src/rdfstore/rdf-persistence/lexicon"
+    "./../rdfstore/rdf-persistence/lexicon"
 ], function (Lexicon) {
     var breaker          = {},
         ArrayProto       = Array.prototype,
@@ -605,8 +605,8 @@ define([
      * values in the array. The guard check allows it to work with Utils.map.
      *
      * @param array
-     * @param n
-     * @param guard
+     * @param [n]
+     * @param [guard]
      * @return {*}
      */
     Utils.last = function(array, n, guard) {

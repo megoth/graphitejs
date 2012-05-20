@@ -1,4 +1,6 @@
-define(["../utils"], function (Utils) {
+define([
+    "../utils"
+], function (Utils) {
     "use strict";
     var xhr = function XHR(options) {
         return new xhr.prototype.init(options);
@@ -18,14 +20,21 @@ define(["../utils"], function (Utils) {
         abort: function () {
             this.req.abort();
         },
-        send: function (callback) {;
-            var obj = this;
+        send: function (callback) {
+            //buster.log("IN XHR, SENDING", this.options);
+            var that = this;
             this.req.open(this.options.method, this.options.uri, this.options.asynchronous);
             this.req.onerror = function () {
+                //buster.log("IN XHR, ERROR");
                 callback("There was an error making the request");
             };
             this.req.onload = function () {
-                callback(null, obj.req.responseText, obj.req.status, obj.req);
+                //buster.log("IN XHR, SUCCESS");
+                callback(null, that.req.responseText, that.req.status, that.req);
+            };
+            this.req.ontimeout = function () {
+                buster.log("IN XHR, TIMEOUT");
+                callback("The request timed out");
             };
             this.req.send();
         }

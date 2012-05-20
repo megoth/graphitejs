@@ -1,4 +1,4 @@
-define(["../trees/utils"], function (Utils) {
+define(["./../trees/utils"], function (Utils) {
     /**
      * Javascript implementation of JSON-LD.
      *
@@ -93,6 +93,8 @@ define(["../trees/utils"], function (Utils) {
                 _setMembers(this, obj);
                 this.stack = new Error().stack;
             };
+        } else {
+            var jsonld = {};
         }
 
 

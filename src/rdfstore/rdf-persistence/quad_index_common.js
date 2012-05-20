@@ -1,6 +1,5 @@
 define([], function () {
     var QuadIndexCommon = {};
-
     /**
      * NodeKey
      *
@@ -8,6 +7,10 @@ define([], function () {
      *
      * A Tree node augmented with BPlusTree
      * node structures
+     *
+     * @param components
+     * @param [order]
+     * @constructor
      */
     QuadIndexCommon.NodeKey = function(components, order) {
         this.subject = components.subject;
@@ -50,7 +53,7 @@ define([], function () {
 
         var order = [];
         var indif = [];
-        var components = ['subject', 'predicate', 'object', 'graph'];
+        components = ['subject', 'predicate', 'object', 'graph'];
 
         // components must have been already normalized and
         // inserted in the lexicon.
