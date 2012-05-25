@@ -263,23 +263,50 @@ define([
                 }));
             }
         },
-        "Function .size": function (done) {
-            var that = this,
-                size1 = this.g.size(),
-                size2 = When.defer(),
-                size3 = When.defer();
-            Graph(this.graph1).then(function (g) {
-                size2 = g.size();
-                g.execute("INSERT DATA" + that.graph2.toNT()).then(function (g) {
-                    size3 = g.size();
+        "Function .size": {
+            "With .then": function (done) {
+                var that = this,
+                    size1 = this.g.size(),
+                    size2 = When.defer(),
+                    size3 = When.defer();
+                Graph(this.graph1).then(function (g) {
+                    size2 = g.size();
+                    g.execute("INSERT DATA" + that.graph2.toNT()).then(function (g) {
+                        size3 = g.size();
+                    });
                 });
-            });
-            When.all([ size1, size2, size3 ]).then(done(function (sizes) {
-                buster.log("SIZES", sizes);
-                assert.equals(sizes[0], 0);
-                assert.equals(sizes[1], 4);
-                assert.equals(sizes[2], 5);
-            }));
+                When.all([ size1, size2, size3 ]).then(done(function (sizes) {
+                    buster.log("SIZES", sizes);
+                    assert.equals(sizes[0], 0);
+                    assert.equals(sizes[1], 4);
+                    assert.equals(sizes[2], 5);
+                }));
+            },
+            "With callback": function (done) {
+                var size1 = When.defer(),
+                    size2 = When.defer(),
+                    size3 = When.defer(),
+                    that = this;
+                this.g.size(function (size) {
+                    size1.resolve(size);
+                });
+                Graph(this.graph1).then(function (g) {
+                    g.size(function (size) {
+                        size2.resolve(size);
+                    });
+                    g.execute("INSERT DATA" + that.graph2.toNT()).then(function (g) {
+                        g.size(function (size) {
+                            size3.resolve(size);
+                        });
+                    });
+                })
+                When.all([ size1, size2, size3 ]).then(done(function (sizes) {
+                    buster.log("SIZES", sizes);
+                    assert.equals(sizes[0], 0);
+                    assert.equals(sizes[1], 4);
+                    assert.equals(sizes[2], 5);
+                }));
+            }
         }
     });
 });

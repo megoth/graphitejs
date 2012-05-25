@@ -100,6 +100,7 @@ define([
             },
             "select": function (promise, options) {
                 return function (success, results) {
+                    buster.log("IN GRAPH, SELECT", success, results);
                     var vars;
                     options.graph.clone().then(function (g) {
                         promise.resolve(g);
@@ -130,26 +131,9 @@ define([
             object;
         that.engine.execute("SELECT * WHERE { ?s ?p ?o }", function (success, results) {
             Utils.each(results, function (t) {
-                subject = t.s.token === "blank" ?
-                    Dictionary.BlankNode(t.s.value) :
-                    Dictionary.Symbol(t.s.value);
-                predicate = Dictionary.Symbol(t.p.value);
-                if (t.o.token === "literal") {
-                    var dt,
-                        val = t.o.value;
-                    if ((''+val).indexOf('e')>=0) {
-                        dt = Dictionary.Symbol.prototype.XSDfloat;
-                    } else if ((''+val).indexOf('.')>=0) {
-                        dt = Dictionary.Symbol.prototype.XSDdecimal;
-                    } else {
-                        dt = Dictionary.Symbol.prototype.XSDinteger;
-                    }
-                    object = Dictionary.Literal(t.o.value, t.o.lang, dt);
-                } else if (t.o.token === "blank") {
-                    object = Dictionary.BlankNode(t.o.value);
-                } else {
-                    object = Dictionary.Symbol(t.o.value);
-                }
+                subject = Dictionary.createSubject(t.s.value);
+                predicate = Dictionary.createPredicate(t.p.value);
+                object = Dictionary.createObject(t.o.value);
                 graph.add(subject, predicate, object);
             });
             deferred.resolve(graph);
@@ -266,7 +250,10 @@ define([
          *
          * @param {Function} [callback]
          */
-        listStatements: function (callback) {
+        listStatements: function (parts, callback) {
+            if (!callback && Utils.isFunction(parts)) {
+                callback = parts;
+            }
             return this.execute('SELECT * { ?subject ?predicate ?object }', callback);
         },
         /*
@@ -285,13 +272,14 @@ define([
             }
         },
         */
-        size: function () {
+        size: function (callback) {
             var promise = When.defer();
             //buster.log("IN SIZE");
             this.engine.execute("SELECT * WHERE { ?s ?p ?o }", function (success, results) {
-                //buster.log("RESULTS IN SIZE", results);
+                if(callback) {
+                    callback(results.length);
+                }
                 promise.resolve(results.length);
-                //buster.log("IN SIZE QUERY", results.length, results);
             });
             return promise;
         }

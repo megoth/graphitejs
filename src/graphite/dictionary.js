@@ -15,9 +15,10 @@ define([
                 if (options.base) {
                     return this.Symbol(Uri('' + object, options.base));
                 }
-                if (options.isBlankNode) {
+                if (options["isBlankNode"]) {
                     return this.BlankNode(object);
                 }
+                //buster.log("IN DICTIONARY, OBJECT FALLS TO LITERAL");
                 return this.Literal(object);
             }
             if (object && options.base) {
@@ -27,6 +28,7 @@ define([
                 return this.Symbol(object);
             }
             if (object) {
+                //buster.log("IN DICTIONARY, OBJECT IS LITERAL");
                 return this.Literal(object);
             }
             return this.BlankNode();
@@ -58,7 +60,6 @@ define([
          * @return {*}
          */
         createSubject: function (subject, base) {
-            var uri;
             if (subject) {
                 if (!Utils.isString(subject)) {
                     return this.BlankNode(subject);
@@ -248,20 +249,13 @@ define([
     Dictionary.Formula.prototype.init.prototype = Dictionary.Formula.prototype;
     //	Literal
     Dictionary.Literal = function (value, lang, datatype) {
+        //buster.log("IN DICTIONARY, LITERAL INIT", value, lang, datatype);
         return new Dictionary.Literal.prototype.init(value, lang, datatype);
     };
     Dictionary.Literal.prototype.init = function (value, lang, datatype) {
         this.value = value;
-        if (lang == "" || lang == null) {
-            this.lang = undefined;
-        } else {
-            this.lang = lang;
-        }	  // string
-        if (datatype == null) {
-            this.datatype = undefined;
-        } else {
-            this.datatype = datatype;
-        }  // term
+        this.lang = lang;
+        this.datatype = datatype;
         return this;
     };
     //Dictionary.Literal.prototype.termType = 'literal';
@@ -277,10 +271,9 @@ define([
         str = '"' + str + '"';  //';
         if (this.datatype){
             //buster.log("DATATYPE", this.datatype, this.datatype.toNT);
-            str = str + '^^' + this.datatype.toNT();
-        }
-        if (this.lang) {
-            str = str + "@" + this.lang;
+            str = str + '^^{0}'.format(this.datatype.toNT());
+        } else if (this.lang) {
+            str = str + "@{0}".format(this.lang);
         }
         return str;
     };
@@ -297,10 +290,9 @@ define([
         str = str.replace(/\n/g, '\\n');    // escape newlines
         str = '"' + str + '"';  //';
         if (this.datatype){
-            str = str + '^^<' + this.datatype.value + ">";
-        }
-        if (this.lang) {
-            str = str + "@" + this.lang;
+            str = str + '^^<{0}>'.format(this.datatype.value);
+        } else if (this.lang) {
+            str = str + '@{0}'.format(this.lang);
         }
         return {
             'literal': str
@@ -413,6 +405,7 @@ define([
             return Dictionary.Literal(val);
         }
         if (typeof val == 'number') {
+            buster.log("IN DICTIONARY, NUMBER");
             var dt;
             if ((''+val).indexOf('e')>=0) {
                 dt = Dictionary.Symbol.prototype.XSDfloat;

@@ -19841,8 +19841,10 @@ define([], function () {
                  */
                 if (result === null || pos !== input.length) {
                     var errorPosition = computeErrorPosition();
+                    var errorMsg = buildErrorMessage();
+                    buster.log("ERROR IN SPARQL PARSER", errorMsg);
                     throw new this.SyntaxError(
-                        buildErrorMessage(),
+                        errorMsg,
                         errorPosition.line,
                         errorPosition.column
                     );

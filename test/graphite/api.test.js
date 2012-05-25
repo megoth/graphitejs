@@ -7,17 +7,24 @@ define([
     "src/graphite/api"
 ], function(API) {
     "use strict";
+    var subJohn = "http://dbpedia.org/resource/John_Lennon",
+        preName = "http://xmlns.com/foaf/0.1/name",
+        preHomepage = "http://xmlns.com/foaf/0.1/homepage",
+        objJohnName = "John Lennon",
+        subTim = "http://dbpedia.org/resource/Tim_B_Lee",
+        objTimName = "Tim Berners-Lee",
+        objTimHomepage = "http://www.w3.org/People/Berners-Lee/";
+        //uriInteger = "http://www.w3.org/2001/XMLSchema#integer",
+        //preKnows = "http://xmlns.com/foaf/0.1/knows";
+    function addStatements (done) {
+        this.addStatement(subJohn, preName, objJohnName)
+            .addStatement(subTim, preName, objTimName)
+            .addStatement(subTim, preHomepage, objTimHomepage)
+            .addStatement(subTim, preName, objJohnName)
+            .then(done);
+    }
     buster.testCase("Graphite API", {
         setUp: function () {
-            this.subJohn = "http://dbpedia.org/resource/John_Lennon";
-            this.preName = "http://xmlns.com/foaf/0.1/name";
-            this.preHomepage = "http://xmlns.com/foaf/0.1/homepage";
-            this.objJohnName = "John Lennon";
-            this.subTim = "http://dbpedia.org/resource/Tim_B_Lee";
-            this.objTimName = "Tim Berners-Lee";
-            this.objTimHomepage = "http://www.w3.org/People/Berners-Lee/";
-            this.uriInteger = "http://www.w3.org/2001/XMLSchema#integer";
-            this.preKnows = "http://xmlns.com/foaf/0.1/knows";
             this.api = API();
         },
         "Default return the API object": function () {
@@ -27,98 +34,72 @@ define([
         "Function .addStatement": {
             "Adding a triple, returns the modified object": function (done) {
                 this.api
-                    .addStatement(this.subJohn, this.preName, this.objJohnName)
+                    .addStatement(subJohn, preName, objJohnName)
                     .size()
                     .then(done(function (size) {
                         assert.equals(size, 1);
                     }));
             },
-            "//Adding a triple fires a callback": function () {
+            "Adding a triple fires a callback": function (done) {
                 var spy = sinon.spy();
-                this.g.addStatement(this.subJohn, this.preName, this.objJohnName, spy);
-                assert(spy.calledOnce);
+                this.api
+                    .addStatement(subJohn, preName, objJohnName, {
+                        callback: spy
+                    })
+                    .then(done(function () {
+                        assert(spy.calledOnce);
+                    }));
             },
-            "//Adding a triple fires a callback which contains a statement": function (done) {
-                var that = this;
-                this.g.addStatement(this.subJohn, this.preName, this.objJohnName, done(function (s) {
-                    assert.equals(s.subject, that.subJohn);
-                    assert.equals(s.predicate, that.preName);
-                    assert.equals(s.object, that.objJohnName);
+            "Adding a triple fires a callback which contains a graph": function (done) {
+                this.api
+                    .addStatement(subJohn, preName, objJohnName, {
+                        callback: function (graph) {
+                            graph.size().then(done(function (size) {
+                                assert.equals(size, 1);
+                            }))
+                        }
+                    });
+            },
+            "Adding a blank node": function (done) {
+                this.api
+                    .addStatement(null, preName, objJohnName)
+                    .size(done(function (size) {
+                        assert.equals(size, 1);
+                    }));
+            },
+            "Adding multiple triples with same subject": function (done) {
+                this.api
+                    .addStatement(subTim, preName, objTimName)
+                    .addStatement(subTim, preHomepage, objTimHomepage)
+                    .size(done(function (size) {
+                    assert.equals(size, 2);
                 }));
             },
-            "//Adding a blank node": function () {
-                var that = this;
-                this.g.addStatement(this.blank1, this.preName, this.objJohnName);
-                this.g.listStatements(function (predicate, object) {
-                    assert.equals(predicate, that.preName.value);
-                    assert.equals(object, that.objJohnName.value);
-                });
+            "Adding redundant triples": function (done) {
+                this.api
+                    .addStatement(subJohn, preName, objTimName)
+                    .addStatement(subJohn, preName, objTimName)
+                    .size(done(function (size) {
+                    assert.equals(size, 1);
+                }))
+            }
+        },
+        "//Function .each": {
+            setUp: function (done) {
+                addStatements.call(this.api, done);
             },
-            "//Adding multiple triples with same subject": function () {
-                this.g.addStatement(this.subTim, this.preName, this.objTimName);
-                this.g.addStatement(this.subTim, this.preHomepage, this.objTimHomepage);
-                //this.g.execute("SELECT ?s WHERE { ?s ?p ?o } GROUP BY ?s", spy);
-                //assert.equals(list[0].subject, list[1].subject);
-                //refute.equals(list[0].predicate, list[1].predicate);
-                //refute.equals(list[0].object, list[1].object);
-            },
-            "//Adding multiple triples with same subject and predicate": function () {
-                var list;
-                this.g.addStatement(this.subJohn, this.preName, "Something");
-                this.g.addStatement(this.subJohn, this.preName, "Something else");
-                list = this.g.listStatements();
-                assert.equals(list[0].subject, list[1].subject);
-                assert.equals(list[0].predicate, list[1].predicate);
-                refute.equals(list[0].object, list[1].object);
-            },
-            "//Typing": {
-                "Default types": function () {
-                    this.g.addStatement(null, this.preName, this.objJohnName);
-                    this.g.addStatement(this.subJohn, this.preName, this.objJohnName);
-                    var list = this.g.listStatements();
-                    assert.equals(list[0].subject.token, "uri");
-                    assert.equals(list[0].predicate.token, "uri");
-                    assert.equals(list[0].object.token, "literal");
-                    assert.equals(list[1].subject.token, "uri");
-                    assert.equals(list[1].predicate.token, "uri");
-                    assert.equals(list[1].object.token, "literal");
-                },
-                "Explicitly typed": function () {
-                    var list;
-                    this.g.addStatement({
-                        value: this.subJohn,
-                        token: "uri"
-                    }, this.preName, {
-                        value: 12,
-                        token: "literal",
-                        datatype: this.uriInteger
-                    });
-                    this.g.addStatement.call(this.g, {
-                        value: "http://dbpedia.org/resource/Sean_Taro_Ono_Lennon",
-                        token: "uri"
-                    }, this.preName, {
-                        value: "小野 太郎",
-                        token: "literal",
-                        lang: "jp"
-                    });
-                    list = this.g.listStatements();
-                    assert.equals(list[0].subject.value, this.subJohn);
-                    assert.equals(list[0].subject.token, "uri");
-                    assert.equals(list[0].object.value, 12);
-                    assert.equals(list[0].object.token, "literal");
-                    assert.equals(list[1].object.value, "小野 太郎");
-                    assert.equals(list[1].object.token, "literal");
-                    assert.equals(list[1].object.lang, "jp");
-                }
+            "By default returns all triples in a graph": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .each(spy)
+                    .then(done(function () {
+                    assert(spy.callCount, 4);
+                }));
             }
         },
         "//Function .listStatement": {
-            setUp: function () {
-                "use strict";
-                this.g.addStatement(this.subJohn, this.preName, this.objJohnName);
-                this.g.addStatement(this.subTim, this.preName, this.objTimName);
-                this.g.addStatement(this.subTim, this.preHomepage, this.objTimHomepage);
-                this.g.addStatement(this.subTim, this.preName, this.objJohnName);
+            setUp: function (done) {
+                addStatements.call(this.api, done);
             },
             "List all triples": function () {
                 var spy = sinon.spy(),
@@ -127,53 +108,53 @@ define([
                 assert(spy.called);
                 assert.equals(spy.callCount, 4);
             },
-            "Listing with a specific subject": function () {
+            "//Listing with a specific subject": function () {
                 "use strict";
                 var spy = sinon.spy(),
                     list = this.g.listStatements({
-                        subject: this.subJohn
+                        subject: subJohn
                     }, spy);
                 assert.equals(list.length, 1);
                 assert(spy.calledOnce);
                 spy = sinon.spy();
                 list = this.g.listStatements({
-                    subject: this.subTim
+                    subject: subTim
                 }, spy);
                 assert.equals(list.length, 3);
                 assert(spy.calledThrice);
             },
-            "Listing with a specific predicate": function () {
+            "//Listing with a specific predicate": function () {
                 "use strict";
                 var spy = sinon.spy(),
                     list = this.g.listStatements({
-                        predicate: this.preHomepage
+                        predicate: preHomepage
                     }, spy);
                 assert.equals(list.length, 1);
                 assert(spy.calledOnce);
                 spy = sinon.spy();
                 list = this.g.listStatements({
-                    predicate: this.preName
+                    predicate: preName
                 }, spy);
                 assert.equals(list.length, 3);
                 assert(spy.calledThrice);
             },
-            "Listing with a specific object": function () {
+            "//Listing with a specific object": function () {
                 "use strict";
                 var spy = sinon.spy(),
                     list = this.g.listStatements({
-                        object: this.objJohnName
+                        object: objJohnName
                     }, spy);
                 assert.equals(list.length, 2);
                 assert(spy.calledTwice);
                 spy = sinon.spy();
                 list = this.g.listStatements({
-                    object: this.objTimHomepage
+                    object: objTimHomepage
                 }, spy);
                 assert.equals(list.length, 1);
                 assert(spy.calledOnce);
                 spy = sinon.spy();
                 list = this.g.listStatements({
-                    object: this.objTimName
+                    object: objTimName
                 }, spy);
                 assert.equals(list.length, 1);
                 assert(spy.calledOnce);
@@ -187,13 +168,23 @@ define([
                     assert.equals(size, 2);
                 }));
         },
+        "Function .query": {
+            setUp: function (done) {
+                addStatements.call(this.api, done);
+            },
+            "SELECT": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .query("SELECT * WHERE { ?s ?p ?o }")
+                    .each(spy)
+                    .then(done(function () {
+                    assert(spy.callCount, 4);
+                }))
+            }
+        },
         "//Function .removeStatement": {
-            setUp: function () {
-                "use strict";
-                this.g.addStatement(this.subJohn, this.preName, this.objJohnName);
-                this.g.addStatement(this.subTim, this.preName, this.objTimName);
-                this.g.addStatement(this.subTim, this.preHomepage, this.objTimHomepage);
-                this.g.addStatement(this.subTim, this.preName, this.objJohnName);
+            setUp: function (done) {
+                addStatements.call(this.api, done);
             },
             "//Remove all statement": function () {
                 this.g.removeStatement();
@@ -206,17 +197,17 @@ define([
                     object: "test"
                 }).length, 0);
                 assert.equals(this.g.removeStatement({
-                    subject: this.subJohn,
-                    predicate: this.preName,
-                    object: this.objJohnName
+                    subject: subJohn,
+                    predicate: preName,
+                    object: objJohnName
                 }).length, 1);
             },
             "//Remove with all specified": function () {
                 "use strict";
                 var spy = sinon.spy(),
-                    subJohn = this.subJohn,
-                    preName = this.preName,
-                    objJohnName = this.objJohnName;
+                    subJohn = subJohn,
+                    preName = preName,
+                    objJohnName = objJohnName;
                 this.g.removeStatement({
                     subject: subJohn,
                     predicate: preName,
@@ -233,7 +224,7 @@ define([
             "//Remove with subject specified": function () {
                 "use strict";
                 var spy = sinon.spy(),
-                    subJohn = this.subJohn;
+                    subJohn = subJohn;
                 this.g.removeStatement({
                     subject: subJohn
                 }, function (sub) {
@@ -246,7 +237,7 @@ define([
             "//Remove with predicate specified": function () {
                 "use strict";
                 var spy = sinon.spy(),
-                    preName = this.preName;
+                    preName = preName;
                 this.g.removeStatement({
                     predicate: preName
                 }, function (sub, pre) {
@@ -259,7 +250,7 @@ define([
             "//Remove with object specified": function () {
                 "use strict";
                 var spy = sinon.spy(),
-                    objJohnName = this.objJohnName;
+                    objJohnName = objJohnName;
                 this.g.removeStatement({
                     object: objJohnName
                 }, function (sub, pre, obj) {
@@ -270,11 +261,60 @@ define([
                 assert(spy.calledTwice);
             }
         },
-        "Function .size": function (done) {
-            this.api.size().then(done(function (size) {
-                buster.log("IN API TEST, SIZE", size);
-                assert.equals(size, 0);
-            }));
+        "//Function .select": {
+            setUp: function (done) {
+                addStatements.call(this.api, done);
+            },
+            "Single call": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .select("?s")
+                    .each(function (s) {
+                        assert(s);
+                        spy();
+                    })
+                    .then(done);
+            }
+        },
+        "Function .size": {
+            "With .then": function (done) {
+                this.api
+                    .size()
+                    .then(done(function (size) {
+                    buster.log("IN API TEST, SIZE", size);
+                    assert.equals(size, 0);
+                }));
+            },
+            "With callback": function (done) {
+                this.api
+                    .size(done(function (size) {
+                        assert.equals(size, 0);
+                    }));
+            }
+        },
+        "//Function .where": {
+            setUp: function (done) {
+                addStatements.call(this.api, done);
+            },
+            "Single call": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .where('?subject <{0}> "{1}"'.format(preName, objJohnName))
+                    .each(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 2);
+                }))
+            },
+            "Multiple calls": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .where('?subject ?predicate "{0}"'.format(objJohnName))
+                    .where('<{0}> ?predicate "{1}"'.format(subJohn, objJohnName))
+                    .each(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 2);
+                }))
+            }
         }
     });
 });
