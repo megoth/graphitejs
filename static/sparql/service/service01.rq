@@ -1,6 +1,6 @@
 # SERVICE join with pattern in the default graph
 
-PREFIX : <http://example.org/> 
+PREFIX : <http://example.org/>
 
 SELECT ?s ?o1 ?o2 
 {

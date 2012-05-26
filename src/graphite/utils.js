@@ -285,7 +285,7 @@ define([
      *
      * Return a completely flattened version of an array.
      * @param array
-     * @param shallow
+     * @param [shallow]
      */
     Utils.flatten = function (array, shallow) {
         return Utils.reduce(array, function (memo, value) {
