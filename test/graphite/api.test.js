@@ -168,7 +168,7 @@ define([
                     assert.equals(size, 2);
                 }));
         },
-        "Function .query": {
+        "//Function .query": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
