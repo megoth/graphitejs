@@ -8,7 +8,6 @@ define([
     var api = function (options) {
         return new api.prototype.init(options);
     };
-
     api.prototype = {
         init: function () {
             var that = this;
@@ -47,9 +46,7 @@ define([
         },
         each: function (callback) {
             var promise = When.defer();
-            buster.log("IN EACH, QUERY", this.queryController.run());
-            this.graph.execute(this.queryController.run(), callback).then(function () {
-                buster.log("IN EACH, EXECUTING");
+            this.graph.execute(this.queryController.retrieveTree(), callback).then(function () {
                 promise.resolve(arguments);
             });
             this.promises.push(promise);

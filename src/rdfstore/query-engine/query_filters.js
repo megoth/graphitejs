@@ -1,16 +1,16 @@
-define(["./../trees/utils"], function (Utils) {
+define([
+    "./../../graphite/utils",
+    "./../trees/utils"
+], function (GraphiteUtils, Utils) {
     var QueryFilters = {};
     QueryFilters.checkFilters = function(pattern, bindings, nullifyErrors, dataset, queryEnv, queryEngine) {
-
         var filters = pattern.filter;
         var nullified = [];
         if(filters==null || pattern.length != null) {
             return bindings;
         }
-
         for(var i=0; i<filters.length; i++) {
             var filter = filters[i];
-
             var filteredBindings = QueryFilters.run(filter.value, bindings, nullifyErrors, dataset, queryEnv, queryEngine);
             var acum = [];
             for(var j=0; j<filteredBindings.length; j++) {
@@ -20,14 +20,12 @@ define(["./../trees/utils"], function (Utils) {
                     acum.push(filteredBindings[j]);
                 }
             }
-
             bindings = acum;
         }
-
         return bindings.concat(nullified);
     };
-
     QueryFilters.boundVars = function(filterExpr) {
+        var acum;
         if(filterExpr.expressionType != null) {
             var expressionType = filterExpr.expressionType;
             if(expressionType == 'relationalexpression') {
@@ -35,37 +33,31 @@ define(["./../trees/utils"], function (Utils) {
                 var op2 = filterExpr.op2;
                 return QueryFilters.boundVars(op1)+QueryFilters.boundVars(op2);
             } else if(expressionType == 'conditionalor' || expressionType == 'conditionaland') {
-                var vars = [];
-                for(var i=0; i< filterExpr.operands; i++) {
-                    vars = vars.concat(QueryFilters.boundVars(filterExpr.operands[i]));
-                }
-                return vars;
+                return GraphiteUtils.map(filterExpr.operands, function (operand) {
+                    return QueryFilters.boundVars(operand);
+                });
             } else if(expressionType == 'builtincall') {
                 if(filterExpr.args == null) {
                     return [];
-                } else {
-                    var acum = [];
-                    for(var i=0; i< filterExpr.args.length; i++) {
-                        acum = acum.concat(QueryFilters.boundVars(filterExpr.args[i]));
-                    }
-                    return acum;
                 }
+                return GraphiteUtils.map(filterExpr.args, function (arg) {
+                    return QueryFilters.boundVars(arg);
+                });
             } else if(expressionType == 'multiplicativeexpression') {
-                var acum = QueryFilters.boundVars(filterExpr.factor);
-                for(var i=0; i<filterExpr.factors.length; i++) {
-                    acum = acum.concat(QueryFilters.boundVars(filterExpr.factors[i].expression))
-                }
+                acum = QueryFilters.boundVars(filterExpr.factor);
+                GraphiteUtils.each(filterExpr.factors, function (factor) {
+                    acum = acum.concat(QueryFilters.boundVars(factor.expression))
+                });
                 return acum;
             } else if(expressionType == 'additiveexpression') {
-                var acum = QueryFilters.boundVars(filterExpr.summand);
-                for(var i=0; i<filterExpr.summands.length; i++) {
-                    acum = acum.concat(QueryFilters.boundVars(filterExpr.summands[i].expression));
-                }
-
+                acum = QueryFilters.boundVars(filterExpr.summand);
+                GraphiteUtils.each(filterExpr.summands, function (summand) {
+                    acum = acum.concat(QueryFilters.boundVars(summand.expression));
+                });
                 return acum;
             } else if(expressionType == 'regex') {
-                var acum = QueryFilters.boundVars(filterExpr.expression1);
-                return acum.concat(QueryFilters.boundVars(filterExpr.expression2));
+                acum = QueryFilters.boundVars(filterExpr["expression1"]);
+                return acum.concat(QueryFilters.boundVars(filterExpr["expression2"]));
             } else if(expressionType == 'unaryexpression') {
                 return QueryFilters.boundVars(filterExpr.expression);
             } else if(expressionType == 'atomic') {
@@ -82,16 +74,17 @@ define(["./../trees/utils"], function (Utils) {
             throw("Cannot find bound expressions in a no expression token");
         }
     };
-
     QueryFilters.run = function(filterExpr, bindings, nullifyFilters, dataset, env, queryEngine) {
         var denormBindings = queryEngine.copyDenormalizedBindings(bindings, env.outCache);
         var filteredBindings = [];
-        for(var i=0; i<bindings.length; i++) {
-            var thisDenormBindings = denormBindings[i];
-            var ebv = QueryFilters.runFilter(filterExpr, thisDenormBindings, queryEngine, dataset, env);
+        var ebv;
+        var thisDenormBindings;
+        GraphiteUtils.each(bindings, function (binding, i) {
+            thisDenormBindings = denormBindings[i];
+            ebv = QueryFilters.runFilter(filterExpr, thisDenormBindings, queryEngine, dataset, env);
             // ebv can be directly a RDFTerm (e.g. atomic expression in filter)
             // this additional call to ebv will return -> true/false/error
-            var ebv = QueryFilters.ebv(ebv);
+            ebv = QueryFilters.ebv(ebv);
             //console.log("EBV:")
             //console.log(ebv)
             //console.log("FOR:")
@@ -99,24 +92,21 @@ define(["./../trees/utils"], function (Utils) {
             if(QueryFilters.isEbvError(ebv)) {
                 // error
                 if(nullifyFilters) {
-                    var thisBindings = {"__nullify__": true, "bindings": bindings[i]};
-                    filteredBindings.push(thisBindings);
+                    filteredBindings.push({"__nullify__": true, "bindings": binding});
                 }
             } else if(ebv === true) {
                 // true
-                filteredBindings.push(bindings[i]);
+                filteredBindings.push(binding);
             } else {
                 // false
                 if(nullifyFilters) {
-                    var thisBindings = {"__nullify__": true, "bindings": bindings[i]};
-                    filteredBindings.push(thisBindings);
+                    filteredBindings.push({"__nullify__": true, "bindings": binding});
                 }
             }
-        }
+        });
         return filteredBindings;
     };
-
-    QueryFilters.collect = function(filterExpr, bindings, dataset, env, queryEngine, callback) {
+    QueryFilters.collect = function(filterExpr, bindings, dataset, env, queryEngine) {
         var denormBindings = queryEngine.copyDenormalizedBindings(bindings, env.outCache);
         var filteredBindings = [];
         for(var i=0; i<denormBindings.length; i++) {
@@ -126,11 +116,7 @@ define(["./../trees/utils"], function (Utils) {
         }
         return(filteredBindings);
     };
-
-    QueryFilters.runDistinct = function(projectedBindings, projectionVariables) {
-    };
-
-// @todo add more aggregation functions here
+    // @todo add more aggregation functions here
     QueryFilters.runAggregator = function(aggregator, bindingsGroup, queryEngine, dataset, env) {
         if(bindingsGroup == null || bindingsGroup.length === 0) {
             return QueryFilters.ebvError();
@@ -142,8 +128,7 @@ define(["./../trees/utils"], function (Utils) {
             } else if(aggregator.expression.expressionType === 'aggregate') {
                 if(aggregator.expression.aggregateType === 'max') {
                     var max = null;
-                    for(var i=0; i< bindingsGroup.length; i++) {
-                        var bindings = bindingsGroup[i];
+                    GraphiteUtils.each(bindingsGroup, function (bindings) {
                         var ebv = QueryFilters.runFilter(aggregator.expression.expression, bindings, queryEngine, dataset, env);
                         if(!QueryFilters.isEbvError(ebv)) {
                             if(max === null) {
@@ -154,8 +139,7 @@ define(["./../trees/utils"], function (Utils) {
                                 }
                             }
                         }
-                    }
-
+                    });
                     if(max===null) {
                         return QueryFilters.ebvError();
                     } else {
@@ -163,8 +147,7 @@ define(["./../trees/utils"], function (Utils) {
                     }
                 } else if(aggregator.expression.aggregateType === 'min') {
                     var min = null;
-                    for(var i=0; i< bindingsGroup.length; i++) {
-                        var bindings = bindingsGroup[i];
+                    GraphiteUtils.each(bindingsGroup, function (bindings) {
                         var ebv = QueryFilters.runFilter(aggregator.expression.expression, bindings, queryEngine, dataset, env);
                         if(!QueryFilters.isEbvError(ebv)) {
                             if(min === null) {
@@ -175,8 +158,7 @@ define(["./../trees/utils"], function (Utils) {
                                 }
                             }
                         }
-                    }
-
+                    });
                     if(min===null) {
                         return QueryFilters.ebvError();
                     } else {
@@ -187,20 +169,18 @@ define(["./../trees/utils"], function (Utils) {
                     var count = 0;
                     if(aggregator.expression.expression === '*') {
                         if(aggregator.expression.distinct != null && aggregator.expression.distinct != '') {
-                            for(var i=0; i< bindingsGroup.length; i++) {
-                                var bindings = bindingsGroup[i];
+                            GraphiteUtils.each(bindingsGroup, function (bindings) {
                                 var key = Utils.hashTerm(bindings);
                                 if(distinct[key] == null) {
                                     distinct[key] = true;
                                     count++;
                                 }
-                            }
+                            });
                         } else {
                             count = bindingsGroup.length;
                         }
                     } else {
-                        for(var i=0; i< bindingsGroup.length; i++) {
-                            var bindings = bindingsGroup[i];
+                        GraphiteUtils.each(bindingsGroup, function (bindings) {
                             var ebv = QueryFilters.runFilter(aggregator.expression.expression, bindings, queryEngine, dataset, env);
                             if(!QueryFilters.isEbvError(ebv)) {
                                 if(aggregator.expression.distinct != null && aggregator.expression.distinct != '') {
@@ -213,9 +193,8 @@ define(["./../trees/utils"], function (Utils) {
                                     count++;
                                 }
                             }
-                        }
+                        });
                     }
-
                     return {token: 'literal', type:"http://www.w3.org/2001/XMLSchema#integer", value:''+count};
                 } else if(aggregator.expression.aggregateType === 'avg') {
                     var distinct = {};
@@ -1678,7 +1657,6 @@ define(["./../trees/utils"], function (Utils) {
                         } else if (from.value.split("+").length > 2) {
                             return QueryFilters.ebvError();
                         }
-
                         try {
                             from.value = parseFloat(from.value);
                             if(isNaN(from.value)) {
@@ -1703,4 +1681,4 @@ define(["./../trees/utils"], function (Utils) {
         }
     };
     return QueryFilters;
-})
+});

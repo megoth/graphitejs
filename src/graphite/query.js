@@ -16,6 +16,9 @@ define([
                 triples = query.match(tripleRegex);
             return triples !== null ? triples : [];
         },
+        retrieveTree: function () {
+            return this.syntaxTree;
+        },
         select: function (part) {
             buster.log(part);
         },

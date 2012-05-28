@@ -22,7 +22,7 @@ define([], function () {
     };
 
     Utils.shuffle = function(o){ //v1.0
-        for(var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x){};
+        for(var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x){}
         return o;
     };
 
@@ -106,17 +106,15 @@ define([], function () {
             });
         };
     };
-
-
     Utils.partition = function(c, n) {
         var rem = c.length % n;
         var currentGroup = [];
-        for(var i=0; i<rem; i++) {
+        var i;
+        for(i=0; i<rem; i++) {
             currentGroup.push(null);
         }
-
         var groups = [];
-        for(var i=0; i<c.length; i++) {
+        for(i=0; i<c.length; i++) {
             currentGroup.push(c[i]);
             if(currentGroup.length % n == 0) {
                 groups.push(currentGroup);
@@ -125,16 +123,16 @@ define([], function () {
         }
         return groups;
     };
-
     Utils.keys = function(obj) {
         var variables = [];
-        for(var variable in obj) {
-            variables.push(variable);
+        var variable;
+        for(variable in obj) {
+            if (obj.hasOwnProperty(variable)) {
+                variables.push(variable);
+            }
         }
-
         return variables;
     };
-
     Utils.iso8601 = function(date) {
         function pad(n){
             return n<10 ? '0'+n : n;
@@ -264,7 +262,7 @@ define([], function () {
     Utils.compareDateComponents = function(stra,strb) {
         var a = Utils.parseISO8601Components(stra);
         var b = Utils.parseISO8601Components(strb);
-
+        var offset;
         if((a.timezone == null && b.timezone == null) ||
             (a.timezone != null && b.timezone != null)) {
             var da = Utils.parseISO8601(stra);
@@ -282,9 +280,7 @@ define([], function () {
             db = Utils.parseISO8601(strb);
             var ta = da.getTime();
             var tb = db.getTime();
-
-            var offset = 14*60*60;
-
+            offset = 14*60*60;
             if(ta < tb && ta < (tb + offset)) {
                 return -1;
             } else if(ta > tb && ta > (tb - offset)) {
@@ -297,8 +293,7 @@ define([], function () {
             db = Utils.parseISO8601(strb);
             ta = da.getTime();
             tb = db.getTime();
-
-            var offset = 14*60*60;
+            offset = 14*60*60;
             if(ta < tb && (ta + offset)  < tb) {
                 return -1;
             } else if(ta > tb && (ta + offset) > tb) {
@@ -308,8 +303,7 @@ define([], function () {
             }
         }
     };
-
-// RDF utils
+    // RDF utils
     Utils.lexicalFormLiteral = function(term, env) {
         var value = term.value;
         var lang = term.lang;
@@ -400,7 +394,6 @@ define([], function () {
             throw "Error, cannot get lexical form of unknown token: "+term.token;
         }
     };
-
     Utils.normalizeUnicodeLiterals = function (string) {
         var escapedUnicode = string.match(/\\u[0-9abcdefABCDEF]{4,4}/g) || [];
         var dups = {};
@@ -413,7 +406,6 @@ define([], function () {
 
         return string;
     };
-
     Utils.hashTerm = function(term) {
         try {
             if(term == null) {
@@ -432,10 +424,9 @@ define([], function () {
         } catch(e) {
             if(typeof(term) === 'object') {
                 var key = "";
-                for(p in term) {
-                    key = key + p + term[p];
-                }
-
+                Utils.each(term, function (t, p) {
+                    key = key + p + t;
+                });
                 return key;
             }
             return term;

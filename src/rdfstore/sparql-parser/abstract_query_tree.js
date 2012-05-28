@@ -1,4 +1,8 @@
-define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
+define([
+    "./sparql_parser",
+    "./../../graphite/utils",
+    "./../trees/utils"
+], function (SparqlParser, GraphiteUtils, Utils) {
     var AbstractQueryTree = {};
     /**
      * @doc
@@ -8,12 +12,10 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
      */
     AbstractQueryTree.AbstractQueryTree = function() {
     };
-
     AbstractQueryTree.AbstractQueryTree.prototype.parseQueryString = function(query_string) {
         //noinspection UnnecessaryLocalVariableJS,UnnecessaryLocalVariableJS
         return SparqlParser.parser.parse(query_string);
     };
-
     AbstractQueryTree.AbstractQueryTree.prototype.parseExecutableUnit = function(executableUnit) {
         if(executableUnit.kind === 'select') {
             return this.parseSelect(executableUnit);
@@ -39,9 +41,7 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
             throw new Error('unknown executable unit: ' + executableUnit.kind);
         }
     };
-
     AbstractQueryTree.AbstractQueryTree.prototype.parseSelect = function(syntaxTree){
-
         if(syntaxTree == null) {
             console.log("error parsing query");
             return null;
@@ -51,7 +51,6 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
             return syntaxTree;
         }
     };
-
     AbstractQueryTree.AbstractQueryTree.prototype.parseInsertData = function(syntaxTree){
         if(syntaxTree == null) {
             console.log("error parsing query");
@@ -60,10 +59,9 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
             return syntaxTree;
         }
     };
-
     AbstractQueryTree.AbstractQueryTree.prototype.build = function(node, env) {
         if(node.token === 'groupgraphpattern') {
-            return this._buildGroupGraphPattern(node, env);
+            return _buildGroupGraphPattern.call(this, node, env);
         } else if (node.token === 'basicgraphpattern') {
             var bgp = { kind: 'BGP',
                 value: node.triplesContext };
@@ -75,7 +73,6 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
         } else if (node.token === 'graphunionpattern') {
             var a = this.build(node.value[0],env);
             var b = this.build(node.value[1],env);
-
             return { kind: 'UNION',
                 value: [a,b] };
         } else if(node.token === 'graphgraphpattern') {
@@ -87,7 +84,6 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
             throw new Error("not supported token in query:"+node.token);
         }
     };
-
     AbstractQueryTree.translatePathExpressionsInBGP = function(bgp, env) {
         var pathExpression;
         var before = [], rest, bottomJoin;
@@ -104,8 +100,6 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
                 } else if(bgpTransformed.kind === 'ZERO_OR_MORE_PATH' || bgpTransformed.kind === 'ONE_OR_MORE_PATH'){
                     //console.log("BEFORE");
                     //console.log(bgpTransformed);
-
-
                     if(before.length > 0) {
                         bottomJoin =  {kind: 'JOIN',
                             lvalue: {kind: 'BGP', value:before},
@@ -113,20 +107,18 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
                     } else {
                         bottomJoin = bgpTransformed;
                     }
-
-
                     if(bgpTransformed.kind === 'ZERO_OR_MORE_PATH') {
                         if(bgpTransformed.y.token === 'var' && bgpTransformed.y.value.indexOf("fresh:")===0 &&
                             bgpTransformed.x.token === 'var' && bgpTransformed.x.value.indexOf("fresh:")===0) {
                             //console.log("ADDING EXTRA PATTERN 1)");
-                            for(var j=0; j<bgp.value.length; j++) {
+                            GraphiteUtils.each(bgp.value, function (value) {
                                 //console.log(bgp.value[j]);
-                                if(bgp.value[j].object && bgp.value[j].object.token === 'var' && bgp.value[j].object.value === bgpTransformed.x.value) {
+                                if(value.object && value.object.token === 'var' && value.object.value === bgpTransformed.x.value) {
                                     //console.log(" YES 1)");
-                                    optionalPattern = Utils.clone(bgp.value[j]);
+                                    optionalPattern = Utils.clone(value);
                                     optionalPattern.object = bgpTransformed.y;
                                 }
-                            }
+                            });
                         } else if(bgpTransformed.y.token === 'var' && bgpTransformed.y.value.indexOf("fresh:")===0) {
                             //console.log("ADDING EXTRA PATTERN 2)");
                             for(var j=0; j<bgp.value.length; j++) {
@@ -139,7 +131,6 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
                             }
                         }
                     }
-
                     if(rest.length >0) {
                         //console.log("(2a)")
                         var rvalueJoin = AbstractQueryTree.translatePathExpressionsInBGP({kind: 'BGP', value: rest}, env);
@@ -161,7 +152,6 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
                         //console.log("(2b)")
                         return bottomJoin;
                     }
-
                 } else {
                     // @todo ????
                     return bgpTransformed;
@@ -170,27 +160,25 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
                 before.push(bgp.value[i]);
             }
         }
-
         //console.log("returning");
         bgp.value = before;
         return bgp;
     };
-
-
     AbstractQueryTree.translatePathExpression  = function(pathExpression, env) {
+        var expandedPath;
         // add support for different path patterns
         if(pathExpression.predicate.kind === 'element') {
             // simple paths, maybe modified
             if(pathExpression.predicate.modifier === '+') {
                 pathExpression.predicate.modifier = null;
-                var expandedPath = AbstractQueryTree.translatePathExpression(pathExpression, env);
+                expandedPath = AbstractQueryTree.translatePathExpression(pathExpression, env);
                 return {kind: 'ONE_OR_MORE_PATH',
                     path: expandedPath,
                     x: pathExpression.subject,
                     y: pathExpression.object};
             } else if(pathExpression.predicate.modifier === '*') {
                 pathExpression.predicate.modifier = null;
-                var expandedPath = AbstractQueryTree.translatePathExpression(pathExpression, env);
+                expandedPath = AbstractQueryTree.translatePathExpression(pathExpression, env);
                 return {kind: 'ZERO_OR_MORE_PATH',
                     path: expandedPath,
                     x: pathExpression.subject,
@@ -215,7 +203,6 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
                 } else {
                     nextObject = lastObject;
                 }
-
                 // @todo
                 // what if the predicate is a path with
                 // '*'? same fresh va in subject and object??
@@ -224,14 +211,13 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
                     predicate: pathExpression.predicate.value[i],
                     object: nextObject
                 };
-
-                if(currentGraph != null)
+                if(currentGraph != null) {
                     chain.graph = Utils.clone(currentGraph);
-
+                }
                 restTriples.push(chain);
-
-                if(i!=pathExpression.predicate.value.length-1)
-                    currentSubject = Utils.clone(nextObject);;
+                if(i!=pathExpression.predicate.value.length-1) {
+                    currentSubject = Utils.clone(nextObject);
+                }
             }
             var bgp = {kind: 'BGP', value: restTriples};
             //console.log("BEFORE (1):");
@@ -240,15 +226,16 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
             return AbstractQueryTree.translatePathExpressionsInBGP(bgp, env);
         }
     };
-
-    AbstractQueryTree.AbstractQueryTree.prototype._buildGroupGraphPattern = function(node, env) {
-        var f = (node.filters || []);
-        var g = {kind: "EMPTY_PATTERN"};
-
-        for(var i=0; i<node.patterns.length; i++) {
-            var pattern = node.patterns[i];
+    function _buildGroupGraphPattern(node, env) {
+        var f = (node.filters || []),
+            g = {
+                kind: "EMPTY_PATTERN"
+            },
+            parsedPattern,
+            that = this;
+        GraphiteUtils.each(node.patterns, function (pattern) {
             if(pattern.token === 'optionalgraphpattern') {
-                var parsedPattern = this.build(pattern.value,env);
+                parsedPattern = that.build(pattern.value, env);
                 if(parsedPattern.kind === 'FILTER') {
                     g =  { kind:'LEFT_JOIN',
                         lvalue: g,
@@ -261,7 +248,7 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
                         filter: true };
                 }
             } else {
-                var parsedPattern = this.build(pattern,env);
+                parsedPattern = that.build(pattern,env);
                 if(g.kind == "EMPTY_PATTERN") {
                     g = parsedPattern;
                 } else {
@@ -270,20 +257,18 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
                         rvalue: parsedPattern };
                 }
             }
-        }
-
+        });
         if(f.length != 0) {
             if(g.kind === 'EMPTY_PATTERN') {
                 return { kind: 'FILTER',
                     filter: f,
                     value: g};
             } else if(g.kind === 'LEFT_JOIN' && g.filter === true) {
-                return { kind: 'FILTER',
+                return {
+                    kind: 'FILTER',
                     filter: f,
-                    value: g};
-
-//            g.filter = f;
-//            return g;
+                    value: g
+                };
             } else if(g.kind === 'LEFT_JOIN') {
                 return { kind: 'FILTER',
                     filter: f,
@@ -311,7 +296,6 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
             return g;
         }
     };
-
     /**
      * Collects basic triple pattern in a complex SPARQL AQT
      */
@@ -319,7 +303,6 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
         if(acum == null) {
             acum = [];
         }
-
         if(aqt.kind === 'select') {
             acum = this.collectBasicTriples(aqt.pattern,acum);
         } else if(aqt.kind === 'BGP') {
@@ -343,10 +326,8 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
         } else {
             throw "Unknown pattern: "+aqt.kind;
         }
-
         return acum;
     };
-
     /**
      * Replaces bindings in an AQT
      */
@@ -358,7 +339,7 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
         if(aqt.filter != null) {
             var acum = [];
             for(var i=0; i< aqt.filter.length; i++) {
-                aqt.filter[i].value = this._bindFilter(aqt.filter[i].value, bindings);
+                aqt.filter[i].value = _bindFilter.call(this, aqt.filter[i].value, bindings);
                 acum.push(aqt.filter[i]);
             }
             aqt.filter = acum;
@@ -367,10 +348,10 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
             aqt.pattern = this.bind(aqt.pattern, bindings);
             //acum = this.collectBasicTriples(aqt.pattern,acum);
         } else if(aqt.kind === 'BGP') {
-            aqt.value = this._bindTripleContext(aqt.value, bindings);
+            aqt.value = _bindTripleContext(aqt.value, bindings);
             //acum = acum.concat(aqt.value);
         } else if(aqt.kind === 'ZERO_OR_MORE_PATH') {
-            aqt.path = this._bindTripleContext(aqt.path, bindings);
+            aqt.path = _bindTripleContext(aqt.path, bindings);
             if(aqt.x && aqt.x.token === 'var' && bindings[aqt.x.value] != null) {
                 aqt.x = bindings[aqt.x.value];
             }
@@ -386,62 +367,57 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
             aqt.lvalue = this.bind(aqt.lvalue, bindings);
             aqt.rvalue = this.bind(aqt.rvalue, bindings);
         } else if(aqt.kind === 'FILTER') {
-            aqt.filter = this._bindFilter(aqt.filter[i].value, bindings);
+            aqt.filter = _bindFilter.call(this, aqt.filter[i].value, bindings);
         } else if(aqt.kind === 'EMPTY_PATTERN') {
             // nothing
         } else {
             throw "Unknown pattern: "+aqt.kind;
         }
-
         return aqt;
     };
-
-    AbstractQueryTree.AbstractQueryTree.prototype._bindTripleContext = function(triples, bindings) {
-        for(var i=0; i<triples.length; i++) {
-            delete triples[i]['graph'];
-            delete triples[i]['variables'];
-            for(var p in triples[i]) {
-                var comp = triples[i][p];
+    function _bindTripleContext(triples, bindings) {
+        GraphiteUtils.each(triples, function (triple, i) {
+            delete triple['graph'];
+            delete triple['variables'];
+            GraphiteUtils.each(triple, function (comp, p) {
                 if(comp.token === 'var' && bindings[comp.value] != null) {
                     triples[i][p] = bindings[comp.value];
                 }
-            }
-        }
-
+            });
+        });
         return triples;
     };
-
-
-    AbstractQueryTree.AbstractQueryTree.prototype._bindFilter = function(filterExpr, bindings) {
+    function _bindFilter(filterExpr, bindings) {
+        var that = this;
         if(filterExpr.expressionType != null) {
             var expressionType = filterExpr.expressionType;
             if(expressionType == 'relationalexpression') {
-                filterExpr.op1 = this._bindFilter(filterExpr.op1, bindings);
-                filterExpr.op2 = this._bindFilter(filterExpr.op2, bindings);
+                filterExpr.op1 = _bindFilter.call(that, filterExpr.op1, bindings);
+                filterExpr.op2 = _bindFilter.call(that, filterExpr.op2, bindings);
             } else if(expressionType == 'conditionalor' || expressionType == 'conditionaland') {
-                for(var i=0; i< filterExpr.operands.length; i++) {
-                    filterExpr.operands[i] = this._bindFilter(filterExpr.operands[i], bindings);
-                }
+                GraphiteUtils.map(filterExpr.operands, function (operand) {
+                    return _bindFilter.call(that, operand, bindings);
+                });
             } else if(expressionType == 'additiveexpression') {
-                filterExpr.summand = this._bindFilter(filterExpr.summand, bindings);
-                for(var i=0; i<filterExpr.summands.length; i++) {
-                    filterExpr.summands[i].expression = this._bindFilter(filterExpr.summands[i].expression, bindings);
-                }
+                filterExpr.summand = _bindFilter.call(that, filterExpr.summand, bindings);
+                GraphiteUtils.each(filterExpr.summands, function (summand) {
+                    summand.expression = _bindFilter.call(that, summand.expression, bindings);
+                });
             } else if(expressionType == 'builtincall') {
-                for(var i=0; i<filterExpr.args.length; i++) {
-                    filterExpr.args[i] = this._bindFilter(filterExpr.args[i], bindings);
-                }
+                GraphiteUtils.map(filterExpr.args, function (arg) {
+                    return _bindFilter.call(that, arg, bindings);
+                });
             } else if(expressionType == 'multiplicativeexpression') {
-                filterExpr.factor = this._bindFilter(filterExpr.factor, bindings);
-                for(var i=0; i<filterExpr.factors.length; i++) {
-                    filterExpr.factors[i].expression = this._bindFilter(filterExpr.factors[i].expression, bindings);
-                }
+                filterExpr.factor = _bindFilter.call(that, filterExpr.factor, bindings);
+                GraphiteUtils.each(filterExpr.factors, function (factor) {
+                    factor.expression = _bindFilter.call(that, factor.expression, bindings);
+                });
             } else if(expressionType == 'unaryexpression') {
-                filterExpr.expression = this._bindFilter(filterExpr.expression, bindings);
+                filterExpr.expression = _bindFilter.call(that, filterExpr.expression, bindings);
             } else if(expressionType == 'irireforfunction') {
-                for(var i=0; i<filterExpr.factors.args; i++) {
-                    filterExpr.args[i] = this._bindFilter(filterExpr.args[i], bindings);
-                }
+                GraphiteUtils.map(filterExpr.args, function (arg) {
+                    return _bindFilter.call(that, arg, bindings);
+                });
             } else if(expressionType == 'atomic') {
                 if(filterExpr.primaryexpression == 'var') {
                     // lookup the var in the bindings
@@ -457,10 +433,8 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
                 }
             }
         }
-
         return filterExpr;
     };
-
     /**
      * Replaces terms in an AQT
      */
@@ -472,7 +446,7 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
         if(aqt.filter != null) {
             var acum = [];
             for(var i=0; i< aqt.filter.length; i++) {
-                aqt.filter[i].value = this._replaceFilter(aqt.filter[i].value, from, to, ns);
+                aqt.filter[i].value = _replaceFilter(aqt.filter[i].value, from, to, ns);
                 acum.push(aqt.filter[i]);
             }
             aqt.filter = acum;
@@ -480,9 +454,9 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
         if(aqt.kind === 'select') {
             aqt.pattern = this.replace(aqt.pattern, from, to, ns);
         } else if(aqt.kind === 'BGP') {
-            aqt.value = this._replaceTripleContext(aqt.value, from, to, ns);
+            aqt.value = _replaceTripleContext(aqt.value, from, to, ns);
         } else if(aqt.kind === 'ZERO_OR_MORE_PATH') {
-            aqt.path = this._replaceTripleContext(aqt.path, from,to, ns);
+            aqt.path = _replaceTripleContext(aqt.path, from,to, ns);
             if(aqt.x && aqt.x.token === from.token && aqt.value === from.value) {
                 aqt.x = Utils.clone(to);
             }
@@ -498,20 +472,17 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
             aqt.lvalue = this.replace(aqt.lvalue, from, to, ns);
             aqt.rvalue = this.replace(aqt.rvalue, from, to, ns);
         } else if(aqt.kind === 'FILTER') {
-            aqt.value = this._replaceFilter(aqt.value, from,to, ns);
+            aqt.value = _replaceFilter(aqt.value, from,to, ns);
         } else if(aqt.kind === 'EMPTY_PATTERN') {
             // nothing
         } else {
             throw "Unknown pattern: "+aqt.kind;
         }
-
         return aqt;
     };
-
-    AbstractQueryTree.AbstractQueryTree.prototype._replaceTripleContext = function(triples, from, to, ns) {
-        for(var i=0; i<triples.length; i++) {
-            for(var p in triples[i]) {
-                var comp = triples[i][p];
+    function _replaceTripleContext(triples, from, to, ns) {
+        GraphiteUtils.each(triples, function (triple, i) {
+            GraphiteUtils.each(triple, function (comp, p) {
                 if(comp.token === 'var' && from.token === 'var' && comp.value === from.value) {
                     triples[i][p] = to;
                 } else if(comp.token === 'blank' && from.token === 'blank' && comp.value === from.value) {
@@ -523,43 +494,41 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
                         triples[i][p] = to;
                     }
                 }
-            }
-        }
-
+            });
+        });
         return triples;
     };
-
-
-    AbstractQueryTree.AbstractQueryTree.prototype._replaceFilter = function(filterExpr, from, to, ns) {
+    function _replaceFilter(filterExpr, from, to, ns) {
+        var that = this;
         if(filterExpr.expressionType != null) {
             var expressionType = filterExpr.expressionType;
             if(expressionType == 'relationalexpression') {
-                filterExpr.op1 = this._replaceFilter(filterExpr.op1, from, to, ns);
-                filterExpr.op2 = this._replaceFilter(filterExpr.op2, from, to, ns);
+                filterExpr.op1 = _replaceFilter(filterExpr.op1, from, to, ns);
+                filterExpr.op2 = _replaceFilter(filterExpr.op2, from, to, ns);
             } else if(expressionType == 'conditionalor' || expressionType == 'conditionaland') {
-                for(var i=0; i< filterExpr.operands.length; i++) {
-                    filterExpr.operands[i] = this._replaceFilter(filterExpr.operands[i], from, to, ns);
-                }
+                GraphiteUtils.map(filterExpr.operands, function (operand) {
+                    return _replaceFilter(operand, from, to, ns);
+                });
             } else if(expressionType == 'additiveexpression') {
-                filterExpr.summand = this._replaceFilter(filterExpr.summand, from, to, ns);
-                for(var i=0; i<filterExpr.summands.length; i++) {
-                    filterExpr.summands[i].expression = this._replaceFilter(filterExpr.summands[i].expression, from, to, ns);
-                }
+                filterExpr.summand = _replaceFilter(filterExpr.summand, from, to, ns);
+                GraphiteUtils.each(filterExpr.summands, function (summand) {
+                    summand.expression = _replaceFilter(summand.expression, from, to, ns);
+                });
             } else if(expressionType == 'builtincall') {
-                for(var i=0; i<filterExpr.args.length; i++) {
-                    filterExpr.args[i] = this._replaceFilter(filterExpr.args[i], from, to, ns);
-                }
+                GraphiteUtils.map(filterExpr.args, function (arg) {
+                    return _replaceFilter(arg, from, to, ns);
+                });
             } else if(expressionType == 'multiplicativeexpression') {
-                filterExpr.factor = this._replaceFilter(filterExpr.factor, from, to, ns);
-                for(var i=0; i<filterExpr.factors.length; i++) {
-                    filterExpr.factors[i].expression = this._replaceFilter(filterExpr.factors[i].expression, from, to, ns);
-                }
+                filterExpr.factor = _replaceFilter(filterExpr.factor, from, to, ns);
+                GraphiteUtils.each(filterExpr.factors, function (factor) {
+                    factor.expression = _replaceFilter(factor.expression, from, to, ns);
+                });
             } else if(expressionType == 'unaryexpression') {
-                filterExpr.expression = this._replaceFilter(filterExpr.expression, from, to, ns);
+                filterExpr.expression = _replaceFilter(filterExpr.expression, from, to, ns);
             } else if(expressionType == 'irireforfunction') {
-                for(var i=0; i<filterExpr.factors.args; i++) {
-                    filterExpr.args[i] = this._replaceFilter(filterExpr.args[i], from, to, ns);
-                }
+                GraphiteUtils.map(filterExpr.factors.args, function (arg) {
+                    return _replaceFilter(arg, from, to, ns);
+                });
             } else if(expressionType == 'atomic') {
                 var val = null;
                 if(filterExpr.primaryexpression == from.token && filterExpr.value == from.value) {
@@ -567,7 +536,6 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
                 } else if(filterExpr.primaryexpression == 'iri' && from.token == 'uri' && filterExpr.value == from.value) {
                     val = to.value;
                 }
-
 
                 if(val != null) {
                     if(to.token === 'uri') {
@@ -579,10 +547,8 @@ define(["./sparql_parser", "./../trees/utils"], function (SparqlParser, Utils) {
                 }
             }
         }
-
         return filterExpr;
     };
-
     AbstractQueryTree.AbstractQueryTree.prototype.treeWithUnion = function(aqt) {
         if(aqt == null)
             return false;

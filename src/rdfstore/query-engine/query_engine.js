@@ -6,8 +6,9 @@ define([
     "./query_filters",
     "./rdf_js_interface",
     "./../communication/rdf_loader",
-    "./callbacks"
-], function (AbstractQueryTree, Utils, QuadIndexCommon, QueryPlan, QueryFilters, RDFJSInterface, RDFLoader, Callbacks) {
+    "./callbacks",
+    "./../../graphite/utils"
+], function (AbstractQueryTree, Utils, QuadIndexCommon, QueryPlan, QueryFilters, RDFJSInterface, RDFLoader, Callbacks, GraphiteUtils) {
     var QueryEngine = {};
     QueryEngine.QueryEngine = function(params) {
         if(arguments.length != 0) {
@@ -521,16 +522,19 @@ define([
     };
     /**
      * Queries execution
-     * @param queryString
+     * @param query
      * @param callback
      * @param [defaultDataset]
      * @param [namedDataset]
      */
-    QueryEngine.QueryEngine.prototype.execute = function(queryString, callback, defaultDataset, namedDataset){
-        //try{
-        //buster.log("IN ENGINE", queryString);
-        queryString = Utils.normalizeUnicodeLiterals(queryString);
-        var syntaxTree = this.abstractQueryTree.parseQueryString(queryString);
+    QueryEngine.QueryEngine.prototype.execute = function(query, callback, defaultDataset, namedDataset) {
+        var syntaxTree;
+        if (GraphiteUtils.isString(query)) {
+            query = Utils.normalizeUnicodeLiterals(query);
+            syntaxTree = this.abstractQueryTree.parseQueryString(query);
+        } else {
+            syntaxTree = query;
+        }
         //buster.log("IN ENGINE, SYNTAXTREE", syntaxTree == null, queryString);
         if(syntaxTree === null) {
             callback(false,"Error parsing query string");
@@ -556,13 +560,6 @@ define([
                 this.executeQuery(syntaxTree, callback, defaultDataset, namedDataset);
             }
         }
-        //} catch(e) {
-        //    if(e.name && e.name==='SyntaxError') {
-        //        callback(false, "Syntax error: \nmessage:"+e.message+"\nline "+e.line+", column:"+e.column);
-        //    } else {
-        //        callback(false, "Query execution error");
-        //    }
-        //}
     };
     // Retrieval queries
     QueryEngine.QueryEngine.prototype.executeQuery = function(syntaxTree, callback, defaultDataset, namedDataset) {

@@ -141,6 +141,7 @@ define([
         return deferred;
     }
     function getQueryKind(query) {
+        buster.log(query);
         var kind = null,
             currentPos = query.length,
             position = {
