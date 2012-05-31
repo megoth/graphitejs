@@ -1,0 +1,61 @@
+{
+    kind: "query",
+    prologue: {
+        base: { token: "base", value: "http://example.org" },
+        prefixes: [{
+            local: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+            prefix: "rdf",
+            token: "prefix"
+        }],
+        token: "prologue"
+    },
+    token: "query",
+    units: [{
+        dataset: {
+            implicit: [{
+                prefix: null,
+                suffix: null,
+                token: "uri",
+                value: "https://github.com/antoniogarrote/rdfstore-js#default_graph"
+            }],
+            named: []
+        },
+        group: "",
+        kind: "select",
+        modifier: "",
+        pattern: {
+            filters: [],
+            patterns: [{
+                token: "basicgraphpattern",
+                triplesContext: [{
+                    object: { token: "var", value: "c" },
+                    predicate: {
+                        prefix: null,
+                        suffix: null,
+                        token: "uri",
+                        value: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+                    },
+                    subject: { token: "var", value: "a" }
+                }]
+            }],
+            token: "groupgraphpattern"
+        },
+        projection: [{ kind: "var", token: "variable", value: { token: "var", value: "a" } }, {
+            alias: { token: "var", value: "b" },
+            expression: {
+                args: [{
+                    expressionType: "atomic",
+                    primaryexpression: "var",
+                    token: "expression",
+                    value: { token: "var", value: "a" }
+                }],
+                builtincall: "bnode",
+                expressionType: "builtincall",
+                token: "expression"
+            },
+            kind: "aliased",
+            token: "variable"
+        }],
+        token: "executableunit"
+    }]
+}

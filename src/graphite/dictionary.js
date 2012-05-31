@@ -2,6 +2,17 @@ define([
     "./../rdfquery/uri",
     "./utils"
 ], function (Uri, Utils) {
+    function _getDatatype(value) {
+        if(Utils.isBoolean(value)) {
+            return Dictionary.Symbol.prototype.XSDboolean;
+        } else if (Utils.isInteger(value)) {
+            //buster.log("IN DICTIONARY, DATATYPE IS INTEGER", value);
+            return Dictionary.Symbol.prototype.XSDinteger;
+        } else if (Utils.isDouble(value)) {
+            //buster.log("IN DICTIONARY, DATATYPE IS DOUBLE", value);
+            return Dictionary.Symbol.prototype.XSDfloat;
+        }
+    }
     var Dictionary = {
         /**
          *
@@ -28,7 +39,7 @@ define([
                 return this.Symbol(object);
             }
             if (object) {
-                //buster.log("IN DICTIONARY, OBJECT IS LITERAL");
+                //buster.log("IN DICTIONARY, OBJECT IS LITERAL", object);
                 return this.Literal(object);
             }
             return this.BlankNode();
@@ -226,6 +237,7 @@ define([
                 }
             }
         }
+        //buster.log("IN DICTIONARY, FORMULA LITERAL DATATYPE", dt);
         return Dictionary.Literal(''+val, lang, dt)
     };
     Dictionary.Formula.prototype.bnode = function (id) {
@@ -255,7 +267,9 @@ define([
     Dictionary.Literal.prototype.init = function (value, lang, datatype) {
         this.value = value;
         this.lang = lang;
-        this.datatype = datatype;
+        //buster.log("IN DICTIONARY, LITERAL DATATYPE BEFORE", datatype);
+        this.datatype = datatype || _getDatatype(value);
+        //buster.log("IN DICTIONARY, LITERAL DATATYPE AFTER", this.datatype);
         return this;
     };
     //Dictionary.Literal.prototype.termType = 'literal';
@@ -405,7 +419,7 @@ define([
             return Dictionary.Literal(val);
         }
         if (typeof val == 'number') {
-            buster.log("IN DICTIONARY, NUMBER");
+            //buster.log("IN DICTIONARY, NUMBER");
             var dt;
             if ((''+val).indexOf('e')>=0) {
                 dt = Dictionary.Symbol.prototype.XSDfloat;

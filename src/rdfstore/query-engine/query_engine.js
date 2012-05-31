@@ -533,6 +533,7 @@ define([
             query = Utils.normalizeUnicodeLiterals(query);
             syntaxTree = this.abstractQueryTree.parseQueryString(query);
         } else {
+            buster.log("IN QUERY ENGINE, QUERY IS PARSED ALREADY");
             syntaxTree = query;
         }
         //buster.log("IN ENGINE, SYNTAXTREE", syntaxTree == null, queryString);
@@ -557,6 +558,7 @@ define([
                     }
                 });
             } else if(syntaxTree.token === 'query' && syntaxTree.kind == 'query') {
+                buster.log("IN QUERY ENGINE, KIND QUERY");
                 this.executeQuery(syntaxTree, callback, defaultDataset, namedDataset);
             }
         }

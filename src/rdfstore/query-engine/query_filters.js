@@ -226,6 +226,7 @@ define([
                     result.value = ''+result.value;
                     return result;
                 } else if(aggregator.expression.aggregateType === 'sum') {
+                    buster.log("IN QUERY FILTERS");
                     var distinct = {};
                     var aggregated = {token: 'literal', type:"http://www.w3.org/2001/XMLSchema#integer", value:'0'};
                     for(var i=0; i< bindingsGroup.length; i++) {
@@ -247,7 +248,6 @@ define([
                             }
                         }
                     }
-
                     aggregated.value =''+aggregated.value;
                     return aggregated;
                 } else {
@@ -1091,7 +1091,6 @@ define([
             return QueryFilters.ebvError();
         }
         var val = QueryFilters.effectiveTypeValue(suma) + QueryFilters.effectiveTypeValue(sumb);
-
         if(QueryFilters.isDouble(suma) || QueryFilters.isDouble(sumb)) {
             return {token: 'literal', type:"http://www.w3.org/2001/XMLSchema#double", value:val};
         } else if(QueryFilters.isFloat(suma) || QueryFilters.isFloat(sumb)) {
@@ -1102,7 +1101,6 @@ define([
             return {token: 'literal', type:"http://www.w3.org/2001/XMLSchema#integer", value:val};
         }
     };
-
     QueryFilters.runSubFunction = function(suma, sumb) {
         if(QueryFilters.isEbvError(suma) || QueryFilters.isEbvError(sumb)) {
             return QueryFilters.ebvError();

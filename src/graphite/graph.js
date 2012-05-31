@@ -8,6 +8,7 @@ define([
 ], function (Dictionary, Lexicon, QuadBackend, QueryEngine, Utils, When) {
     "use strict";
     function getExecuteFunction(queryKind) {
+        //buster.log("IN GRAPH, GET EXECUTE FUNCTION", queryKind);
         var execute = {
             "ask": function (promise, options) {
                 return function (success, result) {
@@ -43,24 +44,8 @@ define([
                     });
                 }
             },
-            /*
-             "deleteData": function (promise, options) {
-             var triples = [];
-             if (options.callback) {
-             triples = this.graph.query.getTriples(options.query);
-             graph(triples).then(function (g) {
-             options.callback(g);
-             });
-             }
-             return function () {
-             options.graph.clone().then(function (g) {
-             promise.resolve(g);
-             });
-             };
-             },
-             */
-            "insertData": function (promise, options) {
-                buster.log("IN GRAPH, INSERT DATA", options.query);
+            "insertdata": function (promise, options) {
+                //buster.log("IN GRAPH, INSERT DATA", options.query);
                 if (options.callback) {
                     graph().then(function (g) {
                         g.execute(options.query).then(function (g) {
@@ -82,7 +67,7 @@ define([
                     query = "INSERT DATA " + results.toNT();
                     options.graph.clone().then(function (g) {
                         g.size().then(function (size) {
-                            buster.log("ONCOMPLETE SIZE", size);
+                            //buster.log("ONCOMPLETE SIZE", size);
                             g.execute(query).then(function (g) {
                                 promise.resolve(g);
                             });
@@ -100,7 +85,7 @@ define([
             },
             "select": function (promise, options) {
                 return function (success, results) {
-                    buster.log("IN GRAPH, SELECT", success, results);
+                    //buster.log("IN GRAPH, SELECT", success, results);
                     var vars;
                     options.graph.clone().then(function (g) {
                         promise.resolve(g);
@@ -108,6 +93,7 @@ define([
                     if (options.callback && options.callback.length > 0) {
                         vars = Utils.extractArgumentMap(options.callback);
                         Utils.each(results, function (args) {
+                            buster.log("IN GRAPH, SELECT", args);
                             options.callback.apply(options.graph, Utils.map(Utils.mapArgs(vars, args), function (v) {
                                 return v.value;
                             }));
@@ -141,13 +127,15 @@ define([
         return deferred;
     }
     function getQueryKind(query) {
-        buster.log(query);
+        if(!Utils.isString(query)) {
+            return query.units[0].kind;
+        }
         var kind = null,
             currentPos = query.length,
             position = {
                 ask: query.indexOf("ASK"),
                 construct: query.indexOf("CONSTRUCT"),
-                insertData: query.indexOf("INSERT DATA"),
+                insertdata: query.indexOf("INSERT DATA"),
                 load: query.indexOf("LOAD"),
                 select: query.indexOf("SELECT")
             };
@@ -235,6 +223,7 @@ define([
             var deferred = When.defer(),
                 executeFunc = getExecuteFunction(getQueryKind(query));
             if(executeFunc) {
+                //buster.log("IN GRAPH, EXECUTING FUNCTION");
                 //buster.log("BEFORE QUERY EXECUTION", query);
                 this.engine.execute(query, executeFunc(deferred, {
                     callback: callback,
@@ -243,6 +232,7 @@ define([
                     query: query
                 }));
             } else {
+                //buster.log("IN GRAPH, QUERY NOT SUPPORTED", query);
                 throw new Error("Query not supported" + query);
             }
             return deferred;

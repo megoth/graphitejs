@@ -348,6 +348,11 @@ define([
     Utils.getToken = function (object) {
         return Utils.isUri(object) ? "uri" : "literal";
     };
+    Utils.getTriples = function (query) {
+        var tripleRegex = /<(_:[0-9]+|http:\/\/[a-zA-Z0-9#_\-.\/]+)>\s+<http:\/\/[a-zA-Z0-9#_\-.\/]+>\s+("[a-zA-Z0-9\s\-_\/]+"\^\^<http:\/\/[a-zA-Z0-9#_\-.\/]+>|"[a-zA-Z0-9\s\-_\/]+"|<(_:[0-9]+|http:\/\/[a-zA-Z0-9#_\-.\/]+|)>)\s*[.]?/g,
+            triples = query.match(tripleRegex);
+        return triples !== null ? triples : [];
+    };
     /**
      * Get a URI from a CURIE and given prefixes
      *
@@ -559,8 +564,12 @@ define([
         return results;
     };
     Utils.mapArgs = function (resultMap, argumentsMap) {
+        buster.log("IN UTILS, MAP ARGS", resultMap, argumentsMap);
         return Utils.map(resultMap, function (arg) {
-            return argumentsMap[arg];
+            if (argumentsMap.hasOwnProperty(arg)) {
+                return argumentsMap[arg];
+            }
+            throw new Error ("Argument not in projection " + arg);
         });
     };
     Utils.mapFunctionArgs = function (functionCode, argumentsMap) {

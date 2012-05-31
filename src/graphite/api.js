@@ -27,62 +27,79 @@ define([
          * @return {*}
          */
         addStatement: function (subject, predicate, object, options) {
-            options = options || {};
-            var that = this,
-                statement = Dictionary.createStatement({
-                    subject: subject,
-                    predicate: predicate,
-                    object: object
-                }),
-                promise = When.defer();
-            When.all(this.promises).then(function () {
-                that.graph.execute("INSERT DATA {{0}}".format(statement), options.callback).then(function (graph) {
-                    that.graph = graph;
-                    promise.resolve(graph);
-                });
-            });
-            this.promises.push(promise);
+            var query = "INSERT DATA {{0}}".format(Dictionary.createStatement({
+                subject: subject,
+                predicate: predicate,
+                object: object
+            }));
+            //buster.log("IN API, ADD STATEMENT QUERY", query);
+            this.queryController = Query(query);
+            this.execute(options);
             return this;
         },
         each: function (callback) {
-            var promise = When.defer();
-            this.graph.execute(this.queryController.retrieveTree(), callback).then(function () {
-                promise.resolve(arguments);
+            buster.log("IN API, EACH");
+            return this.execute({
+                callback: callback
             });
-            this.promises.push(promise);
-            return this;
         },
         /**
-         * @param uri
+         *
          * @param [options]
+         * @return {*}
          */
-        load: function (uri, options) {
+        execute: function (options) {
+            buster.log("IN API, EXECUTE");
             options = options || {};
-            var that = this,
-                promise = When.defer();
+            var promise = When.defer(),
+                that = this;
             When.all(this.promises).then(function () {
-                that.graph.execute("LOAD <{0}>".format(uri), options.callback).then(function (graph) {
+                buster.log("IN API, EXECUTE ALL PROMISES RESOLVED", that.queryController.retrieveTree());
+                that.graph.execute(that.queryController.retrieveTree(), options.callback).then(function (graph) {
+                    buster.log("IN API, EXECUTED QUERY");
                     that.graph = graph;
+                    that.queryController = Query("SELECT * WHERE { ?subject ?predicate ?object }");
                     promise.resolve(graph);
                 });
             });
             this.promises.push(promise);
+            return this;
+        },
+        listStatements: function (options, callback) {
+            if (!callback && Utils.isFunction (options)) {
+                callback = options;
+                options = {};
+            }
+            var subject = options.subject ? Dictionary.createSubject(options.subject).toNT() : "?subject",
+                predicate = options.predicate ? Dictionary.createPredicate(options.predicate).toNT() : "?predicate",
+                object = options.object ? Dictionary.createObject(options.object).toNT() : "?object",
+                queryString = "SELECT * WHERE { {0} {1} {2} }".format(subject, predicate, object);
+            //buster.log(queryString);
+            this.queryController = Query(queryString);
+            return this.each(callback);
+        },
+        /**
+         * @param uri
+         */
+        load: function (uri) {
+            this.queryController = Query("LOAD <{0}>".format(uri));
             return this;
         },
         query: function (queryString) {
             this.queryController = Query(queryString);
             return this;
         },
-        select: function (part) {
-            this.queryController.select(part);
+        select: function (projection) {
+            this.queryController.select(projection);
             return this;
         },
         size: function (callback) {
+            this.execute();
             var that = this,
                 promise = When.defer();
-            When.all(that.promises).then(function () {
+            When.all(this.promises).then(function () {
                 that.graph.size(callback).then(function (size) {
-                    buster.log("IN API, SIZE", size);
+                    //buster.log("IN API, SIZE", size);
                     promise.resolve(size);
                 });
             });
@@ -96,8 +113,8 @@ define([
             });
             return this;
         },
-        where: function (part) {
-            this.queryController.where(part);
+        where: function (pattern) {
+            this.queryController.where(pattern);
             return this;
         }
     };

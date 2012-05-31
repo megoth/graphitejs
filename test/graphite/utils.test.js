@@ -6,6 +6,21 @@ if (typeof module === "object" && typeof require === "function") {
 define([
     "src/graphite/utils"
 ], function (Utils) {
+    var subJohn = "http://dbpedia.org/resource/John_Lennon",
+        preName = "http://xmlns.com/foaf/0.1/name",
+        objJohnName = "John Lennon",
+        subTim = "http://dbpedia.org/resource/Tim_B_Lee",
+        objTimName = "Tim Berners-Lee",
+        preKnows = "http://xmlns.com/foaf/0.1/knows",
+        graph1 = [
+            Utils.createTriple(subJohn, preName, objJohnName).statement,
+            Utils.createTriple(null, preName, objTimName).statement,
+            Utils.createTriple(null, preName, 42).statement,
+            Utils.createTriple(subTim, preName, 42).statement
+        ],
+        triple2 = [
+            Utils.createTriple(subJohn, preKnows, subTim).statement
+        ];
     buster.testCase("Graphite utils", {
         "Function .any": function () {
             "use strict";
@@ -274,6 +289,14 @@ define([
         "Function .format": function () {
             var str = "{0} is dead, but {1} is alive! {0} {2}".format("ASP", "ASP.NET");
             assert.equals(str, "ASP is dead, but ASP.NET is alive! ASP {2}");
+        },
+        "Function .getTriples": function () {
+            var triples = Utils.getTriples("");
+            assert.equals(triples, []);
+            triples = Utils.getTriples("INSERT DATA { " + graph1.join("") + " }");
+            assert.equals(triples, graph1);
+            triples = Utils.getTriples("DELETE DATA { " + triple2.join("") + " }");
+            assert.equals(triples, triple2);
         },
         "Function .indexOf": function () {
             "use strict";

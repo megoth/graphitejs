@@ -4,11 +4,13 @@ if (typeof module === "object" && typeof require === "function") {
 }
 
 define([
-    "src/graphite/api"
-], function(API) {
+    "src/graphite/api",
+    "src/graphite/utils"
+], function(API, Utils) {
     "use strict";
     var subJohn = "http://dbpedia.org/resource/John_Lennon",
         preName = "http://xmlns.com/foaf/0.1/name",
+        preAge = "http://xmlns.com/foaf/0.1/age",
         preHomepage = "http://xmlns.com/foaf/0.1/homepage",
         objJohnName = "John Lennon",
         subTim = "http://dbpedia.org/resource/Tim_B_Lee",
@@ -18,9 +20,11 @@ define([
         //preKnows = "http://xmlns.com/foaf/0.1/knows";
     function addStatements (done) {
         this.addStatement(subJohn, preName, objJohnName)
+            .addStatement(subJohn, preAge, 42)
             .addStatement(subTim, preName, objTimName)
             .addStatement(subTim, preHomepage, objTimHomepage)
             .addStatement(subTim, preName, objJohnName)
+            .addStatement(subTim, preAge, 57)
             .then(done);
     }
     buster.testCase("Graphite API", {
@@ -81,10 +85,10 @@ define([
                     .addStatement(subJohn, preName, objTimName)
                     .size(done(function (size) {
                     assert.equals(size, 1);
-                }))
+                }));
             }
         },
-        "//Function .each": {
+        "Function .each": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
@@ -93,71 +97,51 @@ define([
                 this.api
                     .each(spy)
                     .then(done(function () {
-                    assert(spy.callCount, 4);
+                    assert.equals(spy.callCount, 6);
                 }));
             }
         },
-        "//Function .listStatement": {
+        "Function .listStatement": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
-            "List all triples": function () {
-                var spy = sinon.spy(),
-                    list = this.g.listStatements(spy);
-                assert.isArray(list);
-                assert(spy.called);
-                assert.equals(spy.callCount, 4);
+            "List all triples": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .listStatements(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 6);
+                }));
             },
-            "//Listing with a specific subject": function () {
-                "use strict";
-                var spy = sinon.spy(),
-                    list = this.g.listStatements({
+            "Listing with a specific subject": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .listStatements({
                         subject: subJohn
-                    }, spy);
-                assert.equals(list.length, 1);
-                assert(spy.calledOnce);
-                spy = sinon.spy();
-                list = this.g.listStatements({
-                    subject: subTim
-                }, spy);
-                assert.equals(list.length, 3);
-                assert(spy.calledThrice);
+                    }, spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 2);
+                }));
             },
-            "//Listing with a specific predicate": function () {
-                "use strict";
-                var spy = sinon.spy(),
-                    list = this.g.listStatements({
-                        predicate: preHomepage
-                    }, spy);
-                assert.equals(list.length, 1);
-                assert(spy.calledOnce);
-                spy = sinon.spy();
-                list = this.g.listStatements({
-                    predicate: preName
-                }, spy);
-                assert.equals(list.length, 3);
-                assert(spy.calledThrice);
+            "Listing with a specific predicate": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .listStatements({
+                        predicate: preName
+                    }, spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 3);
+                }));
             },
-            "//Listing with a specific object": function () {
-                "use strict";
-                var spy = sinon.spy(),
-                    list = this.g.listStatements({
-                        object: objJohnName
-                    }, spy);
-                assert.equals(list.length, 2);
-                assert(spy.calledTwice);
-                spy = sinon.spy();
-                list = this.g.listStatements({
-                    object: objTimHomepage
-                }, spy);
-                assert.equals(list.length, 1);
-                assert(spy.calledOnce);
-                spy = sinon.spy();
-                list = this.g.listStatements({
-                    object: objTimName
-                }, spy);
-                assert.equals(list.length, 1);
-                assert(spy.calledOnce);
+            "Listing with a specific object": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .listStatements({
+                        object: 42
+                    }, spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 1);
+                }));
             }
         },
         "Function .load": function (done) {
@@ -168,18 +152,108 @@ define([
                     assert.equals(size, 2);
                 }));
         },
-        "//Function .query": {
-            setUp: function (done) {
-                addStatements.call(this.api, done);
+        "Function .query": {
+            "LOAD": {
+                "JSON-LD": function (done) {
+                    this.api
+                        .query("LOAD <http://localhost:8088/json-ld/people/arne.jsonld>")
+                        .size()
+                        .then(done(function (size) {
+                        assert.equals(size, 2);
+                    }))
+                }
             },
-            "SELECT": function (done) {
-                var spy = sinon.spy();
-                this.api
-                    .query("SELECT * WHERE { ?s ?p ?o }")
-                    .each(spy)
-                    .then(done(function () {
-                    assert(spy.callCount, 4);
-                }))
+            "SELECT": {
+                setUp: function (done) {
+                    addStatements.call(this.api, done);
+                },
+                "called correctly": function (done) {
+                    var spy = sinon.spy();
+                    this.api
+                        .query("SELECT * WHERE { ?s ?p ?o }")
+                        .each(function (s, p, o) {
+                            buster.log("OBJECT", o);
+                            assert.defined(s);
+                            assert.defined(p);
+                            assert.defined(o);
+                            spy();
+                        })
+                        .then(done(function () {
+                        assert.equals(spy.callCount, 6);
+                    }));
+                },
+                "with count": function (done) {
+                    var spy = sinon.spy();
+                    this.api
+                        .query("SELECT (COUNT(?s) as ?count) WHERE { ?s ?p ?o } GROUP BY ?s")
+                        .each(function (count) {
+                            assert.defined(count);
+                            spy();
+                        })
+                        .then(done(function () {
+                        assert.equals(spy.callCount, 2);
+                    }));
+                },
+                "with distinct": function (done) {
+                    var spy = sinon.spy();
+                    this.api
+                        .query("SELECT DISTINCT ?s WHERE { ?s ?p ?o }")
+                        .each(function (s) {
+                            assert.defined(s);
+                            spy();
+                        })
+                        .then(done(function () {
+                        assert.equals(spy.callCount, 2);
+                    }));
+                },
+                "with sum": function (done) {
+                    var spy = sinon.spy();
+                    this.api
+                        .query("SELECT (SUM(?age) as ?totalAge) WHERE { ?s <http://xmlns.com/foaf/0.1/age> ?age }")
+                        .each(function (totalAge) {
+                            assert.equals(totalAge, 99);
+                            spy();
+                        })
+                        .then(done(function () {
+                        assert.equals(spy.callCount, 1);
+                    }));
+                },
+                "with avg": function (done) {
+                    var spy = sinon.spy();
+                    this.api
+                        .query("SELECT (AVG(?age) as ?avgAge) WHERE { ?s <http://xmlns.com/foaf/0.1/age> ?age }")
+                        .each(function (avgAge) {
+                            assert.equals(avgAge, 49.5);
+                            spy();
+                        })
+                        .then(done(function () {
+                        assert.equals(spy.callCount, 1);
+                    }));
+                },
+                "with min": function (done) {
+                    var spy = sinon.spy();
+                    this.api
+                        .query("SELECT (MIN(?age) as ?minAge) WHERE { ?s <http://xmlns.com/foaf/0.1/age> ?age }")
+                        .each(function (minAge) {
+                            assert.equals(minAge, 42);
+                            spy();
+                        })
+                        .then(done(function () {
+                        assert.equals(spy.callCount, 1);
+                    }));
+                },
+                "with max": function (done) {
+                    var spy = sinon.spy();
+                    this.api
+                        .query("SELECT (MAX(?age) as ?maxAge) WHERE { ?s <http://xmlns.com/foaf/0.1/age> ?age }")
+                        .each(function (maxAge) {
+                            assert.equals(maxAge, 57);
+                            spy();
+                        })
+                        .then(done(function () {
+                        assert.equals(spy.callCount, 1);
+                    }));
+                }
             }
         },
         "//Function .removeStatement": {
@@ -190,7 +264,6 @@ define([
                 this.g.removeStatement();
             },
             "//Returns the triples removed": function () {
-                "use strict";
                 assert.equals(this.g.removeStatement({
                     subject: "test",
                     predicate: "test",
@@ -203,7 +276,6 @@ define([
                 }).length, 1);
             },
             "//Remove with all specified": function () {
-                "use strict";
                 var spy = sinon.spy(),
                     subJohn = subJohn,
                     preName = preName,
@@ -222,7 +294,6 @@ define([
                 assert(spy.calledOnce);
             },
             "//Remove with subject specified": function () {
-                "use strict";
                 var spy = sinon.spy(),
                     subJohn = subJohn;
                 this.g.removeStatement({
@@ -235,7 +306,6 @@ define([
                 assert.equals(this.g.listStatements().length, 3);
             },
             "//Remove with predicate specified": function () {
-                "use strict";
                 var spy = sinon.spy(),
                     preName = preName;
                 this.g.removeStatement({
@@ -248,7 +318,6 @@ define([
                 assert(spy.calledThrice);
             },
             "//Remove with object specified": function () {
-                "use strict";
                 var spy = sinon.spy(),
                     objJohnName = objJohnName;
                 this.g.removeStatement({
@@ -261,17 +330,42 @@ define([
                 assert(spy.calledTwice);
             }
         },
-        "//Function .select": {
+        "Function .select": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
-            "Single call": function (done) {
-                var spy = sinon.spy();
+            "Star variable": function (done) {
                 this.api
-                    .select("?s")
+                    .select("*")
+                    .each(function(subject, predicate, object) {
+                        assert.defined(subject);
+                        assert.defined(predicate);
+                        assert.defined(object);
+                    })
+                    .then(done);
+            },
+            "Single variable": function (done) {
+                this.api
+                    .select("?subject")
+                    .each(function (subject) {
+                        assert.defined(subject);
+                    })
+                    .then(done);
+            },
+            "Aliased variables": function (done) {
+                this.api
+                    .select("(?subject as ?s)")
                     .each(function (s) {
-                        assert(s);
-                        spy();
+                        assert.defined(s);
+                    })
+                    .then(done);
+            },
+            "Multiple variables": function (done) {
+                this.api
+                    .select("?subject (?predicate as ?s)")
+                    .each(function (subject, s) {
+                        assert.defined(subject);
+                        assert.defined(s);
                     })
                     .then(done);
             }
@@ -292,7 +386,7 @@ define([
                     }));
             }
         },
-        "//Function .where": {
+        "Function .where": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
