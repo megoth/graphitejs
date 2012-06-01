@@ -289,6 +289,10 @@ define([
         "Function .format": function () {
             var str = "{0} is dead, but {1} is alive! {0} {2}".format("ASP", "ASP.NET");
             assert.equals(str, "ASP is dead, but ASP.NET is alive! ASP {2}");
+            str = "{0}".format("TEST", function (str) {
+                return str + " A";
+            });
+            assert.equals(str, "TEST A");
         },
         "Function .getTriples": function () {
             var triples = Utils.getTriples("");

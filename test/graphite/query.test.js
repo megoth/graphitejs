@@ -20,7 +20,7 @@ define([
             assert.defined(Query);
             assert.isFunction(Query);
         },
-        "Function .base": {
+        ".base": {
             "Single instance": function () {
                 this.query.base("http://example.org/");
                 assert.equals(
@@ -39,6 +39,17 @@ define([
                 )
             }
         },
+        ".filter": function () {
+            this.query.filter('?object = "Arne"');
+            assert.equals(
+                this.query.retrieveTree(),
+                parser('SELECT *\n' +
+                    'WHERE {\n' +
+                    '?subject ?predicate ?object .\n' +
+                    'FILTER (?object = "Arne")\n' +
+                    '}')
+            );
+        },
         ".group": function () {
             this.query.group("?subject");
             assert.equals(
@@ -51,15 +62,7 @@ define([
                 parser("SELECT * WHERE { ?subject ?predicate ?object } GROUP BY ?subject ?predicate")
             );
         },
-        "//JUST SOMETHING": function () {
-            var tmp = SparqlParser.parser.parse("SELECT ?a\n" +
-                "WHERE {\n" +
-                '?a ?b ?c .\n' +
-                "}\n" +
-                "ORDER BY ?a ?b");
-            buster.log(tmp);
-        },
-        "Function .prefix": {
+        ".prefix": {
             "Single instance": function () {
                 this.query.prefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
                 assert.equals(
@@ -88,7 +91,7 @@ define([
                 );
             }
         },
-        "Function .select": function () {
+        ".select": function () {
             this.query.select("?subject");
             assert.equals(
                 this.query.retrieveTree(),
@@ -120,7 +123,7 @@ define([
                     "WHERE { ?subject ?predicate ?object }")
             );
         },
-        "Function .where": {
+        ".where": {
             "Single call": {
                 "Variables": function () {
                     this.query.where("?subject ?predicate ?object");

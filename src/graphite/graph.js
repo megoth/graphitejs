@@ -20,20 +20,6 @@ define([
                     }
                 };
             },
-            /*
-             "clear": function (promise, options) {
-             if (options.callback) {
-             options.graph.clone().then(function (g) {
-             options.callback(g);
-             });
-             }
-             return function () {
-             options.graph.clone().then(function (g) {
-             promise.resolve(g);
-             });
-             };
-             },
-             */
             "construct": function (promise, options) {
                 return function (success, results) {
                     graph(results.triples).then(function (g) {
@@ -43,6 +29,23 @@ define([
                         }
                     });
                 }
+            },
+            "deletedata": function (promise, options) {
+                //buster.log("IN GRAPH, DELETE DATA", options.query);
+                if (options.callback) {
+                    graph().then(function (g) {
+                        g.execute(options.query).then(function (g) {
+                            options.callback(g);
+                        });
+                    });
+                }
+                return function () {
+                    //buster.log("IN GRAPH, EXECUTE DELETE DATA");
+                    options.graph.clone().then(function(g) {
+                        //buster.log("IN GRAPH, DELETE CLONED");
+                        promise.resolve(g);
+                    });
+                };
             },
             "insertdata": function (promise, options) {
                 //buster.log("IN GRAPH, INSERT DATA", options.query);
@@ -93,7 +96,7 @@ define([
                     if (options.callback && options.callback.length > 0) {
                         vars = Utils.extractArgumentMap(options.callback);
                         Utils.each(results, function (args) {
-                            buster.log("IN GRAPH, SELECT", args);
+                            //buster.log("IN GRAPH, SELECT", args);
                             options.callback.apply(options.graph, Utils.map(Utils.mapArgs(vars, args), function (v) {
                                 return v.value;
                             }));
@@ -221,9 +224,10 @@ define([
          */
         execute: function (query, callback, onsuccess) {
             var deferred = When.defer(),
-                executeFunc = getExecuteFunction(getQueryKind(query));
+                queryKind = getQueryKind(query),
+                executeFunc = getExecuteFunction(queryKind);
+            //buster.log("IN GRAPH, EXECUTING FUNCTION", queryKind, executeFunc);
             if(executeFunc) {
-                //buster.log("IN GRAPH, EXECUTING FUNCTION");
                 //buster.log("BEFORE QUERY EXECUTION", query);
                 this.engine.execute(query, executeFunc(deferred, {
                     callback: callback,

@@ -530,10 +530,11 @@ define([
     QueryEngine.QueryEngine.prototype.execute = function(query, callback, defaultDataset, namedDataset) {
         var syntaxTree;
         if (GraphiteUtils.isString(query)) {
+            //buster.log("IN QUERY ENGINE, QUERY ISN'T PARSED ALREADY");
             query = Utils.normalizeUnicodeLiterals(query);
             syntaxTree = this.abstractQueryTree.parseQueryString(query);
         } else {
-            buster.log("IN QUERY ENGINE, QUERY IS PARSED ALREADY");
+            //buster.log("IN QUERY ENGINE, QUERY IS PARSED ALREADY");
             syntaxTree = query;
         }
         //buster.log("IN ENGINE, SYNTAXTREE", syntaxTree == null, queryString);
@@ -558,7 +559,7 @@ define([
                     }
                 });
             } else if(syntaxTree.token === 'query' && syntaxTree.kind == 'query') {
-                buster.log("IN QUERY ENGINE, KIND QUERY");
+                //buster.log("IN QUERY ENGINE, KIND QUERY");
                 this.executeQuery(syntaxTree, callback, defaultDataset, namedDataset);
             }
         }
@@ -1248,8 +1249,8 @@ define([
                 this.rdfLoader.load(aqt.sourceGraph.value, graph, function(success, result){
                     //buster.log("IN ENGINE, LOAD SUCCESS", success, result);
                     if(success == false) {
-                        buster.log("Error loading graph");
-                        buster.log(result);
+                        //buster.log("Error loading graph");
+                        //buster.log(result);
                         callback(false, "error batch loading quads");
                     } else {
                         that.batchLoad(result.toQuads());

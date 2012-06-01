@@ -300,12 +300,17 @@ define([
      * @return {String} The formatted string
      */
     String.prototype.format = function() {
-        var args = arguments;
+        var args = Utils.toArray(arguments),
+            last = Utils.last(args),
+            fn = function (str) { return str; }
+        if (Utils.isFunction(last)) {
+            fn = last;
+            args.pop();
+        }
         return this.replace(/{(\d+)}/g, function(match, number) {
             return typeof args[number] != 'undefined'
-                ? args[number]
-                : match
-                ;
+                ? fn(args[number])
+                : fn(match);
         });
     };
     /**

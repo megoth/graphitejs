@@ -14,13 +14,18 @@ define([
         curieRegex = /^[a-zA-Z0-9]+:[a-zA-Z0-9]+/,
         descRegex = /^(DESC|desc)/,
         dotRegex = /^\./,
+        equalsRegex = /^=/,
+        filterRegex = /^(FILTER|filter)/,
+        greaterOrEqualsRegex = /^>=/,
         greaterRegex = /^>/,
         langRegex = /^@/,
+        lesserOrEqualsRegex = /^<=/,
         lesserRegex = /^</,
         literalRegex = /^"/,
         literalStringRegex = /^[a-zA-Z0-9\s]*/,
         maxRegex = /^(MAX|max)/,
         minRegex = /^(MIN|min)/,
+        notEqualsRegex = /^!=/,
         parenthesisLeft = /^\(/,
         parenthesisRight = /^\)/,
         prefixRegex = /^(PREFIX|prefix)/,
@@ -104,6 +109,86 @@ define([
             },
             "remainder": remainder
         }
+    }
+    function expressionLiteral(data) {
+        var literal = this.literal(data);
+        return {
+            "expression": {
+                "expressionType": "atomic",
+                "primaryexpression": "rdfliteral",
+                "token": "expression",
+                "value": literal.literal
+            },
+            "remainder": literal.remainder
+        };
+    }
+    function expressionRelationalOp2(data, regex) {
+        var op2;
+        data = expect(data, regex);
+        data = ws(data, { required: true });
+        op2 = this.expression(data);
+        data = ws(op2.remainder);
+        op2 = op2.expression;
+        return {
+            "op2": op2,
+            "remainder": data
+        }
+    }
+    function expressionRelational(data, op1) {
+        var op2,
+            expression = {
+                "expressionType": "relationalexpression",
+                "token": "expression"
+            };
+        if (!op1) {
+            if (variableRegex.test(data)) {
+                data = expect(data, variableRegex);
+                op1 = this.expression(data);
+                data = ws(op1.remainder, { required: true });
+                op1 = op1.var;
+            } else {
+                throw new Error ("Expressional relation sign not recognized: " + data);
+            }
+        }
+        if (equalsRegex.test(data)) {
+            op2 = expressionRelationalOp2.call(this, data, equalsRegex);
+            data = op2.remainder;
+            op2 = op2.op2;
+            expression.operator = "=";
+        } else if (greaterOrEqualsRegex.test(data)) {
+            op2 = expressionRelationalOp2.call(this, data, greaterOrEqualsRegex);
+            data = op2.remainder;
+            op2 = op2.op2;
+            expression.operator = ">=";
+        } else if (greaterRegex.test(data)) {
+            op2 = expressionRelationalOp2.call(this, data, greaterRegex);
+            data = op2.remainder;
+            op2 = op2.op2;
+            expression.operator = ">";
+        } else if (lesserOrEqualsRegex.test(data)) {
+            op2 = expressionRelationalOp2.call(this, data, lesserOrEqualsRegex);
+            data = op2.remainder;
+            op2 = op2.op2;
+            expression.operator = "<=";
+        } else if (lesserRegex.test(data)) {
+            op2 = expressionRelationalOp2.call(this, data, lesserRegex);
+            data = op2.remainder;
+            op2 = op2.op2;
+            expression.operator = "<";
+        } else if (notEqualsRegex.test(data)) {
+            op2 = expressionRelationalOp2.call(this, data, notEqualsRegex);
+            data = op2.remainder;
+            op2 = op2.op2;
+            expression.operator = "!=";
+        } else {
+            throw new Error ("Expressional relation sign not recognized: " + data);
+        }
+        expression.op1 = op1;
+        expression.op2 = op2;
+        return {
+            "expression": expression,
+            "remainder": data
+        };
     }
     function ws(data, opts) {
         opts = opts || {};
@@ -208,18 +293,42 @@ define([
             var value,
                 arg,
                 expression,
-                remainder;
+                remainder,
+                irireforfunction;
             if (variableRegex.test(data)) {
                 value = this.var(data.substr(1));
+                expression =  {
+                    "expressionType": "atomic",
+                    "primaryexpression": "var",
+                    "token": "expression",
+                    "value": value.var
+                };
+                data = ws(value.remainder);
+                if (equalsRegex.test(data) ||
+                    greaterOrEqualsRegex.test(data) ||
+                    greaterRegex.test(data) ||
+                    lesserOrEqualsRegex.test(data) ||
+                    lesserRegex.test(data) ||
+                    notEqualsRegex.test(data)) {
+                    return expressionRelational.call(this, data, expression);
+                }
+                return {
+                    "expression": expression,
+                    "remainder": data
+                };
+            } else if (lesserRegex.test(data)) {
+                irireforfunction = this.uri(data);
                 return {
                     "expression": {
-                        "expressionType": "atomic",
-                        "primaryexpression": "var",
-                        "token": "expression",
-                        "value": value.var
+                        "args": undefined,
+                        "expressionType": "irireforfunction",
+                        "iriref": irireforfunction.uri,
+                        "token": "expression"
                     },
-                    "remainder": value.remainder
+                    "remainder": irireforfunction.remainder
                 };
+            } else if (literalRegex.test(data)) {
+                return expressionLiteral.call(this, data);
             } else if (bnodeRegex.test(data)) {
                 remainder = expect(data.substr(5), parenthesisLeft);
                 arg = this.expression(remainder);
@@ -243,9 +352,25 @@ define([
                 return expressionAggregate.call(this, "min", data);
             } else if (sumRegex.test(data)) {
                 return expressionAggregate.call(this, "sum", data);
+            } else if (stringRegex.test(data)) {
+                return expressionLiteral.call(this, data);
             } else {
                 throw new Error("Can't parse expression: " + data);
             }
+        },
+        "filter": function (data) {
+            var value;
+            data = expect(data, filterRegex);
+            data = expect(data, parenthesisLeft);
+            value = this.expression(data);
+            data = expect(value.remainder, parenthesisRight);
+            return {
+                "filter": {
+                    "token": "filter",
+                    "value": value.expression
+                },
+                "remainder": data
+            };
         },
         "group": function (data, group) {
             if (!group) {
@@ -450,9 +575,9 @@ define([
             },
                 remainder;
             if (lesserRegex.test(data)) {
-                uri.value = uriRegex.exec(data.substr(1))[0];
-                remainder = data.substr(uri.value.length + 1);
-                remainder = expect(remainder, greaterRegex);
+                data = expect(data, lesserRegex);
+                uri.value = uriRegex.exec(data)[0];
+                remainder = expect(data.substr(uri.value.length), greaterRegex);
             } else {
                 uri.prefix = stringRegex.exec(data)[0];
                 remainder = data.substr(uri.prefix.length);

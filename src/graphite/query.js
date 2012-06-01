@@ -6,6 +6,20 @@ define([
     var query = function (queryString) {
         return new query.prototype.init(queryString);
     };
+    function mergePatterns(objA, objB) {
+        if (objB.patterns[0]) {
+            buster.log(objA, objB);
+            if (objA.patterns[0]) {
+                Utils.each(objB.patterns[0].triplesContext, function (triplesContext) {
+                    objA.patterns[0].triplesContext.push(triplesContext);
+                });
+            } else {
+                objA.patterns = objB.patterns;
+            }
+        }
+        objA.filters = objA.filters.concat(objB.filters);
+        return objA;
+    }
     query.prototype = {
         init: function (queryString) {
             if(queryString) {
@@ -13,6 +27,7 @@ define([
             } else {
                 this.syntaxTree = SparqlParser.parser.parse("SELECT * WHERE { ?subject ?predicate ?object }");
             }
+            this.currentUnit = 0;
             this.modifiedPattern = false;
             this.prefixes = {};
             this.patterns = {};
@@ -20,6 +35,15 @@ define([
         },
         base: function (value) {
             this.syntaxTree.prologue.base = Tokenizer.base(value).base;
+            return this;
+        },
+        filter: function (filter) {
+            var token = Tokenizer.filter("FILTER({0})".format(filter)).filter;
+            this.syntaxTree.units[0].pattern = mergePatterns(this.syntaxTree.units[0].pattern, {
+                "filters": [ token ],
+                "patterns": [],
+                "token": "groupgraphpattern"
+            });
             return this;
         },
         group: function (group) {
@@ -49,17 +73,7 @@ define([
                 this.patterns[pattern] = token;
                 return this;
             }
-            if (this.patterns[pattern]) {
-                return this;
-            }
-            this.patterns[pattern] = token;
-            var patterns = Utils.toArray(this.patterns);
-            pattern = patterns.shift();
-            Utils.each(patterns, function (p1) {
-                Utils.each(p1.patterns, function (p2) {
-                    pattern.patterns[0].triplesContext = pattern.patterns[0].triplesContext.concat(p2.triplesContext);
-                });
-            });
+            this.syntaxTree.units[0].pattern = mergePatterns(this.syntaxTree.units[0].pattern, token);
             return this;
         }
     };

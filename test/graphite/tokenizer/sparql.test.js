@@ -29,6 +29,30 @@ define([
             "token": "uri",
             "value": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
         },
+        tokenLiteral22 = {
+            "lang": null,
+            "token": "literal",
+            "type": "http://www.w3.org/2001/XMLSchema#integer",
+            "value": "22"
+        },
+        tokenLiteral22Specified = {
+            "lang": null,
+            "token": "literal",
+            "type": tokenUriInteger,
+            "value": "22"
+        },
+        tokenLiteralArne = {
+            "lang": null,
+            "token": "literal",
+            "type": null,
+            "value": "Arne"
+        },
+        tokenLiteralEnglish = {
+            "lang": "en",
+            "token": "literal",
+            "type": null,
+            "value": "Andy"
+        },
         tokenVarA = {
             "token": "var",
             "value": "a"
@@ -47,6 +71,12 @@ define([
             "token": "expression",
             "value": tokenVarA
         },
+        tokenExpressionAtomicArne = {
+            "expressionType": "atomic",
+            "primaryexpression": "rdfliteral",
+            "token": "expression",
+            "value": tokenLiteralArne
+        },
         tokenExpressionAtomicB = {
             "expressionType": "atomic",
             "primaryexpression": "var",
@@ -57,6 +87,48 @@ define([
             "args": [ tokenExpressionAtomicA ],
             "builtincall": "bnode",
             "expressionType": "builtincall",
+            "token": "expression"
+        },
+        tokenExpressionAEqualsArne = {
+            "expressionType": "relationalexpression",
+            "op1": tokenExpressionAtomicA,
+            "op2": tokenExpressionAtomicArne,
+            "operator": "=",
+            "token": "expression"
+        },
+        tokenExpressionAGreaterArne = {
+            "expressionType": "relationalexpression",
+            "op1": tokenExpressionAtomicA,
+            "op2": tokenExpressionAtomicArne,
+            "operator": ">",
+            "token": "expression"
+        },
+        tokenExpressionAGreaterOrEqualsArne = {
+            "expressionType": "relationalexpression",
+            "op1": tokenExpressionAtomicA,
+            "op2": tokenExpressionAtomicArne,
+            "operator": ">=",
+            "token": "expression"
+        },
+        tokenExpressionALesserArne = {
+            "expressionType": "relationalexpression",
+            "op1": tokenExpressionAtomicA,
+            "op2": tokenExpressionAtomicArne,
+            "operator": "<",
+            "token": "expression"
+        },
+        tokenExpressionALesserOrEqualsArne = {
+            "expressionType": "relationalexpression",
+            "op1": tokenExpressionAtomicA,
+            "op2": tokenExpressionAtomicArne,
+            "operator": "<=",
+            "token": "expression"
+        },
+        tokenExpressionANotEqualsArne = {
+            "expressionType": "relationalexpression",
+            "op1": tokenExpressionAtomicA,
+            "op2": tokenExpressionAtomicArne,
+            "operator": "!=",
             "token": "expression"
         },
         tokenExpressionAvgA = {
@@ -94,6 +166,30 @@ define([
             "expressionType": "aggregate",
             "token": "expression"
         },
+        tokenFilterAEqualsArne = {
+            "token": "filter",
+            "value": tokenExpressionAEqualsArne
+        },
+        tokenFilterAGreaterOrEqualsArne = {
+            "token": "filter",
+            "value": tokenExpressionAGreaterOrEqualsArne
+        },
+        tokenFilterAGreaterArne = {
+            "token": "filter",
+            "value": tokenExpressionAGreaterArne
+        },
+        tokenFilterALesserOrEqualsArne = {
+            "token": "filter",
+            "value": tokenExpressionALesserOrEqualsArne
+        },
+        tokenFilterALesserArne = {
+            "token": "filter",
+            "value": tokenExpressionALesserArne
+        },
+        tokenFilterANotEqualsArne = {
+            "token": "filter",
+            "value": tokenExpressionANotEqualsArne
+        },
         tokenDirectionAASC = {
             "direction": "ASC",
             "expression": tokenExpressionAtomicA
@@ -108,33 +204,9 @@ define([
         },
         tokenGroupA = [ tokenVarA ],
         tokenGroupAB = [ tokenVarA, tokenVarB ],
-        tokenLiteral22 = {
-            "lang": null,
-            "token": "literal",
-            "type": "http://www.w3.org/2001/XMLSchema#integer",
-            "value": "22"
-        },
-        tokenLiteral22Specified = {
-            "lang": null,
-            "token": "literal",
-            "type": tokenUriInteger,
-            "value": "22"
-        },
-        tokenLiteralArne = {
-            "lang": null,
-            "token": "literal",
-            "type": null,
-            "value": "Arne"
-        },
-        tokenLiteralEnglish = {
-            "lang": "en",
-            "token": "literal",
-            "type": null,
-            "value": "Andy"
-        },
         tokenOrderAAsc = [ tokenDirectionAASC ],
         tokenOrderADesc = [ tokenDirectionADesc ],
-        tokenOrderADescBAsc = [ tokenDirectionADesc, tokenDirectionBAsc ]
+        tokenOrderADescBAsc = [ tokenDirectionADesc, tokenDirectionBAsc ],
         tokenPrefixRDF = {
             "local": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
             "prefix": "rdf",
@@ -333,26 +405,63 @@ define([
                 assert.equals(Tokenizer.expression("AVG(?a)"), {
                     "expression": tokenExpressionAvgA,
                     "remainder": ""
-                })
+                });
             },
             "count": function () {
                 assert.equals(Tokenizer.expression("COUNT(?a)"), {
                     "expression": tokenExpressionCountA,
                     "remainder": ""
-                })
+                });
             },
             "max": function () {
                 assert.equals(Tokenizer.expression("MAX(?a)"), {
                     "expression": tokenExpressionMaxA,
                     "remainder": ""
-                })
+                });
             },
             "min": function () {
-                buster.log(Tokenizer.expression("MIN(?a)"));
                 assert.equals(Tokenizer.expression("MIN(?a)"), {
                     "expression": tokenExpressionMinA,
                     "remainder": ""
-                })
+                });
+            },
+            "relationalexpression": {
+                "equals": function () {
+                    assert.equals(Tokenizer.expression('?a = "Arne"'), {
+                        "expression": tokenExpressionAEqualsArne,
+                        "remainder": ""
+                    });
+                },
+                "greater": function () {
+                    assert.equals(Tokenizer.expression('?a > "Arne"'), {
+                        "expression": tokenExpressionAGreaterArne,
+                        "remainder": ""
+                    });
+                },
+                "greater-or-equals": function () {
+                    assert.equals(Tokenizer.expression('?a >= "Arne"'), {
+                        "expression": tokenExpressionAGreaterOrEqualsArne,
+                        "remainder": ""
+                    });
+                },
+                "lesser": function () {
+                    assert.equals(Tokenizer.expression('?a < "Arne"'), {
+                        "expression": tokenExpressionALesserArne,
+                        "remainder": ""
+                    });
+                },
+                "lesser-or-equals": function () {
+                    assert.equals(Tokenizer.expression('?a <= "Arne"'), {
+                        "expression": tokenExpressionALesserOrEqualsArne,
+                        "remainder": ""
+                    });
+                },
+                "not-equals": function () {
+                    assert.equals(Tokenizer.expression('?a != "Arne"'), {
+                        "expression": tokenExpressionANotEqualsArne,
+                        "remainder": ""
+                    });
+                }
             },
             "sum": function () {
                 assert.equals(Tokenizer.expression("SUM(?a)"), {
@@ -360,6 +469,32 @@ define([
                     "remainder": ""
                 })
             }
+        },
+        ".filter": function () {
+            assert.equals(Tokenizer.filter('FILTER(?a = "Arne")'), {
+                "filter": tokenFilterAEqualsArne,
+                "remainder": ""
+            });
+            assert.equals(Tokenizer.filter('FILTER(?a > "Arne")'), {
+                "filter": tokenFilterAGreaterArne,
+                "remainder": ""
+            });
+            assert.equals(Tokenizer.filter('FILTER(?a >= "Arne")'), {
+                "filter": tokenFilterAGreaterOrEqualsArne,
+                "remainder": ""
+            });
+            assert.equals(Tokenizer.filter('FILTER(?a < "Arne")'), {
+                "filter": tokenFilterALesserArne,
+                "remainder": ""
+            });
+            assert.equals(Tokenizer.filter('FILTER(?a <= "Arne")'), {
+                "filter": tokenFilterALesserOrEqualsArne,
+                "remainder": ""
+            });
+            assert.equals(Tokenizer.filter('FILTER(?a != "Arne")'), {
+                "filter": tokenFilterANotEqualsArne,
+                "remainder": ""
+            });
         },
         ".group": {
             "Single variable": function () {
