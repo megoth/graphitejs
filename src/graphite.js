@@ -1,4 +1,6 @@
-define([], function () {
+define([
+    "./graphite/api"
+], function (API) {
     /*!
      * Graphite Core
      * Copyright (C) 2012 Arne Hassel
@@ -11,14 +13,7 @@ define([], function () {
      *
      * @returns {Object} The graphite object, run through `init`
      */
-    var graphite = function() {
-        return new graphite.prototype.init();
-    }
-    graphite.prototype = {
-        init: function () {
-            //TODO THIS IS WHERE ALL STARTS
-        }
+    return function(options) {
+        return API(options);
     };
-    graphite.prototype.init.prototype = graphite.prototype;
-    return graphite;
 });

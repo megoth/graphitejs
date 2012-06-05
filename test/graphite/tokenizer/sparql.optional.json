@@ -1,0 +1,47 @@
+{
+    kind: "query",
+    prologue: { base: "", prefixes: [], token: "prologue" },
+    token: "query",
+    units: [{
+        dataset: {
+            implicit: [{
+                prefix: null,
+                suffix: null,
+                token: "uri",
+                value: "https://github.com/antoniogarrote/rdfstore-js#default_graph"
+            }],
+            named: []
+        },
+        group: "",
+        kind: "select",
+        modifier: "",
+        pattern: {
+            filters: [],
+            patterns: [{
+                token: "basicgraphpattern",
+                triplesContext: [{
+                    object: { token: "var", value: "object" },
+                    predicate: { prefix: "foaf", suffix: "name", token: "uri", value: null },
+                    subject: { token: "var", value: "subject" }
+                }]
+            }, {
+                token: "optionalgraphpattern",
+                value: {
+                    filters: [],
+                    patterns: [{
+                        token: "basicgraphpattern",
+                        triplesContext: [{
+                            object: { lang: null, token: "literal", type: null, value: "99" },
+                            predicate: { prefix: "foaf", suffix: "age", token: "uri", value: null },
+                            subject: { token: "var", value: "subject" }
+                        }]
+                    }],
+                    token: "groupgraphpattern"
+                }
+            }],
+            token: "groupgraphpattern"
+        },
+        projection: [{ kind: "*", token: "variable" }],
+        token: "executableunit"
+    }]
+}

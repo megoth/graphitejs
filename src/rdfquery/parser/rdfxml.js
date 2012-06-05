@@ -52,8 +52,8 @@ define([
             }
         },
         getAttributeNS = function(elem, namespace, name){
-            var basename;
-            buster.log("TEST", elem.getAttributeNS);
+            var basename
+            //buster.log("TEST", elem.getAttributeNS);
             if (elem.getAttributeNS) {
                 return elem.getAttributeNS(namespace, name);
             } else {
@@ -175,7 +175,7 @@ define([
                             tmpObject1 = Utils.last(graph.statements);
                             parseRdfXmlDescription(p, false, graph, base, lang);
                             tmpObject2 = Utils.last(graph.statements);
-                            buster.log("TMP OBJECT 1", tmpObject1);
+                            //buster.log("TMP OBJECT 1", tmpObject1);
                             if (tmpObject1 && tmpObject1 !== tmpObject2) {
                                 object = tmpObject2;
                             } else {
@@ -196,7 +196,7 @@ define([
                                     tmpObject1 = Utils.last(graph.statements);
                                     parseRdfXmlDescription(o, true, graph, base, lang);
                                     tmpObject2 = Utils.last(graph.statements);
-                                    buster.log("TMP OBJECT 2", tmpObject1);
+                                    //buster.log("TMP OBJECT 2", tmpObject1);
                                     if (tmpObject1 && tmpObject1 !== tmpObject2) {
                                         collectionItem = tmpObject2;
                                     } else {
@@ -225,7 +225,7 @@ define([
                                 tmpObject1 = Utils.last(graph.statements);
                                 parseRdfXmlDescription(o, true, graph, base, lang);
                                 tmpObject2 = Utils.last(graph.statements);
-                                buster.log("TMP OBJECT 3", tmpObject1);
+                                //buster.log("TMP OBJECT 3", tmpObject1);
                                 if (tmpObject1 && tmpObject1 !== tmpObject2) {
                                     object = tmpObject2;
                                 } else {
@@ -240,7 +240,7 @@ define([
                         tmpObject1 = Utils.last(graph.statements);
                         parseRdfXmlDescription(p, false, graph, base, lang);
                         tmpObject2 = Utils.last(graph.statements);
-                        buster.log("TMP OBJECT 4", tmpObject1, graph.statements, tmpObject2);
+                        //buster.log("TMP OBJECT 4", tmpObject1, graph.statements, tmpObject2);
                         if (tmpObject1 && tmpObject1 !== tmpObject2) {
                             object = tmpObject2;
                         } else {
@@ -258,10 +258,11 @@ define([
             }
             return graph;
         },
-        parseRdfXml = function (doc) {
+        parseRdfXml = function (doc, options) {
+            options = options || {};
             var base,
                 lang,
-                graph = Dictionary.Formula();
+                graph = Dictionary.Formula(options.graph);
             if (doc.documentElement.namespaceURI === rdfNs && getLocalName(doc.documentElement) === 'RDF') {
                 lang = getAttributeNS(doc.documentElement, 'http://www.w3.org/XML/1998/namespace', 'lang');
                 base = getAttributeNS(doc.documentElement, 'http://www.w3.org/XML/1998/namespace', 'base') || URI.base();
@@ -285,6 +286,6 @@ define([
             var parser = new DOMParser();
             doc = parser.parseFromString(data, 'text/xml');
         }
-        callback(parseRdfXml(doc));
+        callback(parseRdfXml(doc, options));
     };
 });

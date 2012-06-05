@@ -14,7 +14,7 @@ define([
             args.push(cleanArg);
             queryString = String.prototype.format.apply(queryString, args);
         }
-        buster.log("IN API, FORMAT QUERY STRING", queryString);
+        //buster.log("IN API, FORMAT QUERY STRING", queryString);
         return queryString;
     }
     var api = function () {
@@ -23,12 +23,12 @@ define([
     api.prototype = {
         init: function () {
             var that = this;
-            that.promises = [ When.defer() ];
+            this.promises = [ When.defer() ];
             Graph().then(function (graph) {
                 that.graph = graph;
                 that.promises[0].resolve(true);
             });
-            this.queryController = Query("SELECT * WHERE { ?s ?p ?o }");
+            this.queryController = Query();
         },
         /**
          *
@@ -48,8 +48,12 @@ define([
             this.queryController = Query(query);
             return this.execute(options);
         },
+        base: function (uri) {
+            this.queryController.base(uri);
+            return this;
+        },
         each: function (callback) {
-            //buster.log("IN API, EACH");
+            //console.log("IN API, EACH", this.queryController.retrieveTree());
             return this.execute({
                 callback: callback
             });
@@ -63,13 +67,12 @@ define([
             //buster.log("IN API, EXECUTE", this.promises.length);
             options = options || {};
             var promise = When.defer(),
-                that = this;
+                that = this,
+                syntaxTree = this.queryController.retrieveTree();
+            this.queryController = Query();
             When.all(this.promises).then(function () {
-                //buster.log("IN API, EXECUTE ALL PROMISES RESOLVED", that.queryController.retrieveTree());
-                that.graph.execute(that.queryController.retrieveTree(), options.callback).then(function (graph) {
-                    //buster.log("IN API, EXECUTED QUERY");
+                that.graph.execute(syntaxTree, options.callback).then(function (graph) {
                     that.graph = graph;
-                    that.queryController = Query("SELECT * WHERE { ?subject ?predicate ?object }");
                     promise.resolve(graph);
                 });
             });
@@ -77,7 +80,6 @@ define([
             return this;
         },
         filter: function (filter) {
-            filter = format(filter, arguments, 1);
             this.queryController.filter(filter);
             return this;
         },
@@ -99,6 +101,16 @@ define([
          */
         load: function (uri) {
             this.queryController = Query("LOAD <{0}>".format(uri));
+            return this.execute();
+        },
+        optional: function (optional) {
+            optional = format(optional, arguments, 1);
+            this.queryController.optional(optional);
+            //buster.log("IN API, OPTIONAL", this.queryController.retrieveTree());
+            return this;
+        },
+        prefix: function (prefix, local) {
+            this.queryController.prefix(prefix, local);
             return this;
         },
         query: function (queryString) {
@@ -142,6 +154,7 @@ define([
         },
         where: function (pattern) {
             pattern = format(pattern, arguments, 1);
+            //buster.log("IN API, WHERE", pattern);
             this.queryController.where(pattern);
             return this;
         }

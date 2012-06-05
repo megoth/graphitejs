@@ -30,7 +30,6 @@ define([
     };
     /**
      *
-     * @return {ContextLoader.prototype.init}
      * @constructor
      */
     var ContextLoader = function () {
@@ -77,11 +76,10 @@ define([
      * @param properties
      * @param contexts
      * @param options
-     * @return {Node.prototype.init}
      * @constructor
      */
-    var Node = function (pseudoGraph, properties, contexts, options) {
-        return new Node.prototype.init(pseudoGraph, properties, contexts, options);
+    var Node = function (pseudoGraph, properties, contexts, bnodes, options) {
+        return new Node.prototype.init(pseudoGraph, properties, contexts, bnodes, options);
     };
     Node.prototype = {
         /**
@@ -92,7 +90,7 @@ define([
          * @param options
          * @return {*}
          */
-        init: function (pseudoGraph, properties, contexts, options) {
+        init: function (pseudoGraph, properties, contexts, bnodes, options) {
             this.contexts = Utils.clone(contexts);
             this.context = {
                 "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -100,6 +98,7 @@ define([
                 "xsd": "http://www.w3.org/TR/xmlschema-2/#"
             };
             this.options = options;
+            this.bnodes = bnodes;
             var obj,
                 node = {};
             if(obj = Utils.extract(properties, "@context")) {
@@ -184,23 +183,29 @@ define([
                 predicate,
                 object;
             //buster.log("TRIPLES ASSEMBLING", this.triples);
-            Utils.each(this.triples, function (triple, i) {
-                //buster.log("TRIPLE ASSEMBLING", i, triple);
+            Utils.each(this.triples, function (triple) {
+                //console.log("TRIPLE ASSEMBLING", triple);
                 subject = node.getSubject(triple[0]);
-                subject = subject || (subject[0] === "_" ?
-                    Dictionary.BlankNode(subject) :
-                    Dictionary.Symbol(subject));
+                if (subject.type === "bnode") {
+                    subject = node.getBlankNode(subject.value);
+                } else if (subject.type === "uri") {
+                    subject = Dictionary.Symbol(subject.value);
+                } else {
+                    throw new Error ("Unrecognized type of subject" + subject.type);
+                }
                 predicate = node.getPredicate(triple[1]);
                 predicate = Dictionary.Symbol(predicate);
                 object = node.getObject(triple[2], predicate);
+                //console.log("JSONLD, ADD TRIPLE, OBJECT", object);
                 if(object.type === "bnode") {
-                    object = Dictionary.BlankNode(object.value);
+                    object = node.getBlankNode(object.value);
                 } else if (object.type === "uri") {
                     object = Dictionary.Symbol(object.value)
                 } else {
+                    //console.log("IN JSONLD, OBJECT", object);
                     object = Dictionary.Literal(object.value, object.lang, object.datatype);
                 }
-                //buster.log("TRIPLE", subject, predicate, object);
+                //console.log("TRIPLE", subject, predicate, object);
                 graph.add(subject, predicate, object);
             });
         },
@@ -214,6 +219,18 @@ define([
             Utils.each(this.contexts, function (num) {
                 Utils.extend(node.context, contexts[num]);
             });
+        },
+        getBlankNode: function (value) {
+            var subject;
+            //console.log("BNODES", this.bnodes);
+            if (this.bnodes[value]) {
+                subject = this.bnodes[value];
+            } else {
+                subject = Dictionary.BlankNode(value);
+                this.bnodes[value] = subject;
+            }
+            //console.log("BNODE", value, subject);
+            return subject;
         },
         /**
          * In case of dereferencing the loader is handy
@@ -238,6 +255,7 @@ define([
          * @returns {string} The expanded object
          */
         getObject: function (object, predicate) {
+            var value;
             if(Utils.isInteger(object)) {
                 object = {
                     value: object,
@@ -256,10 +274,16 @@ define([
                     type: "literal",
                     datatype: "http://www.w3.org/TR/xmlschema-2/#boolean"
                 };
-            } else if(Utils.isString(object)) {
+            } else if (Utils.isString(object) && object[0] === "_") {
                 object = {
-                    value: this.getUri(object),
-                    type: Utils.isUri(object) ? "uri" : "literal"
+                    value: object,
+                    type: "bnode"
+                };
+            } else if(Utils.isString(object)) {
+                value = this.getUri(object);
+                object = {
+                    value: value,
+                    type: Utils.isUri(value) ? "uri" : "literal"
                 };
             }
             if(this.context) {
@@ -330,7 +354,21 @@ define([
          * @returns {string} The expanded subject
          */
         getSubject: function (subject) {
-            return this.context && this.context["@id"] || subject;
+            subject = this.context && this.context["@id"]
+                ? this.context["@id"]
+                : subject;
+            if (Utils.isString(subject) && subject[0] === "_") {
+                subject = {
+                    value: subject,
+                    type: "bnode"
+                };
+            } else if (Utils.isString(subject)) {
+                subject = {
+                    value: this.getUri(subject),
+                    type: "uri"
+                }
+            }
+            return subject;
         },
         /**
          * Expand the uri with the help of the context
@@ -351,7 +389,6 @@ define([
     /**
      *
      * @param options
-     * @return {PseudoGraph.prototype.init}
      * @constructor
      */
     var PseudoGraph = function (options) {
@@ -377,8 +414,8 @@ define([
         assembleTriples: function () {
             var graph = Dictionary.Formula(this.options.graph),
                 cl = this.contextLoader;
-            Utils.each(this.nodes, function (node, i) {
-                //buster.log("NODE ASSEMBLING", i, node);
+            Utils.each(this.nodes, function (node) {
+                //buster.log("NODE ASSEMBLING", node);
                 node.deriveContexts(cl.contexts);
                 node.addTriples(graph);
             });

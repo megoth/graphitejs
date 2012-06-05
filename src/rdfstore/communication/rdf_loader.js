@@ -63,11 +63,12 @@ define([
     };
      */
     RDFLoader.RDFLoader.prototype.load = function(uri, graph, callback) {
+        //console.debug(graph);
         Loader({
             uri: uri,
             accept: this.acceptHeaderValue,
             success: function (err, data, status, xhr) {
-                buster.log("RDFLOADER LOAD", data);
+                //buster.log("RDFLOADER LOAD", data);
                 if(!err) {
                     //buster.log("DATA RETRIEVED");
                     var mime = getMime(xhr.getResponseHeader("Content-Type") || xhr.getResponseHeader("content-type"));

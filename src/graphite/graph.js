@@ -3,10 +3,19 @@ define([
     "./../rdfstore/rdf-persistence/lexicon",
     "./../rdfstore/rdf-persistence/quad_backend",
     "./../rdfstore/query-engine/query_engine",
+    "./serializer/sparql",
     "./utils",
     "./when"
-], function (Dictionary, Lexicon, QuadBackend, QueryEngine, Utils, When) {
+], function (Dictionary, Lexicon, QuadBackend, QueryEngine, Serializer, Utils, When) {
     "use strict";
+    function bindVar (vars) {
+        return Utils.map(vars, function (v) {
+            if (v.hasOwnProperty("value")) {
+                return v.value;
+            }
+            throw new Error("IN GRAPH, variable has no value: " + v);
+        })
+    }
     function getExecuteFunction(queryKind) {
         //buster.log("IN GRAPH, GET EXECUTE FUNCTION", queryKind);
         var execute = {
@@ -48,7 +57,7 @@ define([
                 };
             },
             "insertdata": function (promise, options) {
-                //buster.log("IN GRAPH, INSERT DATA", options.query);
+                //console.log("IN GRAPH, INSERT DATA", options.query);
                 if (options.callback) {
                     graph().then(function (g) {
                         g.execute(options.query).then(function (g) {
@@ -66,14 +75,11 @@ define([
                 var query;
                 //buster.log("BEFORE LOAD");
                 return function (success, results) {
-                    //buster.log("GRAPH LOAD, RESULTS", success, results);
+                    //console.log("GRAPH LOAD, RESULTS", success, results);
                     query = "INSERT DATA " + results.toNT();
                     options.graph.clone().then(function (g) {
-                        g.size().then(function (size) {
-                            //buster.log("ONCOMPLETE SIZE", size);
-                            g.execute(query).then(function (g) {
-                                promise.resolve(g);
-                            });
+                        g.execute(query).then(function (g) {
+                            promise.resolve(g);
                         });
                     });
                     if(options.callback) {
@@ -88,18 +94,17 @@ define([
             },
             "select": function (promise, options) {
                 return function (success, results) {
-                    //buster.log("IN GRAPH, SELECT", success, results);
-                    var vars;
-                    options.graph.clone().then(function (g) {
-                        promise.resolve(g);
-                    });
+                    if (results.length === 0) {
+                        console.debug("The query didn't return any results");
+                    }
+                    var vars, lvars;
+                    promise.resolve(options.graph);
                     if (options.callback && options.callback.length > 0) {
                         vars = Utils.extractArgumentMap(options.callback);
                         Utils.each(results, function (args) {
-                            //buster.log("IN GRAPH, SELECT", args);
-                            options.callback.apply(options.graph, Utils.map(Utils.mapArgs(vars, args), function (v) {
-                                return v.value;
-                            }));
+                            //console.log("IN GRAPH, SELECT", args, vars);
+                            lvars = Utils.mapArgs(vars, args);
+                            options.callback.apply(options.graph, bindVar(lvars));
                         });
                     } else if (options.callback) {
                         Utils.each(results, options.callback);

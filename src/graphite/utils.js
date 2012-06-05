@@ -444,16 +444,6 @@ define([
         return -1;
     };
     /**
-     * Determine if an object is an `Array`.
-     *
-     * @param {Object} object An object that may or may not be an array
-     * @returns {Boolean} True if the parameter is an array
-     */
-    Utils.isArray = Array.isArray || function (object) {
-        return !!(object && object.concat
-            && object.unshift && !object.callee);
-    };
-    /**
      * Is a given variable an arguments object?
      * Taken from underscore.js
      *
@@ -468,6 +458,16 @@ define([
             return !!(obj && Utils.has(obj, 'callee'));
         };
     }
+    /**
+     * Determine if an object is an `Array`.
+     *
+     * @param {Object} object An object that may or may not be an array
+     * @returns {Boolean} True if the parameter is an array
+     */
+    Utils.isArray = Array.isArray || function (object) {
+        return !!(object && object.concat
+            && object.unshift && !object.callee);
+    };
     /**
      * Is a given value a boolean?
      * Taken from underscore.js
@@ -569,7 +569,7 @@ define([
         return results;
     };
     Utils.mapArgs = function (resultMap, argumentsMap) {
-        buster.log("IN UTILS, MAP ARGS", resultMap, argumentsMap);
+        //console.log("IN UTILS, MAP ARGS", resultMap, argumentsMap);
         return Utils.map(resultMap, function (arg) {
             if (argumentsMap.hasOwnProperty(arg)) {
                 return argumentsMap[arg];

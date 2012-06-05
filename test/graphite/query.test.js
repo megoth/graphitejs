@@ -1,18 +1,11 @@
 define([
     "src/graphite/query",
-    "src/rdfstore/sparql-parser/sparql_parser",
-    "src/graphite/utils"
-], function (Query, SparqlParser, Utils) {
-    var subJohn = "http://dbpedia.org/resource/John_Lennon",
-        preName = "http://xmlns.com/foaf/0.1/name",
-        objJohnName = "John Lennon",
-        subTim = "http://dbpedia.org/resource/Tim_B_Lee",
-        objTimName = "Tim Berners-Lee",
-        preKnows = "http://xmlns.com/foaf/0.1/knows",
-        xsdUri = "http://www.w3.org/2001/XMLSchema#",
-        integerUri = xsdUri + "integer";
+    "src/rdfstore/sparql-parser/sparql_parser"
+], function (Query, SparqlParser) {
+    var preName = "http://xmlns.com/foaf/0.1/name",
+        objJohnName = "John Lennon";
     var parser = SparqlParser.parser["parse"];
-    buster.testCase("Graphite this.query", {
+    buster.testCase("Graphite query", {
         setUp: function () {
             this.query = Query();
         },
@@ -61,6 +54,50 @@ define([
                 this.query.retrieveTree(),
                 parser("SELECT * WHERE { ?subject ?predicate ?object } GROUP BY ?subject ?predicate")
             );
+        },
+        ".optional": {
+            "Single instance": function () {
+                this.query.optional('?subject ?predicate "42"');
+                assert.equals(
+                    this.query.retrieveTree(),
+                    parser('SELECT * WHERE {\?' +
+                        'subject ?predicate ?object .\n' +
+                        'OPTIONAL {\n' +
+                        '?subject ?predicate "42"\n' +
+                        '}\n' +
+                        '}')
+                );
+            },
+            "Single instance, multiple triples": function () {
+                this.query.optional('?subject foaf:age "42" . ?subject foaf:name "Arne"');
+                assert.equals(
+                    this.query.retrieveTree(),
+                    parser('SELECT * WHERE {\?' +
+                        'subject ?predicate ?object .\n' +
+                        'OPTIONAL {\n' +
+                        '?subject foaf:age "42" .\n' +
+                        '?subject foaf:name "Arne" .\n' +
+                        '}\n' +
+                        '}')
+                );
+            },
+            "Multiple instances": function () {
+                this.query
+                    .optional('?subject foaf:age "42"')
+                    .optional('?subject foaf:name "Arne"');
+                assert.equals(
+                    this.query.retrieveTree(),
+                    parser('SELECT * WHERE {\?' +
+                        'subject ?predicate ?object .\n' +
+                        'OPTIONAL {\n' +
+                        '?subject foaf:age "42" .\n' +
+                        '}\n' +
+                        'OPTIONAL {\n' +
+                        '?subject foaf:name "Arne" .\n' +
+                        '}\n' +
+                        '}')
+                );
+            }
         },
         ".prefix": {
             "Single instance": function () {
@@ -181,6 +218,15 @@ define([
                     );
                 }
             }
+        },
+        "//JUST SOMETHING": function () {
+            var query = parser("SELECT *\n" +
+                "WHERE {\n" +
+                "?subject foaf:name ?object .\n" +
+                'OPTIONAL { ?subject foaf:age "99" }\n' +
+                'OPTIONAL { ?subject foaf:name "Arne" }\n' +
+                "}");
+            buster.log(query);
         }
     });
 });

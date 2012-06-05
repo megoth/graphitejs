@@ -86,6 +86,21 @@ define([
                 }));
             }
         },
+        ".base": {
+            setUp: function (done) {
+                addStatements.call(this.api, done);
+            },
+            "Single call": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .base("http://xmlns.com/foaf/0.1/")
+                    .where("?subject <age> ?object")
+                    .each(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 2);
+                }))
+            }
+        },
         ".each": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
@@ -166,13 +181,72 @@ define([
                 }));
             }
         },
-        ".load": function (done) {
-            this.api
-                .load("http://localhost:8088/json-ld/simple.jsonld")
-                .size()
-                .then(done(function(size) {
+        ".load": {
+            "Single call": function (done) {
+                this.api
+                    .load("http://localhost:8088/json-ld/simple.jsonld")
+                    .size(done(function(size) {
                     assert.equals(size, 2);
                 }));
+            },
+            "Multiple calls": function (done) {
+                this.api
+                    .load("http://localhost:8088/json-ld/people/arne.jsonld")
+                    .load("http://localhost:8088/json-ld/people/manu.jsonld")
+                    .size(done(function(size) {
+                    assert.equals(size, 3);
+                }));
+            }
+        },
+        ".optional": {
+            setUp: function (done) {
+                addStatements.call(this.api, done);
+            },
+            "Single call": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .where('?subject <{0}> ?name'.format(preName))
+                    .optional('?subject <{0}> ?homepage'.format(preHomepage))
+                    .each(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 3);
+                }))
+            },
+            "Single call, with variable injection": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .where('?subject <{0}> ?name', preName)
+                    .each(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 3);
+                }))
+            },
+            "Multiple calls": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .where('?subject <{0}> ?name'.format(preName))
+                    .optional('?subject <{0}> ?homepage'.format(preHomepage))
+                    .optional('?subject <{0}> ?age'.format(preAge))
+                    .each(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 3);
+                }))
+            }
+        },
+        ".prefix": {
+            setUp: function (done) {
+                addStatements.call(this.api, done);
+            },
+            "Single call": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .prefix("foaf", "http://xmlns.com/foaf/0.1/")
+                    .where("?subject foaf:age ?object")
+                    .each(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 2);
+                }));
+            }
         },
         ".query": {
             "LOAD": {

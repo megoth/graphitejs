@@ -374,6 +374,10 @@ define([
             "patterns": [ tokenBGPAUriTypeC ],
             "token": "groupgraphpattern"
         },
+        tokenOptionalABC = {
+            "token": "optionalgraphpattern",
+            "value": tokenPatternABC
+        },
         tokenProjectionA = [ tokenVariableA ],
         tokenProjectionAAsB = [ tokenVariableAliasedAAsB ],
         tokenProjectionsAAndAAsB = [ tokenVariableA, tokenVariableAliasedAAsB ],
@@ -510,6 +514,12 @@ define([
                 });
             }
         },
+        ".optional": function () {
+            assert.equals(Tokenizer.optional("OPTIONAL { ?a ?b ?c }"), {
+                "optional": tokenOptionalABC,
+                "remainder": ""
+            });
+        },
         ".order": function () {
             assert.equals(Tokenizer.order("?a"), {
                 "order": tokenOrderAAsc,
@@ -560,7 +570,11 @@ define([
                     "pattern": tokenPatternACurieTypeC,
                     "remainder": ""
                 });
-                assert.equals(Tokenizer.pattern("?a <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?c"), {
+                assert.equals(Tokenizer.pattern("?a <type> ?c", { base: "http://www.w3.org/1999/02/22-rdf-syntax-ns#" }), {
+                    "pattern": tokenPatternAUriTypeC,
+                    "remainder": ""
+                });
+                assert.equals(Tokenizer.pattern("?a a ?c"), {
                     "pattern": tokenPatternAUriTypeC,
                     "remainder": ""
                 });

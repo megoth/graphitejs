@@ -12,6 +12,9 @@ define([
         commaRegex = /^,/,
         countRegex = /^(COUNT|count)/,
         curieRegex = /^[a-zA-Z0-9]+:[a-zA-Z0-9]+/,
+        curlyBracketLeftRegex = /^\{/,
+        curlyBracketRightRegex = /^\}/,
+        datatypeRegex = /^\^\^/,
         descRegex = /^(DESC|desc)/,
         dotRegex = /^\./,
         equalsRegex = /^=/,
@@ -26,13 +29,14 @@ define([
         maxRegex = /^(MAX|max)/,
         minRegex = /^(MIN|min)/,
         notEqualsRegex = /^!=/,
+        optionalRegex = /^(OPTIONAL|optional)/,
         parenthesisLeft = /^\(/,
         parenthesisRight = /^\)/,
         prefixRegex = /^(PREFIX|prefix)/,
         semicolonRegex = /^;/,
         stringRegex = /^[a-zA-Z0-9]*/,
         sumRegex = /^(SUM|sum)/,
-        typeRegex = /^\^\^/,
+        typeRegex = /^a/,
         uriRegex = /^http:\/\/[a-zA-Z0-9#_\-.\/]+/,
         variableRegex = /^\?/,
         wsRegex = /^(\u0009|\u000A|\u000D|\u0020|#([^\u000A\u000D])*)+/,
@@ -59,11 +63,25 @@ define([
                     "value": value
                 };
             },
+            "optional": function (value) {
+                return {
+                    "token": "optionalgraphpattern",
+                    "value": value
+                };
+            },
             "prefix": function (prefix, local) {
                 return {
                     "local": local,
                     "prefix": prefix,
                     "token": "prefix"
+                };
+            },
+            "uri": function (options) {
+                return {
+                    "prefix": options.prefix || null,
+                    "suffix": options.suffix || null,
+                    "token": "uri",
+                    "value": options.value || null
                 };
             },
             "var": function (value) {
@@ -89,6 +107,42 @@ define([
                 return tmp;
             }
         };
+    /**
+     *
+     * @param data
+     * @param [options]
+     * @return {Object}
+     */
+    function bpgPart(data, options) {
+        //buster.log("BPGPART", data);
+        var lToken, part;
+        if (typeRegex.test(data)) {
+            data = expect(data, typeRegex);
+            lToken = token.uri({
+                value: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+            });
+        } else if (variableRegex.test(data)) {
+            part = this.var(data.substr(1));
+            lToken = part.var;
+            data = part.remainder;
+        } else if (literalRegex.test(data)) {
+            part = this.literal(data, options);
+            lToken = part.literal;
+            data = part.remainder;
+        } else if (curieRegex.test(data) || lesserRegex.test(data)) {
+            part = this.uri(data, options);
+            lToken = part.uri;
+            data = part.remainder;
+        } else {
+            part = this.literal(data, options);
+            lToken = part.literal;
+            data = part.remainder;
+        }
+        return {
+            "remainder": data,
+            "token": lToken
+        };
+    }
     function expect(data, regex) {
         if (!regex.test(data)) {
             throw new Error ("Didn't meet expected token: " + data);
@@ -110,8 +164,14 @@ define([
             "remainder": remainder
         }
     }
-    function expressionLiteral(data) {
-        var literal = this.literal(data);
+    /**
+     *
+     * @param data
+     * @param [options]
+     * @return {Object}
+     */
+    function expressionLiteral(data, options) {
+        var literal = this.literal(data, options);
         return {
             "expression": {
                 "expressionType": "atomic",
@@ -216,7 +276,7 @@ define([
             }
         },
         "base": function (data) {
-            buster.log("In tokenizer (SPARQL)", data);
+            //buster.log("In tokenizer (SPARQL)", data);
             var value = uriRegex.exec(data)[0];
             return {
                 "base": token.base(value),
@@ -226,39 +286,49 @@ define([
         /**
          *
          * @param data
-         * @param [oldSubject]
-         * @param [oldPredicate]
+         * @param triplesContext
+         * @param [options]
          * @return {Object}
          */
-        "basicgraphpattern": function (data, triplesContext, oldSubject, oldPredicate) {
+        "basicgraphpattern": function (data, triplesContext, options) {
+            options = options || {};
             //buster.log("STARTING BGP", data, subject);
-            buster.log("IN SPARQL, BGP", data);
-            var subject = !oldSubject ? this.bpgPart(data) : {
+            //buster.log("IN SPARQL, BGP", data);
+            //buster.log(options);
+            var subject = !options.subject ? bpgPart.call(this, data, options) : {
                     "remainder": data,
-                    "value": oldSubject.value
+                    "token": options.subject
                 },
-                predicate = !oldPredicate ? this.bpgPart(ws(subject.remainder, { required: true })) : {
+                predicate = !options.predicate ? bpgPart.call(this, ws(subject.remainder, { required: true }), options) : {
                     "remainder": data,
-                    "value": oldPredicate.value
+                    "token": options.predicate
                 },
-                newObject = this.bpgPart(ws(predicate.remainder, { required: true })),
-                remainder = ws(newObject.remainder);
+                object = bpgPart.call(this, ws(predicate.remainder, { required: true }), options),
+                remainder = ws(object.remainder);
             triplesContext = triplesContext || [];
             triplesContext.push({
-                "object": newObject.value,
-                "predicate": predicate.value,
-                "subject": subject.value
+                "object": object.token,
+                "predicate": predicate.token,
+                "subject": subject.token
             });
-            buster.log("IN SPARQL, BGP, parsed triple", data);
+            //buster.log("IN SPARQL, BGP, parsed triple", triplesContext);
             if (dotRegex.test(remainder)) {
                 remainder = ws(remainder.substr(1));
             } else if (semicolonRegex.test(remainder)) {
-                return this.basicgraphpattern(remainder.substr(1), triplesContext, subject);
+                remainder = expect(remainder, semicolonRegex);
+                options.subject = subject.token;
+                return this.basicgraphpattern(remainder, triplesContext, options);
             } else if (commaRegex.test(remainder)) {
-                return this.basicgraphpattern(remainder.substr(1), triplesContext, subject, predicate);
+                remainder = expect(remainder, commaRegex);
+                options.subject = subject.token;
+                options.predicate = predicate.token;
+                return this.basicgraphpattern(remainder, triplesContext, options);
             }
             if (variableRegex.test(remainder)) {
-                return this.basicgraphpattern(remainder, triplesContext);
+                return this.basicgraphpattern(remainder, triplesContext, options);
+            }
+            if (options.basicgraphpattern && options.modifiedPattern) {
+                triplesContext = options.basicgraphpattern.triplesContext.concat(triplesContext);
             }
             return {
                 "basicgraphpattern": {
@@ -268,28 +338,13 @@ define([
                 "remainder": remainder
             }
         },
-        "bpgPart": function (data) {
-            //buster.log("BPGPART", data);
-            var value, part;
-            if (variableRegex.test(data)) {
-                part = this.var(data.substr(1));
-                value = part.var;
-            } else if (literalRegex.test(data)) {
-                part = this.literal(data);
-                value = part.literal;
-            } else if (curieRegex.test(data) || lesserRegex.test(data)) {
-                part = this.uri(data);
-                value = part.uri;
-            } else {
-                part = this.literal(data);
-                value = part.literal;
-            }
-            return {
-                "remainder": part.remainder,
-                "value": value
-            };
-        },
-        "expression": function (data) {
+        /**
+         *
+         * @param data
+         * @param [options]
+         * @return {Object}
+         */
+        "expression": function (data, options) {
             var value,
                 arg,
                 expression,
@@ -317,7 +372,7 @@ define([
                     "remainder": data
                 };
             } else if (lesserRegex.test(data)) {
-                irireforfunction = this.uri(data);
+                irireforfunction = this.uri(data, options);
                 return {
                     "expression": {
                         "args": undefined,
@@ -328,7 +383,7 @@ define([
                     "remainder": irireforfunction.remainder
                 };
             } else if (literalRegex.test(data)) {
-                return expressionLiteral.call(this, data);
+                return expressionLiteral.call(this, data, options);
             } else if (bnodeRegex.test(data)) {
                 remainder = expect(data.substr(5), parenthesisLeft);
                 arg = this.expression(remainder);
@@ -353,7 +408,7 @@ define([
             } else if (sumRegex.test(data)) {
                 return expressionAggregate.call(this, "sum", data);
             } else if (stringRegex.test(data)) {
-                return expressionLiteral.call(this, data);
+                return expressionLiteral.call(this, data, options);
             } else {
                 throw new Error("Can't parse expression: " + data);
             }
@@ -395,18 +450,23 @@ define([
         /**
          *
          * @param data
-         * @param [filters]
-         * @param [patterns]
+         * @param filters
+         * @param patterns
+         * @param [options]
          * @return {Object}
          */
-        "groupgraphpattern": function (data, filters, patterns) {
-            filters = filters || [];
-            patterns = patterns || [];
-            var pattern;
-            if (variableRegex.test(data)) {
-                pattern = this.basicgraphpattern(data);
-                patterns.push(pattern.basicgraphpattern);
-                return this.groupgraphpattern(pattern.remainder, filters, patterns);
+        "groupgraphpattern": function (data, filters, patterns, options) {
+            //console.log("IN SPARQL TOKENIZER, groupgraphpattern", patterns);
+            options = options || {};
+            var pattern,
+                triplesContext = [];
+            if (variableRegex.test(data) || lesserRegex.test(data)) {
+                if (options.triplesContext) {
+                    triplesContext = options.triplesContext;
+                }
+                pattern = this.basicgraphpattern(data, triplesContext, options);
+                patterns = [ pattern.basicgraphpattern ];
+                return this.groupgraphpattern(pattern.remainder, filters, patterns, options);
             }
             return {
                 "groupgraphpattern": {
@@ -414,10 +474,16 @@ define([
                     "patterns": patterns,
                     "token": "groupgraphpattern"
                 },
-                "remainder": ""
+                "remainder": data
             };
         },
-        "literal": function (data) {
+        /**
+         *
+         * @param data
+         * @param [options]
+         * @return {Object}
+         */
+        "literal": function (data, options) {
             var lang = null,
                 type = null,
                 value;
@@ -429,9 +495,10 @@ define([
                 if (langRegex.test(data)) {
                     data = data.substr(1);
                     lang = stringRegex.exec(data)[0];
-                } else if (typeRegex.test(data)) {
+                    data = data.substr(lang.length);
+                } else if (datatypeRegex.test(data)) {
                     data = data.substr(2);
-                    type = this.uri(data);
+                    type = this.uri(data, options);
                     data = type.remainder;
                     type = type.uri;
                 }
@@ -451,6 +518,19 @@ define([
                 },
                 "remainder": data
             };
+        },
+        "optional": function (data) {
+            var groupgraphpattern;
+            data = expect(data, optionalRegex);
+            data = ws(data);
+            data = expect(data, curlyBracketLeftRegex);
+            data = ws(data);
+            groupgraphpattern = this.groupgraphpattern(data, [], []);
+            data = expect(groupgraphpattern.remainder, curlyBracketRightRegex);
+            return {
+                "optional": token.optional(groupgraphpattern.groupgraphpattern),
+                "remainder": data
+            }
         },
         "order": function (data, order) {
             if (!order) {
@@ -496,8 +576,11 @@ define([
                 "remainder": data
             }
         },
-        "pattern": function (data) {
-            var bgp = this.groupgraphpattern(data);
+        "pattern": function (data, options) {
+            //console.log("IN SPARQL, PATTERN", options);
+            options = options || {};
+            var bgp = this.groupgraphpattern(data, [], [], options);
+            //buster.log("IN SPARQL, PATTERN", bgp);
             return {
                 "pattern": bgp.groupgraphpattern,
                 "remainder": bgp.remainder
@@ -566,18 +649,33 @@ define([
                 "remainder": data
             };
         },
-        "uri": function (data) {
+        /**
+         *
+         * @param data
+         * @param [options]
+         * @return {Object}
+         */
+        "uri": function (data, options) {
+            //buster.log(options);
             var uri = {
                 "prefix": null,
                 "suffix": null,
                 "token": "uri",
                 "value": null
             },
-                remainder;
+                remainder,
+                value;
             if (lesserRegex.test(data)) {
                 data = expect(data, lesserRegex);
-                uri.value = uriRegex.exec(data)[0];
-                remainder = expect(data.substr(uri.value.length), greaterRegex);
+                if (uriRegex.test(data)) {
+                    uri.value = value = uriRegex.exec(data)[0];
+                } else if (options && options.base) {
+                    value = stringRegex.exec(data)[0];
+                    uri.value = options.base + value;
+                } else {
+                    throw new Error("IN SPARQL TOKENIZER, URI couldn't parse data: " + data);
+                }
+                remainder = expect(data.substr(value.length), greaterRegex);
             } else {
                 uri.prefix = stringRegex.exec(data)[0];
                 remainder = data.substr(uri.prefix.length);

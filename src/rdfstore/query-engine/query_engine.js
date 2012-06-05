@@ -1408,7 +1408,12 @@ define([
                 graph = maybeBlankOid;
             }
             originalQuad = quad;
-            quad = {subject: subject, predicate:predicate, object:object, graph: graph};
+            quad = {
+                subject: subject,
+                predicate: predicate,
+                object: object,
+                graph: graph
+            };
             key = new QuadIndexCommon.NodeKey(quad);
             var result = this.backend.search(key);
             if(!result) {

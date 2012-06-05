@@ -224,11 +224,11 @@ define([
         "Array as objects": {
             "Literal values": function () {
                 Parser({
-                    "http://xmlns.com/foaf/spec/nick": [ "test", "test2" ]
+                    "http://xmlns.com/foaf/spec/nick": [ "test", "0:47" ]
                 }, {}, function (graph) {
                     assert.equals(graph.statements.length, 2);
                     assert.equals(graph.statements[0].object.value, "test");
-                    assert.equals(graph.statements[1].object.value, "test2");
+                    assert.equals(graph.statements[1].object.value, "0:47");
                 });
             },
             "Complex values": function () {

@@ -188,7 +188,7 @@ define([
             } else {
                 return {
                     remainder: data,
-                    literal: Dictionary.Literal('"' + str.replace(/"/g, '\\"') + '"')
+                    literal: Dictionary.Literal(str)
                 };
             }
         }
@@ -259,7 +259,7 @@ define([
     }
     function parse(data, opts) {
         var parsed = {},
-            graph = Dictionary.Formula();
+            graph = Dictionary.Formula(opts.graph);
         opts = opts || {};
         opts.namespaces = {};
         opts.base = opts.base || URI.base();
