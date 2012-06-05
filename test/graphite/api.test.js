@@ -189,6 +189,18 @@ define([
                     assert.equals(size, 2);
                 }));
             },
+            "Single call, loading query": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .load("http://localhost:8088/json-ld/people/arne.jsonld")
+                    .load("http://localhost:8088/sparql/api.test.rq", {
+                        callback: spy,
+                        type: "query"
+                    })
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 2);
+                }));
+            },
             "Multiple calls": function (done) {
                 this.api
                     .load("http://localhost:8088/json-ld/people/arne.jsonld")
