@@ -6,6 +6,7 @@ if (typeof module === "object" && typeof require === "function") {
 define([
     "src/graphite/utils"
 ], function (Utils) {
+    "use strict";
     var subJohn = "http://dbpedia.org/resource/John_Lennon",
         preName = "http://xmlns.com/foaf/0.1/name",
         objJohnName = "John Lennon",
@@ -23,7 +24,6 @@ define([
         ];
     buster.testCase("Graphite utils", {
         "Function .any": function () {
-            "use strict";
             var nativeSome = Array.prototype.some;
             Array.prototype.some = null;
             refute(Utils.any([]), 'the empty set');
@@ -38,7 +38,6 @@ define([
             Array.prototype.some = nativeSome;
         },
         "Function .bind": function () {
-            "use strict";
             var context = {name : 'moe'},
                 name,
                 func = function (arg) {
@@ -68,30 +67,36 @@ define([
         },
         "Function .clone": {
             "Cloning an object": function () {
-                "use strict";
                 var objA = { test: 1 },
                     objB = Utils.clone(objA);
                 assert.equals(objA, objB);
                 refute.same(objA, objB);
             },
             "Cloning an array": function () {
-                "use strict";
                 var arrA = [1, 2, 3],
                     arrB = Utils.clone(arrA);
                 assert.equals(arrA, arrB);
                 refute.same(arrA, arrB);
             },
             "Cloning a string": function () {
-                "use strict";
                 var strA = "test",
                     strB = Utils.clone(strA);
                 assert.equals(strA, strB);
                 assert.same(strA, strB);
+            },
+            "Clones deep": function () {
+                var objA = {
+                        A: {
+                            A1: "test"
+                        }
+                    },
+                    objB = Utils.clone(objA);
+                assert.equals(objA.A, objB.A);
+                refute.same(objA.A, objB.A);
             }
         },
         "Function .create": {
             "On object with init": function () {
-                "use strict";
                 var obj = {
                         anArray: [],
                         init: function (str) {
@@ -107,7 +112,6 @@ define([
                 refute.equals(a, b);
             },
             "On object without init": function () {
-                "use strict";
                 var obj = {
                         anArray: [],
                         doSomething: function (str) {
@@ -120,7 +124,6 @@ define([
                 refute.equals(a, b);
             },
             "On functions": function () {
-                "use strict";
                 var func = function (str) {
                         this.str = str;
                         return this;
@@ -199,7 +202,6 @@ define([
             assert.equals(uri, "<http://e.org/a>");
         },
         "Function .difference": function () {
-            "use strict";
             var result = Utils.difference([1, 2, 3], [2, 30, 40]);
             assert.equals(result.join(' '), '1 3', 'takes the difference of two arrays');
             result = Utils.difference([1, 2, 3, 4], [2, 30, 40], [1, 11, 111]);
@@ -207,7 +209,6 @@ define([
         },
         "Function .each": {
             "An array": function () {
-                "use strict";
                 var count = 1;
                 Utils.each([1, 2, 3], function (num) {
                     assert.equals(num, count);
@@ -215,7 +216,6 @@ define([
                 });
             },
             "An object": function () {
-                "use strict";
                 var count = 1,
                     numbers = ["one", "two", "three"];
                 Utils.each({ one: 1, two: 2, three: 3 }, function (num, key) {
@@ -227,7 +227,6 @@ define([
         },
         "Function .extend": {
             "No conflicting properties":  function () {
-                "use strict";
                 var obj = {
                     test1: 1
                 };
@@ -240,7 +239,6 @@ define([
                 });
             },
             "Conflicting properties": function () {
-                "use strict";
                 var obj = {
                     test1: 1
                 };
@@ -253,7 +251,6 @@ define([
             }
         },
         "Function .extract": function () {
-            "use strict";
             var map = {
                     "test1": 1,
                     "test2": 2
@@ -274,12 +271,10 @@ define([
             assert.equals(function3Map, ["b", "d", "c"]);
         },
         "Function .filter": function () {
-            "use strict";
             var evens = Utils.filter([1, 2, 3, 4, 5, 6], function (num) { return num % 2 === 0; });
             assert.equals(evens.join(', '), '2, 4, 6', 'aliased as "filter"');
         },
         "Function .flatten": function () {
-            "use strict";
             var list = [1, [2], [3, [[[4]]]]],
                 result = (function () { return Utils.flatten(arguments); }(1, [2], [3, [[[4]]]]));
             assert.equals(JSON.stringify(Utils.flatten(list)), '[1,2,3,4]', 'can flatten nested arrays');
@@ -303,13 +298,11 @@ define([
             assert.equals(triples, triple2);
         },
         "Function .indexOf": function () {
-            "use strict";
             var arr = [1, 2, 3],
                 index = Utils.indexOf(arr, 2);
             assert.equals(index, 1);
         },
         "Function .isBoolean": function () {
-            "use strict";
             assert(Utils.isBoolean(true));
             assert(Utils.isBoolean(false));
             refute(Utils.isBoolean("true"));
@@ -318,21 +311,18 @@ define([
             refute(Utils.isBoolean(0));
         },
         "Function .isDouble": function () {
-            "use strict";
             assert(Utils.isDouble(5));
             assert(Utils.isDouble(5.3));
             assert(Utils.isDouble(5.3e0));
             refute(Utils.isDouble("test"));
         },
         "Function .isInteger": function () {
-            "use strict";
             assert(Utils.isInteger(5));
             refute(Utils.isInteger(5.3));
             refute(Utils.isInteger(5.3e0));
             refute(Utils.isInteger("test"));
         },
         "Function .isNaN": function () {
-            "use strict";
             assert(Utils.isNaN(NaN));
             refute(Utils.isNaN(1));
         },
@@ -365,7 +355,6 @@ define([
             assert.equals(Utils.mapFunctionArgs(function2, response), [2, 1]);
         },
         "Function .parseUri": function () {
-            "use strict";
             var uri = Utils.parseUri("http://usr:pwd@www.test.com:81/" +
                 "dir/dir.2/index.htm?q1=0&&test1&test2=value#top");
             assert.equals(uri.anchor, "top");
@@ -387,7 +376,6 @@ define([
             assert.equals(uri.userInfo, "usr:pwd");
         },
         "Function .reduce": function () {
-            "use strict";
             var sum = Utils.reduce([1, 2, 3], function (sum, num) { return sum + num; }, 0),
                 context = {multiplier : 3},
                 ifnull,
@@ -410,12 +398,10 @@ define([
             assert.equals(Utils.reduce(sparseArray, function (a, b) { return a - b; }), 25, 'initially-sparse arrays with no memo');
         },
         "Function .size": function () {
-            "use strict";
             var size = Utils.size({ "one": 1, "two": 2, "three": 3 });
             assert.equals(size, 3);
         },
         "Function .trim": function () {
-            "use strict";
             assert.equals(Utils.trim(123), "123", "Non string");
             assert.equals(" foo".trim(), "foo");
             assert.equals("foo ".trim(), "foo");
@@ -437,7 +423,6 @@ define([
             assert.equals(result.join(', '), '1, 2, 3, 4', 'works on an arguments object');
         },
         "Function .without": function () {
-            "use strict";
             var list = [1, 2, 1, 0, 3, 1, 4],
                 result = (function () { return Utils.without(arguments, 0, 1); }(1, 2, 1, 0, 3, 1, 4));
             assert.equals(Utils.without(list, 0, 1).join(', '), '2, 3, 4', 'can remove all instances of an object');

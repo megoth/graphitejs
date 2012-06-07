@@ -295,7 +295,7 @@ define([
         } else {
             return g;
         }
-    };
+    }
     /**
      * Collects basic triple pattern in a complex SPARQL AQT
      */
@@ -386,7 +386,7 @@ define([
             });
         });
         return triples;
-    };
+    }
     function _bindFilter(filterExpr, bindings) {
         var that = this;
         if(filterExpr.expressionType != null) {
@@ -434,7 +434,7 @@ define([
             }
         }
         return filterExpr;
-    };
+    }
     /**
      * Replaces terms in an AQT
      */
@@ -497,9 +497,8 @@ define([
             });
         });
         return triples;
-    };
+    }
     function _replaceFilter(filterExpr, from, to, ns) {
-        var that = this;
         if(filterExpr.expressionType != null) {
             var expressionType = filterExpr.expressionType;
             if(expressionType == 'relationalexpression') {
@@ -548,7 +547,7 @@ define([
             }
         }
         return filterExpr;
-    };
+    }
     AbstractQueryTree.AbstractQueryTree.prototype.treeWithUnion = function(aqt) {
         if(aqt == null)
             return false;

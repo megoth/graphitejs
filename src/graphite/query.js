@@ -22,21 +22,36 @@ define([
     };
     query.prototype = {
         init: function (queryString) {
+            var unitindex = 0;
             this.options = {
                 basicgraphpatternindex: 0,
                 modifiedPattern: false,
-                unitindex: 0
+                unitindex: unitindex
             };
             if(queryString) {
+                console.log("IN QUERY, INIT, WITH", queryString);
                 this.syntaxTree = SparqlParser.parser.parse(queryString);
-                this.options.unitindex = findUnit(this.syntaxTree);
-                this.options.basicgraphpatternindex = findBGP(this.syntaxTree, this.options.unitindex);
-                this.options.modifiedPattern = true;
+                unitindex = findUnit(this.syntaxTree);
+                this.options = Utils.extend({}, {
+                    basicgraphpatternindex: findBGP(this.syntaxTree, unitindex),
+                    modifiedPattern: true,
+                    unitindex: unitindex,
+                    variables: Utils.map(this.syntaxTree.units[unitindex].projection, function (p) {
+                        console.log("TEST", p);
+                        if (p.kind === "*") {
+                            return p.kind;
+                        } else if (p.kind === "aliased") {
+                            return p.alias.value;
+                        }
+                        return p.value.value;
+                    })
+                });
             } else {
+                console.log("IN QUERY, INIT, WITHOUT");
                 this.syntaxTree = SparqlParser.parser.parse("SELECT * WHERE { ?subject ?predicate ?object }");
             }
+            console.log("IN QUERY, INIT", this.syntaxTree.units[unitindex].pattern);
             this.prefixes = {};
-            this.patterns = {};
             return this;
         },
         base: function (value) {
@@ -46,10 +61,15 @@ define([
             return this;
         },
         filter: function (filter) {
-            var token = Tokenizer.filter("FILTER({0})".format(filter)).filter,
+            var modifiedPattern = this.options.modifiedPattern;
+            this.where("FILTER(" + filter + ")");
+            this.options.modifiedPattern = modifiedPattern;
+            return this;
+            /*
+            var token = Tokenizer.where("WHERE {FILTER({0})}".format(filter), options).filter,
                 pattern = this.syntaxTree.units[0].pattern;
             pattern.filters = pattern.filters ? pattern.filters.concat(token) : [ token ];
-            return this;
+            */
         },
         group: function (group) {
             group = Tokenizer.group(group).group;
@@ -76,15 +96,18 @@ define([
             return this;
         },
         where: function (pattern) {
-            if (this.options.modifiedPattern && this.options.basicgraphpatternindex !== null) {
-                this.options.triplesContext = this.syntaxTree.units[this.options.unitindex]
-                    .pattern.patterns[this.options.basicgraphpatternindex]
-                    .triplesContext;
-                //buster.log("IN QUERY, WHERE OPTIONS", this.options);
+            var options = Utils.clone(this.options);
+            options.pattern = this.syntaxTree.units[options.unitindex].pattern
+            console.log("IN QUERY, WHERE", pattern, options);
+            if (options.modifiedPattern && options.basicgraphpatternindex !== null) {
+                if (options.pattern.patterns) {
+                    options.triplesContext = options.pattern
+                        .patterns[options.basicgraphpatternindex].triplesContext;
+                }
             }
-            this.syntaxTree.units[this.options.unitindex].pattern = Tokenizer.pattern(pattern, this.options).pattern;
+            pattern = "WHERE {" + pattern + "}";
+            this.syntaxTree.units[options.unitindex].pattern = Tokenizer.where(pattern, options).where;
             this.options.modifiedPattern = true;
-            //buster.log("IN QUERY, WHERE", this.syntaxTree);
             return this;
         }
     };

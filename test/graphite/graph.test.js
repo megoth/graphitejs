@@ -251,10 +251,10 @@ define([
                     query2 = When.defer();
                 Graph(this.graph2).then(function (g) {
                     g.execute(query, function (o, p, s) {
-                        query1.resolve(arguments);
+                        query1.resolve([ o, p, s ]);
                     });
                     g.execute(query, function (p, o) {
-                        query2.resolve(arguments);
+                        query2.resolve([ p, o ]);
                     });
                 });
                 When.all([ query1, query2 ]).then(done(function (results) {
@@ -299,7 +299,7 @@ define([
                             size3.resolve(size);
                         });
                     });
-                })
+                });
                 When.all([ size1, size2, size3 ]).then(done(function (sizes) {
                     buster.log("SIZES", sizes);
                     assert.equals(sizes[0], 0);

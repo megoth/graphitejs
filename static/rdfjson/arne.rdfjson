@@ -1,6 +1,6 @@
 {
   "http://example.com/people/arne": {
-    "http://xmlns.com/foaf/spec/name": [{
+    "http://xmlns.com/foaf/0.1/name": [{
         "type": "literal",
         "value": "Arne Hassel"
     }]

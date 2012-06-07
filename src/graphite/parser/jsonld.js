@@ -4,6 +4,9 @@ define([
     "../utils",
     "../when"
 ], function (Loader, Dictionary, Utils, When) {
+    var curieRegex = /^[a-zA-Z0-9]+:[a-zA-Z0-9]+/,
+        literalStringRegex = /^[a-zA-Z0-9\s:_#\*\$&\-]*/,
+        uriRegex = /^http:\/\/[a-zA-Z0-9#_\-.\/]+/;
     /*
      * The JSON-LD parser object
      * 
@@ -196,7 +199,7 @@ define([
                 predicate = node.getPredicate(triple[1]);
                 predicate = Dictionary.Symbol(predicate);
                 object = node.getObject(triple[2], predicate);
-                //console.log("JSONLD, ADD TRIPLE, OBJECT", object);
+                console.log("JSONLD, ADD TRIPLE, OBJECT", object);
                 if(object.type === "bnode") {
                     object = node.getBlankNode(object.value);
                 } else if (object.type === "uri") {
@@ -250,12 +253,12 @@ define([
         /**
          * Get the expanded version of the object
          *
-         * @param {Object} object The object to be expanded
+         * @param {Object|String} object The object to be expanded
          * @param {String} predicate Sometimes the predicate affects the object
          * @returns {string} The expanded object
          */
         getObject: function (object, predicate) {
-            var value;
+            var value, tmp;
             if(Utils.isInteger(object)) {
                 object = {
                     value: object,
@@ -280,7 +283,17 @@ define([
                     type: "bnode"
                 };
             } else if(Utils.isString(object)) {
-                value = this.getUri(object);
+                value = literalStringRegex.exec(object)[0];
+                if (uriRegex.test(value)) {
+                    value = this.getUri(value);
+                } else if (curieRegex.test(value)) {
+                    tmp = this.getUri(value);
+                    if (uriRegex.test(tmp)) {
+                        value = tmp;
+                    }
+                } else {
+                    value = object;
+                }
                 object = {
                     value: value,
                     type: Utils.isUri(value) ? "uri" : "literal"

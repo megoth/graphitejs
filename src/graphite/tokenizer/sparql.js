@@ -39,6 +39,7 @@ define([
         typeRegex = /^a/,
         uriRegex = /^http:\/\/[a-zA-Z0-9#_\-.\/]+/,
         variableRegex = /^\?/,
+        whereRegex = /^(WHERE|where)/,
         wsRegex = /^(\u0009|\u000A|\u000D|\u0020|#([^\u000A\u000D])*)+/,
         token = {
             "base": function (value) {
@@ -250,6 +251,54 @@ define([
             "remainder": data
         };
     }
+    function whereBGP(triplesContext, pattern, options) {
+        switch (pattern.kind) {
+            case "BGP":
+                console.log("IN SPARQL, WHERE BGP BGP");
+                return {
+                    "kind": "BGP",
+                    "value": pattern.value.concat(triplesContext)
+                };
+            case "EMPTY_PATTERN":
+                console.log("IN SPARQL, WHERE BGP EMPTY_PATTERN");
+                return {
+                    "kind": "BGP",
+                    "value": triplesContext
+                };
+            case "FILTER":
+                console.log("IN SPARQL, WHERE BGP FILTER");
+                pattern.value = whereBGP(triplesContext, pattern.value, options);
+                return pattern;
+            case "JOIN":
+                console.log("IN SPARQL, WHERE BGP JOIN");
+                pattern.rvalue.value = pattern.rvalue.value.concat(triplesContext);
+                return pattern;
+            case "LEFT_JOIN":
+                console.log("IN SPARQL, WHERE BGP LEFT_JOIN");
+                return {
+                    "kind": "JOIN",
+                    "lvalue": pattern,
+                    "rvalue": {
+                        "kind": "BGP",
+                        "value": triplesContext
+                    }
+                };
+            default:
+                throw new Error("NOT SUPPORTED YET");
+        }
+    }
+    function whereFilter(token, pattern) {
+        token = {
+            "filter": true,
+            "kind": "LEFT_JOIN",
+            "lvalue": pattern,
+            "rvalue": {
+                "kind": "BGP",
+                "value": token.optional.value.patterns[0].triplesContext
+            }
+        };
+        return token;
+    }
     function ws(data, opts) {
         opts = opts || {};
         if ((opts.required || false) && !wsRegex.test(data)) {
@@ -304,13 +353,17 @@ define([
                     "token": options.predicate
                 },
                 object = bpgPart.call(this, ws(predicate.remainder, { required: true }), options),
-                remainder = ws(object.remainder);
+                remainder = ws(object.remainder),
+                value = {
+                    "object": object.token,
+                    "predicate": predicate.token,
+                    "subject": subject.token
+                };
+            if (options.variables) {
+                value.variables = options.variables;
+            }
             triplesContext = triplesContext || [];
-            triplesContext.push({
-                "object": object.token,
-                "predicate": predicate.token,
-                "subject": subject.token
-            });
+            triplesContext.push(value);
             //buster.log("IN SPARQL, BGP, parsed triple", triplesContext);
             if (dotRegex.test(remainder)) {
                 remainder = ws(remainder.substr(1));
@@ -413,12 +466,19 @@ define([
                 throw new Error("Can't parse expression: " + data);
             }
         },
-        "filter": function (data) {
+        /**
+         *
+         * @param data
+         * @param [options]
+         * @return {Object}
+         */
+        "filter": function (data, options) {
             var value;
             data = expect(data, filterRegex);
             data = expect(data, parenthesisLeft);
-            value = this.expression(data);
+            value = this.expression(data, options);
             data = expect(value.remainder, parenthesisRight);
+            data = ws(data);
             return {
                 "filter": {
                     "token": "filter",
@@ -458,7 +518,8 @@ define([
         "groupgraphpattern": function (data, filters, patterns, options) {
             //console.log("IN SPARQL TOKENIZER, groupgraphpattern", patterns);
             options = options || {};
-            var pattern,
+            var filter,
+                pattern,
                 triplesContext = [];
             if (variableRegex.test(data) || lesserRegex.test(data)) {
                 if (options.triplesContext) {
@@ -466,7 +527,13 @@ define([
                 }
                 pattern = this.basicgraphpattern(data, triplesContext, options);
                 patterns = [ pattern.basicgraphpattern ];
-                return this.groupgraphpattern(pattern.remainder, filters, patterns, options);
+                data = ws(pattern.remainder);
+                return this.groupgraphpattern(data, filters, patterns, options);
+            } else if (filterRegex.test(data)) {
+                filter = this.filter(data, options);
+                data = ws(filter.remainder);
+                filters.push(filter.filter);
+                return this.groupgraphpattern(data, filters, patterns, options);
             }
             return {
                 "groupgraphpattern": {
@@ -519,14 +586,21 @@ define([
                 "remainder": data
             };
         },
-        "optional": function (data) {
+        /**
+         *
+         * @param data
+         * @param [options]
+         * @return {Object}
+         */
+        "optional": function (data, options) {
             var groupgraphpattern;
             data = expect(data, optionalRegex);
             data = ws(data);
             data = expect(data, curlyBracketLeftRegex);
             data = ws(data);
-            groupgraphpattern = this.groupgraphpattern(data, [], []);
+            groupgraphpattern = this.groupgraphpattern(data, [], [], options);
             data = expect(groupgraphpattern.remainder, curlyBracketRightRegex);
+            data = ws(data);
             return {
                 "optional": token.optional(groupgraphpattern.groupgraphpattern),
                 "remainder": data
@@ -726,6 +800,72 @@ define([
                 };
             }
             throw new Error("Tried to parse something which is not a variable: " + data);
+        },
+        /**
+         *
+         * @param data
+         * @param [options]
+         * @return {Object}
+         */
+        "where": function (data, options) {
+            var pattern, patterns, token, value;
+            data = expect(data, whereRegex);
+            data = ws(data);
+            data = expect(data, curlyBracketLeftRegex);
+            data = ws(data);
+            options = Utils.clone(options);
+            if (options.pattern && options.pattern.token || !options.pattern) {
+                console.log("SIMPLE QUERY", options);
+                patterns = options.pattern ? options.pattern.patterns : [];
+                delete options.variables;
+                token = this.groupgraphpattern(data, [], patterns, options);
+                data = token.remainder;
+                token = token.groupgraphpattern;
+            } else {
+                console.log("COMPLEX QUERY", options);
+                pattern = options.pattern;
+                if (variableRegex.test(data) || lesserRegex.test(data)) {
+                    token = this.basicgraphpattern(data, [], options);
+                    data = token.remainder;
+                    value = token.basicgraphpattern.triplesContext;
+                    token = whereBGP(value, pattern, options);
+                } else if (optionalRegex.test(data)) {
+                    token = this.optional(data, options);
+                    data = token.remainder;
+                    if (pattern.kind === "FILTER") {
+                        pattern.value = whereFilter(token, pattern.value);
+                        token = pattern;
+                    } else {
+                        token = whereFilter(token, pattern);
+                    }
+                } else if (filterRegex.test(data)) {
+                    value = this.filter(data, options);
+                    data = value.remainder;
+                    if (pattern.kind === "FILTER") {
+                        token = pattern;
+                        token.filter.push(value.filter);
+                    } else {
+                        token = {
+                            "filter": [ value.filter ],
+                            "kind": "FILTER",
+                            "value": pattern
+                        };
+                    }
+                } else {
+                    console.log("SOMETHING WENT WRONG...");
+                    throw new Error("NOT SUPPORTED YET");
+                }
+                if (!curlyBracketRightRegex.test(data)) {
+                    console.log("SOMETHING WENT WRONG...");
+                    throw new Error("NOT SUPPORTED YET");
+                }
+            }
+            data = expect(data, curlyBracketRightRegex);
+            data = ws(data);
+            return {
+                "remainder": data,
+                "where": token
+            }
         }
     };
 });

@@ -6,6 +6,7 @@ define([
     "./utils",
     "./when"
 ], function (Dictionary, Graph, Loader, Query, Utils, When) {
+    var sparqlRegex = /^(#|ADD|ASK|BASE|CONSTRUCT|COPY|CLEAR|CREATE|DESCRIBE|DELETE|DROP|INSERT|LOAD|MOVE|PREFIX|SELECT|WITH)/;
     function cleanArg(str) {
         return str.replace(/"/g, '\\"');
     }
@@ -15,7 +16,7 @@ define([
             args.push(cleanArg);
             queryString = String.prototype.format.apply(queryString, args);
         }
-        //buster.log("IN API, FORMAT QUERY STRING", queryString);
+        //console.debug("IN API, FORMAT QUERY STRING", queryString, args);
         return queryString;
     }
     var api = function () {
@@ -23,17 +24,13 @@ define([
     };
     api.prototype = {
         init: function () {
-            var that = this;
-            var graphInit = When.defer();
-            this.promises = {
-                "graph": [ graphInit ],
-                "query": []
-            };
+            var that = this,
+                graphInit = When.defer();
+            this.promises = [ graphInit ];
             Graph().then(function (graph) {
                 that.graph = graph;
-                graphInit.resolve(true);
+                graphInit.resolve(Query());
             });
-            this.queryController = Query();
         },
         /**
          *
@@ -45,51 +42,84 @@ define([
          */
         addStatement: function (subject, predicate, object, options) {
             var query = "INSERT DATA {{0}}".format(Dictionary.createStatement({
-                subject: subject,
-                predicate: predicate,
-                object: object
-            }));
-            this.queryController = Query(query);
+                    subject: subject,
+                    predicate: predicate,
+                    object: object
+                })),
+                promise = When.defer();
+            When.all(this.promises).then(function () {
+                promise.resolve(Query(query));
+            });
+            this.promises.push(promise);
             return this.execute(options);
         },
         base: function (uri) {
-            var that = this;
-            When.all(this.promises["query"]).then(function () {
-                that.queryController.base(uri);
+            var promise = When.defer(),
+                query;
+            When.all(this.promises).then(function () {
+                //console.debug("IN API, BASE", uri);
+                query = Utils.last(arguments[0]);
+                query.base(uri);
+                promise.resolve(query);
             });
+            this.promises.push(promise);
             return this;
         },
         each: function (callback) {
-            //console.log("IN API, EACH", this.queryController.retrieveTree());
-            return this.execute({
-                callback: callback
+            //console.log("IN API, EACH BEGINNING");
+            this.execute({
+                callback: callback,
+                onExecuted: function (promise, query) {
+                    //console.log("IN API, EACH CALLBACK");
+                    promise.resolve(query);
+                }
             });
+            return this;
         },
         /**
          *
+         * @param [queryString]
          * @param [options]
          * @return {*}
          */
-        execute: function (options) {
-            options = options || {};
+        execute: function (queryString, options) {
+            if (Utils.isString(queryString)) {
+                this.query(queryString);
+            } else {
+                options = queryString;
+            }
+            options = Utils.extend({}, {
+                onExecuted: function (promise) {
+                    promise.resolve(Query());
+                }
+            }, options);
             var promise = When.defer(),
                 that = this,
-                syntaxTree = this.queryController.retrieveTree();
-            this.queryController = Query();
-            When.all(this.promises["graph"]).then(function () {
+                query,
+                syntaxTree;
+            When.all(this.promises).then(function () {
+                //buster.log("IN API, EXECUTE, #promises", that.promises.length);
+                query = Utils.last(arguments[0]);
+                syntaxTree = query.retrieveTree();
                 that.graph.execute(syntaxTree, options.callback).then(function (graph) {
                     that.graph = graph;
-                    promise.resolve(graph);
+                    options.onExecuted.call(that, promise, query);
+                    //buster.log("IN API, EXECUTE AFTER onExecuted");
                 });
             });
-            this.promises["graph"].push(promise);
+            this.promises.push(promise);
             return this;
         },
         filter: function (filter) {
-            var that = this;
-            When.all(this.promises["query"]).then(function () {
-                that.queryController.filter(filter);
+            var promise = When.defer(),
+                query;
+            filter = format(filter, arguments, 1);
+            When.all(this.promises).then(function () {
+                query = Utils.last(arguments[0]);
+                query.filter(filter);
+                promise.resolve(query);
             });
+            this.promises.push(promise);
             return this;
         },
         listStatements: function (options, callback) {
@@ -99,98 +129,141 @@ define([
             }
             var subject = options.subject ? Dictionary.createSubject(options.subject).toNT() : "?subject",
                 predicate = options.predicate ? Dictionary.createPredicate(options.predicate).toNT() : "?predicate",
-                object = options.object ? Dictionary.createObject(options.object).toNT() : "?object";
-            this.queryController = Query("SELECT * WHERE { {0} {1} {2} }".format(subject, predicate, object));
+                object = options.object ? Dictionary.createObject(options.object).toNT() : "?object",
+                promise = When.defer(),
+                query;
+            When.all(this.promises).then(function () {
+                query = Query("SELECT * WHERE { {0} {1} {2} }".format(subject, predicate, object));
+                promise.resolve(query);
+            });
+            this.promises.push(promise);
             return this.each(callback);
         },
         /**
          * @param uri
          */
         load: function (uri, options) {
-            var that = this,
-                query;
-            options = options || {};
-            if (options.type === "query") {
-                query = When.defer();
-                When.all(this.promises["query"]).then(function () {
-                    Loader({
-                        uri: uri,
-                        success: function (err, data) {
-                            that.queryController = Query(data);
-                            query.resolve(true);
-                        }
-                    });
-                });
-                this.promises["query"].push(query);
-            } else {
-                this.queryController = Query("LOAD <{0}>".format(uri));
-            }
+            var promise = When.defer();
+            When.all(this.promises).then(function () {
+                promise.resolve(Query("LOAD <{0}>".format(uri)));
+            });
+            this.promises.push(promise);
             return this.execute(options);
         },
         optional: function (optional) {
-            var that = this;
+            var promise = When.defer(),
+                query;
             optional = format(optional, arguments, 1);
-            When.all(this.promises["query"]).then(function () {
-                that.queryController.optional(optional);
-                //buster.log("IN API, OPTIONAL", this.queryController.retrieveTree());
+            When.all(this.promises).then(function () {
+                query = Utils.last(arguments[0]);
+                query.optional(optional);
+                promise.resolve(query);
             });
+            this.promises.push(promise);
             return this;
         },
         prefix: function (prefix, local) {
-            var that = this;
-            When.all(this.promises["query"]).then(function () {
-                that.queryController.prefix(prefix, local);
+            var promise = When.defer(),
+                query;
+            When.all(this.promises).then(function () {
+                query = Utils.last(arguments[0]);
+                query.prefix(prefix, local);
+                promise.resolve(query);
             });
+            this.promises.push(promise);
             return this;
         },
         query: function (queryString) {
-            var that = this;
-            queryString = format(queryString, arguments, 1);
-            When.all(this.promises["query"]).then(function () {
-                that.queryController = Query(queryString);
+            var promise = When.defer(),
+                query,
+                args = arguments;
+            When.all(this.promises).then(function () {
+                if (sparqlRegex.test(queryString)) {
+                    console.log("IN API, QUERY LOAD SPARQL");
+                    queryString = format(queryString, args, 1);
+                    console.log("IN API, QUERY", queryString);
+                    query = Query(queryString);
+                    promise.resolve(query);
+                } else {
+                    console.log("IN API, QUERY LOAD URL");
+                    Loader({
+                        uri: queryString,
+                        success: function (err, data) {
+                            console.log("IN API, QUERY URL LOADED");
+                            queryString = format(data, args, 1);
+                            query = Query(queryString);
+                            promise.resolve(query);
+                        }
+                    });
+                }
+                //console.log("IN API, QUERY", queryString);
             });
+            this.promises.push(promise);
             return this;
         },
         removeStatement: function (subject, predicate, object) {
-            this.queryController = Query("DELETE DATA { {0} }".format(Dictionary.createStatement({
-                subject: subject,
-                predicate: predicate,
-                object: object
-            })));
+            var promise = When.defer(),
+                query;
+            When.all(this.promises).then(function () {
+                query = Query("DELETE DATA { {0} }".format(Dictionary.createStatement({
+                    subject: subject,
+                    predicate: predicate,
+                    object: object
+                })));
+                promise.resolve(query);
+            });
+            this.promises.push(promise);
             return this.execute();
         },
         select: function (projection) {
-            var that = this;
-            When.all(this.promises["query"]).then(function () {
-                that.queryController.select(projection);
+            var promise = When.defer(),
+                query;
+            When.all(this.promises).then(function () {
+                query = Utils.last(arguments[0]);
+                query.select(projection);
+                promise.resolve(query);
             });
+            this.promises.push(promise);
             return this;
         },
         size: function (callback) {
-            this.execute();
             var that = this,
-                promise = When.defer();
-            When.all(this.promises["graph"]).then(function () {
-                that.graph.size(callback).then(function (size) {
-                    //buster.log("IN API, SIZE", size);
-                    promise.resolve(size);
+                promise = When.defer(),
+                query;
+            When.all(this.promises).then(function () {
+                query = Utils.last(arguments[0]);
+                that.graph.size(function (size) {
+                    callback(size);
+                    promise.resolve(query);
                 });
             });
-            this.promises["graph"].push(promise);
+            this.promises.push(promise);
             return this;
         },
         then: function (callback) {
-            When.all(this.promises["graph"]).then(function (results) {
-                callback(Utils.last(results));
+            var that = this,
+                promise = When.defer(),
+                query;
+            //buster.log("IN API, THEN");
+            When.all(this.promises).then(function () {
+                query = Utils.last(arguments[0]);
+                callback(that.graph);
+                promise.resolve(query);
             });
+            this.promises.push(promise);
             return this;
         },
         where: function (pattern) {
-            var that = this;
+            var promise = When.defer(),
+                query;
             pattern = format(pattern, arguments, 1);
-            When.all(this.promises["query"]).then(function () {
-                that.queryController.where(pattern);
+            When.all(this.promises).then(function () {
+                query = Utils.last(arguments[0]);
+                console.log("IN API, WHERE", query);
+                query.where(pattern);
+                promise.resolve(query)
             });
+            this.promises.push(promise);
             return this;
         }
     };

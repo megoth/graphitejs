@@ -69,11 +69,16 @@ define([
         if (!Utils.isFunction(func)) throw new TypeError;
         args = slice.call(arguments, 2);
         return bound = function () {
-            if (!(this instanceof bound)) return func.apply(context, args.concat(slice.call(arguments)));
+            var ctor = {};
+            if (!(this instanceof bound)) {
+                return func.apply(context, args.concat(slice.call(arguments)));
+            }
             ctor.prototype = func.prototype;
             var self = new ctor;
             var result = func.apply(self, args.concat(slice.call(arguments)));
-            if (Object(result) === result) return result;
+            if (Object(result) === result) {
+                return result;
+            }
             return self;
         };
     };
@@ -82,8 +87,17 @@ define([
      * Taken from underscore.js
      */
     Utils.clone = function (obj) {
-        if (!Utils.isObject(obj)) return obj;
-        return Utils.isArray(obj) ? obj.slice() : Utils.extend({}, obj);
+        if (!Utils.isObject(obj)) {
+            return obj;
+        }
+        if (Utils.isArray(obj)) {
+            return obj.slice();
+        }
+        var objB = {};
+        Utils.each(obj, function (value, key) {
+            objB[key] = Utils.clone(value);
+        });
+        return objB;
     };
     /**
      * Create an instance of a given object

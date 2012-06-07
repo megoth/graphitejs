@@ -161,7 +161,7 @@ define([
             );
         },
         ".where": {
-            "Single call": {
+            "Single call, with no pattern": {
                 "Variables": function () {
                     this.query.where("?subject ?predicate ?object");
                     assert.equals(
@@ -203,7 +203,7 @@ define([
                     );
                 }
             },
-            "Multiple call": {
+            "Multiple call, with no pattern": {
                 "Different patterns": function () {
                     this.query
                         .where("?subject foaf:name ?object")
@@ -217,14 +217,46 @@ define([
                             "}")
                     );
                 }
+            },
+            "//Single call, with pattern": {
+                //Haven't understood the mechanics of this yet
+                setUp: function () {
+                    this.query = Query("SELECT ?a WHERE { ?a ?b ?c }");
+                    this.query.syntaxTree.units[0].pattern = {
+                        "kind": "BGP",
+                        "value": [{
+                            "object": {
+                                "token": "var",
+                                "value": "c"
+                            },
+                            "predicate": {
+                                "token": "var",
+                                "value": "b"
+                            },
+                            "subject": {
+                                "token": "var",
+                                "value": "a"
+                            },
+                            "variables": [ "a" ]
+                        }]
+                    };
+                    this.query.modifiedPattern = true;
+                },
+                "With variables": function () {
+                    this.query.where("?a foaf:name ?name");
+                    buster.log(this.query);
+                }
             }
         },
         "//JUST SOMETHING": function () {
-            var query = parser("SELECT *\n" +
+            var query = parser("PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n" +
+                "SELECT *\n" +
                 "WHERE {\n" +
-                "?subject foaf:name ?object .\n" +
-                'OPTIONAL { ?subject foaf:age "99" }\n' +
-                'OPTIONAL { ?subject foaf:name "Arne" }\n' +
+                "?subject foaf:name ?name .\n" +
+                "?subject foaf:name ?name .\n" +
+                "OPTIONAL { ?subject foaf:age ?age }\n" +
+                "?subject foaf:name ?name .\n" +
+                'FILTER (?name > "22")' +
                 "}");
             buster.log(query);
         }

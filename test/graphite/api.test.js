@@ -14,8 +14,6 @@ define([
         subTim = "http://dbpedia.org/resource/Tim_B_Lee",
         objTimName = "Tim Berners-Lee",
         objTimHomepage = "http://www.w3.org/People/Berners-Lee/";
-        //uriInteger = "http://www.w3.org/2001/XMLSchema#integer",
-        //preKnows = "http://xmlns.com/foaf/0.1/knows";
     function addStatements (done) {
         this.addStatement(subJohn, preName, objJohnName)
             .addStatement(subJohn, preAge, 42)
@@ -37,8 +35,7 @@ define([
             "Adding a triple, returns the modified object": function (done) {
                 this.api
                     .addStatement(subJohn, preName, objJohnName)
-                    .size()
-                    .then(done(function (size) {
+                    .size(done(function (size) {
                         assert.equals(size, 1);
                     }));
             },
@@ -105,12 +102,23 @@ define([
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
-            "By default returns all triples in a graph": function (done) {
+            "Single call": function (done) {
                 var spy = sinon.spy();
                 this.api
                     .each(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 6);
+                }));
+            },
+            "//Multiple call": function (done) {
+                //Troublesome at the moment...
+                var spy = sinon.spy();
+                this.api
+                    .each(spy)
+                    .then(function () {})
+                    .each(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 12);
                 }));
             }
         },
@@ -121,7 +129,8 @@ define([
             "Single call": function (done) {
                 var spy = sinon.spy();
                 this.api
-                    .filter('?object = "{0}"'.format(objJohnName))
+                    .where("?subject ?predicate ?object")
+                    .filter('?object = "{0}"', objJohnName)
                     .each(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 2);
@@ -130,11 +139,12 @@ define([
             "Multiple calls": function (done) {
                 var spy = sinon.spy();
                 this.api
-                    .filter('?object = "{0}"'.format(objJohnName))
-                    .filter('?subject = <{0}>'.format(subJohn))
+                    .where("?subject ?predicate ?object")
+                    .filter('?object = "{0}"', objJohnName)
+                    .filter("?subject = <{0}>", subJohn)
                     .each(spy)
                     .then(done(function () {
-                    assert.equals(spy.callCount, 1);
+                    assert.equals(spy.callCount, 2);
                 }));
             }
         },
@@ -187,18 +197,6 @@ define([
                     .load("http://localhost:8088/json-ld/simple.jsonld")
                     .size(done(function(size) {
                     assert.equals(size, 2);
-                }));
-            },
-            "Single call, loading query": function (done) {
-                var spy = sinon.spy();
-                this.api
-                    .load("http://localhost:8088/json-ld/people/arne.jsonld")
-                    .load("http://localhost:8088/sparql/api.test.rq", {
-                        callback: spy,
-                        type: "query"
-                    })
-                    .then(done(function () {
-                    assert.equals(spy.callCount, 2);
                 }));
             },
             "Multiple calls": function (done) {
@@ -261,12 +259,22 @@ define([
             }
         },
         ".query": {
+            "Loading query": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .load("http://localhost:8088/json-ld/people/arne.jsonld")
+                    .query("http://localhost:8088/sparql/api.test.rq")
+                    .each(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 1);
+                }));
+            },
             "LOAD": {
                 "JSON-LD": function (done) {
                     this.api
                         .query("LOAD <http://localhost:8088/json-ld/people/arne.jsonld>")
-                        .size()
-                        .then(done(function (size) {
+                        .execute()
+                        .size(done(function (size) {
                         assert.equals(size, 2);
                     }))
                 }
@@ -278,14 +286,8 @@ define([
                 "called correctly": function (done) {
                     var spy = sinon.spy();
                     this.api
-                        .query("SELECT * WHERE { ?s ?p ?o }")
-                        .each(function (s, p, o) {
-                            buster.log("OBJECT", o);
-                            assert.defined(s);
-                            assert.defined(p);
-                            assert.defined(o);
-                            spy();
-                        })
+                        .query("SELECT ?s WHERE { ?s ?p ?o }")
+                        .each(spy)
                         .then(done(function () {
                         assert.equals(spy.callCount, 6);
                     }));
@@ -434,14 +436,6 @@ define([
             }
         },
         ".size": {
-            "With .then": function (done) {
-                this.api
-                    .size()
-                    .then(done(function (size) {
-                    buster.log("IN API TEST, SIZE", size);
-                    assert.equals(size, 0);
-                }));
-            },
             "With callback": function (done) {
                 this.api
                     .size(done(function (size) {

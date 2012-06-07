@@ -10,11 +10,11 @@ define([
     "use strict";
     function bindVar (vars) {
         return Utils.map(vars, function (v) {
-            if (v.hasOwnProperty("value")) {
+            if (v && v.hasOwnProperty("value")) {
                 return v.value;
             }
-            throw new Error("IN GRAPH, variable has no value: " + v);
-        })
+            return null;
+        });
     }
     function getExecuteFunction(queryKind) {
         //buster.log("IN GRAPH, GET EXECUTE FUNCTION", queryKind);
@@ -94,6 +94,7 @@ define([
             },
             "select": function (promise, options) {
                 return function (success, results) {
+                    //console.log("IN GRAPH, SELECT QUERY", results.length, results);
                     if (results.length === 0) {
                         console.debug("The query didn't return any results");
                     }
@@ -102,8 +103,12 @@ define([
                     if (options.callback && options.callback.length > 0) {
                         vars = Utils.extractArgumentMap(options.callback);
                         Utils.each(results, function (args) {
-                            //console.log("IN GRAPH, SELECT", args, vars);
-                            lvars = Utils.mapArgs(vars, args);
+                            try {
+                                lvars = Utils.mapArgs(vars, args);
+                            } catch (e) {
+                                lvars = args;
+                            }
+                            //console.debug("IN GRAPH, SELECT", lvars);
                             options.callback.apply(options.graph, bindVar(lvars));
                         });
                     } else if (options.callback) {
@@ -233,7 +238,7 @@ define([
                 executeFunc = getExecuteFunction(queryKind);
             //buster.log("IN GRAPH, EXECUTING FUNCTION", queryKind, executeFunc);
             if(executeFunc) {
-                //buster.log("BEFORE QUERY EXECUTION", query);
+                //console.log("IN GRAPH, BEFORE QUERY EXECUTION", query);
                 this.engine.execute(query, executeFunc(deferred, {
                     callback: callback,
                     graph: this,

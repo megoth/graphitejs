@@ -1,6 +1,7 @@
 define([
-    "src/graphite/tokenizer/sparql"
-], function (Tokenizer) {
+    "src/graphite/tokenizer/sparql",
+    "src/graphite/utils"
+], function (Tokenizer, Utils) {
     var tokenBase = {
             "token": "base",
             "value": "http://example.org/"
@@ -382,11 +383,66 @@ define([
         tokenProjectionAAsB = [ tokenVariableAliasedAAsB ],
         tokenProjectionsAAndAAsB = [ tokenVariableA, tokenVariableAliasedAAsB ],
         tokenProjectionStar = [ tokenVariableStar ],
-        varA = Tokenizer.var("a"),
-        variableA = Tokenizer.variable("?a"),
-        variableAliased1 = Tokenizer.variable("(?a AS ?b)"),
-        variableBnode1 = Tokenizer.variable("(BNODE(?a) AS ?b)"),
-        variableStar = Tokenizer.variable("*");
+        tokenWhereBGPABCWithVariableA = {
+            "object": tokenVarC,
+            "predicate": tokenVarB,
+            "subject": tokenVarA,
+            "variables": [ "a" ]
+        },
+        tokenWhereABCWithVariableA = {
+            "kind": "BGP",
+            "value": [ tokenWhereBGPABCWithVariableA ]
+        },
+        tokenWhereABCWithVariableAx2 = {
+            "kind": "BGP",
+            "value": [ tokenWhereBGPABCWithVariableA, tokenWhereBGPABCWithVariableA ]
+        },
+        tokenWhereEmptyPattern = {
+            "kind": "EMPTY_PATTERN"
+        },
+        tokenWhereOptionalABCWithVariableA = {
+            "filter": true,
+            "kind": "LEFT_JOIN",
+            "lvalue": tokenWhereEmptyPattern,
+            "rvalue": tokenWhereABCWithVariableA
+        },
+        tokenWhereOptionalABCAndOptionalABCWithVariableA = {
+            "filter": true,
+            "kind": "LEFT_JOIN",
+            "lvalue": tokenWhereOptionalABCWithVariableA,
+            "rvalue": tokenWhereABCWithVariableA
+        },
+        tokenWhereABCAndOptionalABCWithVariableA = {
+            "filter": true,
+            "kind": "LEFT_JOIN",
+            "lvalue": tokenWhereABCWithVariableA,
+            "rvalue": tokenWhereABCWithVariableA
+        },
+        tokenWhereABCAndOptionalABCAndBGPABCWithVariableA = {
+            "kind": "JOIN",
+            "lvalue": tokenWhereABCAndOptionalABCWithVariableA,
+            "rvalue": tokenWhereABCWithVariableA
+        },
+        tokenWhereFilterAEqualsArneAndBGPABCWithVariableA = {
+            "filter": [ tokenFilterAEqualsArne ],
+            "kind": "FILTER",
+            "value": tokenWhereABCWithVariableA
+        },
+        tokenWhereFilterAEqualsArneAndBGPABCx2WithVariableA = {
+            "filter": [ tokenFilterAEqualsArne ],
+            "kind": "FILTER",
+            "value": tokenWhereABCWithVariableAx2
+        },
+        tokenWhereFilterAEqualsArneAndFilterALesserArneAndBGPABCWithVariableA = {
+            "filter": [ tokenFilterAEqualsArne, tokenFilterALesserArne ],
+            "kind": "FILTER",
+            "value": tokenWhereABCWithVariableA
+        },
+        tokenWhereFilterAEqualsArneAndBGPABCAndOptionalABCWithVariableA = {
+            "filter": [ tokenFilterAEqualsArne ],
+            "kind": "FILTER",
+            "value": tokenWhereABCAndOptionalABCWithVariableA
+        };
     buster.testCase("Graphite tokenizer (SPARQL)", {
         "Proper setup": function () {
             assert.defined(Tokenizer);
@@ -644,28 +700,145 @@ define([
             });
         },
         ".var": function () {
-            assert.equals(varA, {
+            assert.equals(Tokenizer.var("a"), {
                 "remainder": "",
                 "var": tokenVarA
             });
         },
         ".variable": function () {
-            assert.equals(variableA, {
+            assert.equals(Tokenizer.variable("?a"), {
                 "remainder": "",
                 "variable": tokenVariableA
             });
-            assert.equals(variableStar, {
+            assert.equals(Tokenizer.variable("*"), {
                 "remainder": "",
                 "variable": tokenVariableStar
             });
-            assert.equals(variableAliased1, {
+            assert.equals(Tokenizer.variable("(?a AS ?b)"), {
                 "remainder": "",
                 "variable": tokenVariableAliasedAAsB
             });
-            assert.equals(variableBnode1, {
+            assert.equals(Tokenizer.variable("(BNODE(?a) AS ?b)"), {
                 "remainder": "",
                 "variable": tokenVariableAliasedBnodeAsB
-            })
+            });
+        },
+        ".where": {
+            "Inserting BGP": {
+                "Simple case": function () {
+                    assert.equals(
+                        Tokenizer.where("WHERE { ?a ?b ?c }", {
+                            variables: [ "a" ]
+                        }), {
+                            remainder: "",
+                            where: tokenPatternABC
+                        });
+                },
+                "Pattern: Empty pattern": function () {
+                    assert.equals(
+                        Tokenizer.where("WHERE { ?a ?b ?c }", {
+                            pattern: tokenWhereEmptyPattern,
+                            variables: [ "a" ]
+                        }), {
+                            remainder: "",
+                            where: tokenWhereABCWithVariableA
+                        });
+                },
+                "Pattern: BGP": function () {
+                    assert.equals(
+                        Tokenizer.where("WHERE { ?a ?b ?c }", {
+                            pattern: tokenWhereABCWithVariableA,
+                            variables: [ "a" ]
+                        }), {
+                            remainder: "",
+                            where: tokenWhereABCWithVariableAx2
+                        });
+                },
+                "Pattern: Optional": function () {
+                    assert.equals(
+                        Tokenizer.where("WHERE { ?a ?b ?c }", {
+                            pattern: tokenWhereABCAndOptionalABCWithVariableA,
+                            variables: [ "a" ]
+                        }), {
+                            remainder: "",
+                            where: tokenWhereABCAndOptionalABCAndBGPABCWithVariableA
+                        });
+                },
+                "Pattern: Filter": function () {
+                    assert.equals(
+                        Tokenizer.where("WHERE { ?a ?b ?c }", {
+                            pattern: tokenWhereFilterAEqualsArneAndBGPABCWithVariableA,
+                            variables: [ "a" ]
+                        }), {
+                            remainder: "",
+                            where: tokenWhereFilterAEqualsArneAndBGPABCx2WithVariableA
+                        });
+                }
+            },
+            "Inserting optional": {
+                "Pattern: BGP": function () {
+                    assert.equals(
+                        Tokenizer.where("WHERE { OPTIONAL { ?a ?b ?c } }", {
+                            pattern: tokenWhereABCWithVariableA,
+                            variables: [ "a" ]
+                        }), {
+                            remainder: "",
+                            where: tokenWhereABCAndOptionalABCWithVariableA
+                        });
+                },
+                "Pattern: Optional": function () {
+                    assert.equals(
+                        Tokenizer.where("WHERE { OPTIONAL { ?a ?b ?c } }", {
+                            pattern: tokenWhereOptionalABCWithVariableA,
+                            variables: [ "a" ]
+                        }), {
+                            remainder: "",
+                            where: tokenWhereOptionalABCAndOptionalABCWithVariableA
+                        });
+                },
+                "Pattern: Filter": function () {
+                    assert.equals(
+                        Tokenizer.where("WHERE { OPTIONAL { ?a ?b ?c } }", {
+                            pattern: tokenWhereFilterAEqualsArneAndBGPABCWithVariableA,
+                            variables: [ "a" ]
+                        }), {
+                            remainder: "",
+                            where: tokenWhereFilterAEqualsArneAndBGPABCAndOptionalABCWithVariableA
+                        });
+                }
+            },
+            "Inserting filter": {
+                "Pattern: BGP": function () {
+                    assert.equals(
+                        Tokenizer.where('WHERE { FILTER(?a = "Arne") }', {
+                            pattern: tokenWhereABCWithVariableA,
+                            variables: [ "a" ]
+                        }), {
+                            remainder: "",
+                            where: tokenWhereFilterAEqualsArneAndBGPABCWithVariableA
+                        })
+                },
+                "Pattern: Optional": function () {
+                    assert.equals(
+                        Tokenizer.where('WHERE { FILTER(?a = "Arne") }', {
+                            pattern: tokenWhereABCAndOptionalABCWithVariableA,
+                            variables: [ "a" ]
+                        }), {
+                            remainder: "",
+                            where: tokenWhereFilterAEqualsArneAndBGPABCAndOptionalABCWithVariableA
+                        });
+                },
+                "Pattern: Filter": function () {
+                    assert.equals(
+                        Tokenizer.where('WHERE { FILTER(?a < "Arne") }', {
+                            pattern: tokenWhereFilterAEqualsArneAndBGPABCWithVariableA,
+                            variables: [ "a" ]
+                        }), {
+                            remainder: "",
+                            where: tokenWhereFilterAEqualsArneAndFilterALesserArneAndBGPABCWithVariableA
+                        });
+                }
+            }
         }
     });
 });
