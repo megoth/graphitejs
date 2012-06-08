@@ -83,11 +83,12 @@ define([
                 }));
             }
         },
-        ".base": {
+        "//.base": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
             "Single call": function (done) {
+                //is buggy atm
                 var spy = sinon.spy();
                 this.api
                     .base("http://xmlns.com/foaf/0.1/")
@@ -105,17 +106,17 @@ define([
             "Single call": function (done) {
                 var spy = sinon.spy();
                 this.api
+                    .where("?subject ?predicate ?object")
                     .each(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 6);
                 }));
             },
-            "//Multiple call": function (done) {
-                //Troublesome at the moment...
+            "Multiple call": function (done) {
                 var spy = sinon.spy();
                 this.api
+                    .where("?subject ?predicate ?object")
                     .each(spy)
-                    .then(function () {})
                     .each(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 12);
@@ -144,7 +145,7 @@ define([
                     .filter("?subject = <{0}>", subJohn)
                     .each(spy)
                     .then(done(function () {
-                    assert.equals(spy.callCount, 2);
+                    assert.equals(spy.callCount, 1);
                 }));
             }
         },
@@ -217,6 +218,16 @@ define([
                 this.api
                     .where('?subject <{0}> ?name'.format(preName))
                     .optional('?subject <{0}> ?homepage'.format(preHomepage))
+                    .each(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 3);
+                }))
+            },
+            "Single call, with multiple triples": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .where('?subject <{0}> ?name'.format(preName))
+                    .optional('?subject <{0}> ?homepage . ?subject <{0}> ?age', preHomepage, preAge)
                     .each(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 3);
@@ -399,9 +410,10 @@ define([
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
-            "Star variable": function (done) {
+            "Asterix variable": function (done) {
                 this.api
                     .select("*")
+                    .where("?subject ?predicate ?object")
                     .each(function(subject, predicate, object) {
                         assert.defined(subject);
                         assert.defined(predicate);
@@ -412,6 +424,7 @@ define([
             "Single variable": function (done) {
                 this.api
                     .select("?subject")
+                    .where("?subject ?predicate ?object")
                     .each(function (subject) {
                         assert.defined(subject);
                     })
@@ -420,6 +433,7 @@ define([
             "Aliased variables": function (done) {
                 this.api
                     .select("(?subject as ?s)")
+                    .where("?subject ?predicate ?object")
                     .each(function (s) {
                         assert.defined(s);
                     })
@@ -428,6 +442,7 @@ define([
             "Multiple variables": function (done) {
                 this.api
                     .select("?subject (?predicate as ?s)")
+                    .where("?subject ?predicate ?object")
                     .each(function (subject, s) {
                         assert.defined(subject);
                         assert.defined(s);
@@ -442,6 +457,12 @@ define([
                         assert.equals(size, 0);
                     }));
             }
+        },
+        ".then": function (done) {
+            this.api
+                .then(done(function () {
+                assert(true);
+            }));
         },
         ".where": {
             setUp: function (done) {

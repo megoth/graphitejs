@@ -3,16 +3,14 @@ define([
     "./tokenizer/sparql",
     "./utils"
 ], function (SparqlParser, Tokenizer, Utils) {
-    function findBGP(syntaxTree, unitindex) {
-        var basicgraphpatternindex = null;
-        if (syntaxTree.units[unitindex].pattern) {
-            Utils.each(syntaxTree.units[unitindex].pattern.patterns, function (pattern, i) {
-                if (pattern.token === "basicgraphpattern") {
-                    basicgraphpatternindex = i;
-                }
-            });
-        }
-        return basicgraphpatternindex;
+    function findBGP(pattern) {
+        var bgpindex = null;
+        Utils.each(pattern.patterns, function (p, i) {
+            if (p.token === "basicgraphpattern") {
+                bgpindex = i;
+            }
+        });
+        return bgpindex;
     }
     function findUnit(syntaxTree) {
         return syntaxTree.units.length - 1;
@@ -22,21 +20,23 @@ define([
     };
     query.prototype = {
         init: function (queryString) {
-            var unitindex = 0;
-            this.options = {
-                basicgraphpatternindex: 0,
-                modifiedPattern: false,
-                unitindex: unitindex
-            };
+            this.prologueBase = null;
+            this.bgpindex = null;
+            this.pattern = null;
+            this.prefixes = {};
+            this.projection = null;
+            this.variables = [];
+            this.unitGroup = null;
+            this.unitindex = 0;
             if(queryString) {
                 console.log("IN QUERY, INIT, WITH", queryString);
                 this.syntaxTree = SparqlParser.parser.parse(queryString);
-                unitindex = findUnit(this.syntaxTree);
-                this.options = Utils.extend({}, {
-                    basicgraphpatternindex: findBGP(this.syntaxTree, unitindex),
-                    modifiedPattern: true,
-                    unitindex: unitindex,
-                    variables: Utils.map(this.syntaxTree.units[unitindex].projection, function (p) {
+                if (this.syntaxTree.kind === "query") {
+                    this.unitindex = findUnit(this.syntaxTree);
+                    this.pattern = this.syntaxTree.units[this.unitindex].pattern;
+                    this.projection = this.syntaxTree.units[this.unitindex].projection;
+                    this.bgpindex = findBGP(this.pattern);
+                    this.variables = Utils.map(this.projection, function (p) {
                         console.log("TEST", p);
                         if (p.kind === "*") {
                             return p.kind;
@@ -44,70 +44,66 @@ define([
                             return p.alias.value;
                         }
                         return p.value.value;
-                    })
-                });
+                    });
+                }
             } else {
                 console.log("IN QUERY, INIT, WITHOUT");
                 this.syntaxTree = SparqlParser.parser.parse("SELECT * WHERE { ?subject ?predicate ?object }");
             }
-            console.log("IN QUERY, INIT", this.syntaxTree.units[unitindex].pattern);
-            this.prefixes = {};
             return this;
         },
         base: function (value) {
-            var token = Tokenizer.base(value).base;
-            this.syntaxTree.prologue.base = token;
-            this.options.base = token.value;
+            this.prologueBase = Tokenizer.base(value).base;
             return this;
         },
         filter: function (filter) {
-            var modifiedPattern = this.options.modifiedPattern;
-            this.where("FILTER(" + filter + ")");
-            this.options.modifiedPattern = modifiedPattern;
-            return this;
-            /*
-            var token = Tokenizer.where("WHERE {FILTER({0})}".format(filter), options).filter,
-                pattern = this.syntaxTree.units[0].pattern;
-            pattern.filters = pattern.filters ? pattern.filters.concat(token) : [ token ];
-            */
+            return this.where("FILTER(" + filter + ")");
         },
         group: function (group) {
-            group = Tokenizer.group(group).group;
-            this.syntaxTree.units[this.options.unitindex].group = group;
+            this.unitGroup = Tokenizer.group(group).group;
+            return this;
         },
         optional: function (optional) {
-            var token = Tokenizer.optional("OPTIONAL { " + optional + " }").optional;
-            this.syntaxTree.units[this.options.unitindex].pattern.patterns.push(token);
-            return this;
+            return this.where("OPTIONAL { " + optional + " }");
         },
         prefix: function (prefix, local) {
             if (!this.prefixes[prefix]) {
                 var token = Tokenizer.prefix("{0}: <{1}>".format(prefix, local));
-                this.prefixes[prefix] = token;
-                this.syntaxTree.prologue.prefixes.push(token.prefix);
+                this.prefixes[prefix] = token.prefix;
             }
             return this;
         },
         retrieveTree: function () {
+            console.log("IN QUERY, RETRIEVE TREE", this.prologueBase);
+            if (this.prologueBase) {
+                console.log("IN QUERY, RETRIEVE TREE BASE");
+                this.syntaxTree.prologue.base = this.prologueBase;
+            }
+            if (this.pattern) {
+                this.syntaxTree.units[this.unitindex].pattern = this.pattern;
+            }
+            if (Utils.size(this.prefixes) > 0) {
+                this.syntaxTree.prologue.prefixes = Utils.toArray(this.prefixes);
+            }
+            if (this.projection) {
+                this.syntaxTree.units[this.unitindex].projection = this.projection;
+            }
+            if (this.unitGroup) {
+                this.syntaxTree.units[this.unitindex].group = this.unitGroup;
+            }
             return this.syntaxTree;
         },
         select: function (projection) {
-            this.syntaxTree.units[this.options.unitindex].projection = Tokenizer.projection(projection).projection;
+            this.projection = Tokenizer.projection(projection).projection;
             return this;
         },
         where: function (pattern) {
-            var options = Utils.clone(this.options);
-            options.pattern = this.syntaxTree.units[options.unitindex].pattern
-            console.log("IN QUERY, WHERE", pattern, options);
-            if (options.modifiedPattern && options.basicgraphpatternindex !== null) {
-                if (options.pattern.patterns) {
-                    options.triplesContext = options.pattern
-                        .patterns[options.basicgraphpatternindex].triplesContext;
-                }
-            }
-            pattern = "WHERE {" + pattern + "}";
-            this.syntaxTree.units[options.unitindex].pattern = Tokenizer.where(pattern, options).where;
-            this.options.modifiedPattern = true;
+            var where = Tokenizer.where("WHERE {" + pattern + "}", {
+                bgpindex: this.bgpindex,
+                pattern: this.pattern
+            });
+            this.bgpindex = Utils.isNumber(where.bgpindex) ? where.bgpindex : this.bgpindex;
+            this.pattern = where.where;
             return this;
         }
     };

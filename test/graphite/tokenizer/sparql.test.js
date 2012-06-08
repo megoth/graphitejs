@@ -66,6 +66,7 @@ define([
             "token": "var",
             "value": "c"
         },
+        tokenEmptyPattern = null,
         tokenExpressionAtomicA = {
             "expressionType": "atomic",
             "primaryexpression": "var",
@@ -594,66 +595,6 @@ define([
                 "remainder": ""
             });
         },
-        ".pattern": {
-            "With variables": function () {
-                assert.equals(Tokenizer.pattern("?a ?b ?c"), {
-                    "pattern": tokenPatternABC,
-                    "remainder": ""
-                });
-                assert.equals(Tokenizer.pattern("?a ?b ?c ."), {
-                    "pattern": tokenPatternABC,
-                    "remainder": ""
-                });
-                assert.equals(Tokenizer.pattern("?a ?b ?c.?a ?b ?c"), {
-                    "pattern": tokenPatternABCx2,
-                    "remainder": ""
-                });
-                assert.equals(Tokenizer.pattern("?a ?b ?c; ?b ?c"), {
-                    "pattern": tokenPatternABCx2,
-                    "remainder": ""
-                });
-                assert.equals(Tokenizer.pattern("?a ?b ?c, ?c"), {
-                    "pattern": tokenPatternABCx2,
-                    "remainder": ""
-                });
-                assert.equals(Tokenizer.pattern("?a ?b ?c; ?b ?c, ?c ."), {
-                    "pattern": tokenPatternABCx3,
-                    "remainder": ""
-                });
-            },
-            "With uris": function () {
-                assert.equals(Tokenizer.pattern("?a rdf:type ?c"), {
-                    "pattern": tokenPatternACurieTypeC,
-                    "remainder": ""
-                });
-                assert.equals(Tokenizer.pattern("?a <type> ?c", { base: "http://www.w3.org/1999/02/22-rdf-syntax-ns#" }), {
-                    "pattern": tokenPatternAUriTypeC,
-                    "remainder": ""
-                });
-                assert.equals(Tokenizer.pattern("?a a ?c"), {
-                    "pattern": tokenPatternAUriTypeC,
-                    "remainder": ""
-                });
-            },
-            "With literals": function () {
-                assert.equals(Tokenizer.pattern('?a foaf:name "Arne"'), {
-                    "pattern": tokenPatternACurieNameArne,
-                    "remainder": ""
-                });
-                assert.equals(Tokenizer.pattern('?a foaf:name "22"^^<http://www.w3.org/2001/XMLSchema#integer>'), {
-                    "pattern": tokenPatternACurieName22Specified,
-                    "remainder": ""
-                });
-                assert.equals(Tokenizer.pattern("?a foaf:name 22"), {
-                    "pattern": tokenPatternACurieName22,
-                    "remainder": ""
-                });
-                assert.equals(Tokenizer.pattern('?a foaf:name "Andy"@en'), {
-                    "pattern": tokenPatternACurieNameEnglish,
-                    "remainder": ""
-                });
-            }
-        },
         ".prefix": function () {
             assert.equals(Tokenizer.prefix("rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"), {
                 "prefix": tokenPrefixRDF,
@@ -728,8 +669,9 @@ define([
                 "Simple case": function () {
                     assert.equals(
                         Tokenizer.where("WHERE { ?a ?b ?c }", {
-                            variables: [ "a" ]
+                            pattern: tokenEmptyPattern
                         }), {
+                            bgpindex: 0,
                             remainder: "",
                             where: tokenPatternABC
                         });

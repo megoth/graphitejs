@@ -284,7 +284,10 @@ define([
                     }
                 };
             default:
-                throw new Error("NOT SUPPORTED YET");
+                return {
+                    "kind": "BGP",
+                    "value": triplesContext
+                }
         }
     }
     function whereFilter(token, pattern) {
@@ -324,7 +327,7 @@ define([
                 throw new Error("Alias don't know how to parse the following " + data);
             }
         },
-        "base": function (data) {
+        base: function (data) {
             //buster.log("In tokenizer (SPARQL)", data);
             var value = uriRegex.exec(data)[0];
             return {
@@ -339,7 +342,7 @@ define([
          * @param [options]
          * @return {Object}
          */
-        "basicgraphpattern": function (data, triplesContext, options) {
+        basicgraphpattern: function (data, triplesContext, options) {
             options = options || {};
             //buster.log("STARTING BGP", data, subject);
             //buster.log("IN SPARQL, BGP", data);
@@ -397,7 +400,7 @@ define([
          * @param [options]
          * @return {Object}
          */
-        "expression": function (data, options) {
+        expression: function (data, options) {
             var value,
                 arg,
                 expression,
@@ -472,7 +475,7 @@ define([
          * @param [options]
          * @return {Object}
          */
-        "filter": function (data, options) {
+        filter: function (data, options) {
             var value;
             data = expect(data, filterRegex);
             data = expect(data, parenthesisLeft);
@@ -487,7 +490,7 @@ define([
                 "remainder": data
             };
         },
-        "group": function (data, group) {
+        group: function (data, group) {
             if (!group) {
                 if (!variableRegex.test(data)) {
                     throw new Error("Not valid group-syntax: " + data);
@@ -512,30 +515,42 @@ define([
          * @param data
          * @param filters
          * @param patterns
+         * @param bgpindex
          * @param [options]
          * @return {Object}
          */
-        "groupgraphpattern": function (data, filters, patterns, options) {
+        groupgraphpattern: function (data, filters, patterns, bgpindex, options) {
             //console.log("IN SPARQL TOKENIZER, groupgraphpattern", patterns);
             options = options || {};
             var filter,
                 pattern,
                 triplesContext = [];
             if (variableRegex.test(data) || lesserRegex.test(data)) {
-                if (options.triplesContext) {
-                    triplesContext = options.triplesContext;
+                if (Utils.isNumber(bgpindex)) {
+                    buster.log(patterns, bgpindex);
+                    triplesContext = patterns[bgpindex].triplesContext;
+                    console.log("IN SPARQL, GGP", triplesContext);
+                } else {
+                    bgpindex = patterns.length;
                 }
                 pattern = this.basicgraphpattern(data, triplesContext, options);
-                patterns = [ pattern.basicgraphpattern ];
+                patterns[bgpindex] = pattern.basicgraphpattern;
                 data = ws(pattern.remainder);
-                return this.groupgraphpattern(data, filters, patterns, options);
+                return this.groupgraphpattern(data, filters, patterns, bgpindex, options);
             } else if (filterRegex.test(data)) {
                 filter = this.filter(data, options);
                 data = ws(filter.remainder);
                 filters.push(filter.filter);
-                return this.groupgraphpattern(data, filters, patterns, options);
+                return this.groupgraphpattern(data, filters, patterns, null, options);
+            } else if (optionalRegex.test(data)) {
+                pattern = this.optional(data, options);
+                patterns.push(pattern.optional);
+                data = pattern.remainder;
+                data = ws(data);
+                return this.groupgraphpattern(data, filters, patterns, bgpindex, options);
             }
             return {
+                "bgpindex": bgpindex,
                 "groupgraphpattern": {
                     "filters": filters,
                     "patterns": patterns,
@@ -598,7 +613,7 @@ define([
             data = ws(data);
             data = expect(data, curlyBracketLeftRegex);
             data = ws(data);
-            groupgraphpattern = this.groupgraphpattern(data, [], [], options);
+            groupgraphpattern = this.groupgraphpattern(data, [], [], null, options);
             data = expect(groupgraphpattern.remainder, curlyBracketRightRegex);
             data = ws(data);
             return {
@@ -648,16 +663,6 @@ define([
             return {
                 "order": order,
                 "remainder": data
-            }
-        },
-        "pattern": function (data, options) {
-            //console.log("IN SPARQL, PATTERN", options);
-            options = options || {};
-            var bgp = this.groupgraphpattern(data, [], [], options);
-            //buster.log("IN SPARQL, PATTERN", bgp);
-            return {
-                "pattern": bgp.groupgraphpattern,
-                "remainder": bgp.remainder
             }
         },
         "prefix": function (data) {
@@ -807,23 +812,21 @@ define([
          * @param [options]
          * @return {Object}
          */
-        "where": function (data, options) {
-            var pattern, patterns, token, value;
+        where: function (data, options) {
+            var bgpindex, pattern, token, value, where;
             data = expect(data, whereRegex);
             data = ws(data);
             data = expect(data, curlyBracketLeftRegex);
             data = ws(data);
             options = Utils.clone(options);
-            if (options.pattern && options.pattern.token || !options.pattern) {
-                console.log("SIMPLE QUERY", options);
-                patterns = options.pattern ? options.pattern.patterns : [];
-                delete options.variables;
-                token = this.groupgraphpattern(data, [], patterns, options);
+            bgpindex = Utils.isNumber(options.bgpindex) ? options.bgpindex : null;
+            pattern = options.pattern;
+            if (pattern && pattern.token) {
+                token = this.groupgraphpattern(data, pattern.filters, pattern.patterns, bgpindex, options);
+                bgpindex = token.bgpindex;
                 data = token.remainder;
                 token = token.groupgraphpattern;
-            } else {
-                console.log("COMPLEX QUERY", options);
-                pattern = options.pattern;
+            } else if (pattern && pattern.kind) {
                 if (variableRegex.test(data) || lesserRegex.test(data)) {
                     token = this.basicgraphpattern(data, [], options);
                     data = token.remainder;
@@ -859,13 +862,25 @@ define([
                     console.log("SOMETHING WENT WRONG...");
                     throw new Error("NOT SUPPORTED YET");
                 }
+            } else if (pattern === null) {
+                token = this.groupgraphpattern(data, [], [], bgpindex, options);
+                bgpindex = token.bgpindex;
+                data = token.remainder;
+                token = token.groupgraphpattern;
+                console.log("IN SPARQL, WHERE", bgpindex);
+            } else {
+                throw new Error("NOT SUPPORTED!");
             }
             data = expect(data, curlyBracketRightRegex);
             data = ws(data);
-            return {
+            where = {
                 "remainder": data,
                 "where": token
+            };
+            if (Utils.isNumber(bgpindex)) {
+                where.bgpindex = bgpindex;
             }
+            return where;
         }
     };
 });

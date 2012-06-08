@@ -236,7 +236,7 @@ define([
             var deferred = When.defer(),
                 queryKind = getQueryKind(query),
                 executeFunc = getExecuteFunction(queryKind);
-            //buster.log("IN GRAPH, EXECUTING FUNCTION", queryKind, executeFunc);
+            //console.log("IN GRAPH, EXECUTING FUNCTION", queryKind, executeFunc);
             if(executeFunc) {
                 //console.log("IN GRAPH, BEFORE QUERY EXECUTION", query);
                 this.engine.execute(query, executeFunc(deferred, {

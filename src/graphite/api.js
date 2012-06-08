@@ -54,27 +54,28 @@ define([
             return this.execute(options);
         },
         base: function (uri) {
+            console.log("IN API, BASE BEGINNING");
             var promise = When.defer(),
                 query;
             When.all(this.promises).then(function () {
-                //console.debug("IN API, BASE", uri);
                 query = Utils.last(arguments[0]);
                 query.base(uri);
+                console.debug("IN API, BASE QUERY", query);
                 promise.resolve(query);
             });
+            console.log("IN API, BASE AFTER");
             this.promises.push(promise);
             return this;
         },
         each: function (callback) {
-            //console.log("IN API, EACH BEGINNING");
-            this.execute({
+            console.log("IN API, EACH BEGINNING");
+            return this.execute({
                 callback: callback,
                 onExecuted: function (promise, query) {
-                    //console.log("IN API, EACH CALLBACK");
+                    console.log("IN API, EACH CALLBACK");
                     promise.resolve(query);
                 }
             });
-            return this;
         },
         /**
          *
@@ -97,10 +98,11 @@ define([
                 that = this,
                 query,
                 syntaxTree;
-            When.all(this.promises).then(function () {
-                //buster.log("IN API, EXECUTE, #promises", that.promises.length);
-                query = Utils.last(arguments[0]);
+            When.all(this.promises).then(function (queries) {
+                console.log("IN API, EXECUTE, #promises", that.promises.length);
+                query = Utils.last(queries);
                 syntaxTree = query.retrieveTree();
+                console.log("IN API, EXECUTE SYNTAX TREE", syntaxTree);
                 that.graph.execute(syntaxTree, options.callback).then(function (graph) {
                     that.graph = graph;
                     options.onExecuted.call(that, promise, query);
@@ -114,8 +116,8 @@ define([
             var promise = When.defer(),
                 query;
             filter = format(filter, arguments, 1);
-            When.all(this.promises).then(function () {
-                query = Utils.last(arguments[0]);
+            When.all(this.promises).then(function (queries) {
+                query = Utils.last(queries);
                 query.filter(filter);
                 promise.resolve(query);
             });
@@ -154,8 +156,8 @@ define([
             var promise = When.defer(),
                 query;
             optional = format(optional, arguments, 1);
-            When.all(this.promises).then(function () {
-                query = Utils.last(arguments[0]);
+            When.all(this.promises).then(function (queries) {
+                query = Utils.last(queries);
                 query.optional(optional);
                 promise.resolve(query);
             });
@@ -165,8 +167,8 @@ define([
         prefix: function (prefix, local) {
             var promise = When.defer(),
                 query;
-            When.all(this.promises).then(function () {
-                query = Utils.last(arguments[0]);
+            When.all(this.promises).then(function (queries) {
+                query = Utils.last(queries);
                 query.prefix(prefix, local);
                 promise.resolve(query);
             });
@@ -218,8 +220,8 @@ define([
         select: function (projection) {
             var promise = When.defer(),
                 query;
-            When.all(this.promises).then(function () {
-                query = Utils.last(arguments[0]);
+            When.all(this.promises).then(function (queries) {
+                query = Utils.last(queries);
                 query.select(projection);
                 promise.resolve(query);
             });
@@ -230,8 +232,8 @@ define([
             var that = this,
                 promise = When.defer(),
                 query;
-            When.all(this.promises).then(function () {
-                query = Utils.last(arguments[0]);
+            When.all(this.promises).then(function (queries) {
+                query = Utils.last(queries);
                 that.graph.size(function (size) {
                     callback(size);
                     promise.resolve(query);
@@ -245,8 +247,8 @@ define([
                 promise = When.defer(),
                 query;
             //buster.log("IN API, THEN");
-            When.all(this.promises).then(function () {
-                query = Utils.last(arguments[0]);
+            When.all(this.promises).then(function (queries) {
+                query = Utils.last(queries);
                 callback(that.graph);
                 promise.resolve(query);
             });
@@ -254,12 +256,12 @@ define([
             return this;
         },
         where: function (pattern) {
+            console.log("IN API, WHERE BEGINNING");
             var promise = When.defer(),
                 query;
             pattern = format(pattern, arguments, 1);
-            When.all(this.promises).then(function () {
-                query = Utils.last(arguments[0]);
-                console.log("IN API, WHERE", query);
+            When.all(this.promises).then(function (queries) {
+                query = Utils.last(queries);
                 query.where(pattern);
                 promise.resolve(query)
             });

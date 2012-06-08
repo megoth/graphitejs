@@ -32,16 +32,35 @@ define([
                 )
             }
         },
-        ".filter": function () {
-            this.query.filter('?object = "Arne"');
-            assert.equals(
-                this.query.retrieveTree(),
-                parser('SELECT *\n' +
-                    'WHERE {\n' +
-                    '?subject ?predicate ?object .\n' +
-                    'FILTER (?object = "Arne")\n' +
-                    '}')
-            );
+        ".filter": {
+            "Single call": function () {
+                this.query
+                    .where("?subject ?predicate ?object")
+                    .filter('?object = "Arne"');
+                assert.equals(
+                    this.query.retrieveTree(),
+                    parser('SELECT *\n' +
+                        'WHERE {\n' +
+                        '?subject ?predicate ?object .\n' +
+                        'FILTER (?object = "Arne")\n' +
+                        '}')
+                );
+            },
+            "Multiple calls": function () {
+                this.query
+                    .where("?subject ?predicate ?object")
+                    .filter('?object = "Arne"')
+                    .filter('?subject = <http://example.org/Arne>');
+                assert.equals(
+                    this.query.retrieveTree(),
+                    parser('SELECT *\n' +
+                        'WHERE {\n' +
+                        '?subject ?predicate ?object .\n' +
+                        'FILTER (?object = "Arne")\n' +
+                        'FILTER (?subject = <http://example.org/Arne>)\n' +
+                        '}')
+                );
+            }
         },
         ".group": function () {
             this.query.group("?subject");
@@ -57,7 +76,9 @@ define([
         },
         ".optional": {
             "Single instance": function () {
-                this.query.optional('?subject ?predicate "42"');
+                this.query
+                    .where("?subject ?predicate ?object")
+                    .optional('?subject ?predicate "42"');
                 assert.equals(
                     this.query.retrieveTree(),
                     parser('SELECT * WHERE {\?' +
@@ -69,7 +90,9 @@ define([
                 );
             },
             "Single instance, multiple triples": function () {
-                this.query.optional('?subject foaf:age "42" . ?subject foaf:name "Arne"');
+                this.query
+                    .where("?subject ?predicate ?object")
+                    .optional('?subject foaf:age "42" . ?subject foaf:name "Arne"');
                 assert.equals(
                     this.query.retrieveTree(),
                     parser('SELECT * WHERE {\?' +
@@ -83,12 +106,13 @@ define([
             },
             "Multiple instances": function () {
                 this.query
+                    .where("?subject ?predicate ?object")
                     .optional('?subject foaf:age "42"')
                     .optional('?subject foaf:name "Arne"');
                 assert.equals(
                     this.query.retrieveTree(),
-                    parser('SELECT * WHERE {\?' +
-                        'subject ?predicate ?object .\n' +
+                    parser('SELECT * WHERE {\n' +
+                        '?subject ?predicate ?object .\n' +
                         'OPTIONAL {\n' +
                         '?subject foaf:age "42" .\n' +
                         '}\n' +
@@ -109,8 +133,9 @@ define([
                 );
             },
             "Multiple instances": function () {
-                this.query.prefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-                this.query.prefix("foaf", "http://xmlns.com/foaf/0.1/");
+                this.query
+                    .prefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#")
+                    .prefix("foaf", "http://xmlns.com/foaf/0.1/");
                 assert.equals(
                     this.query.retrieveTree(),
                     parser("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
@@ -119,8 +144,9 @@ define([
                 );
             },
             "Multiple instances, same prefix": function () {
-                this.query.prefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-                this.query.prefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+                this.query
+                    .prefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#")
+                    .prefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
                 assert.equals(
                     this.query.retrieveTree(),
                     parser("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
