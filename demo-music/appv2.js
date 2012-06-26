@@ -1,9 +1,9 @@
 require([
-    "../src/graphite/graph",
-    "../src/graphite/loader",
-    "../src/graphite/query",
-    "jquery",
-    "tmpl"
+    "js/graphite/graph",
+    "js/graphite/loader",
+    "js/graphite/query",
+    "js/jquery",
+    "js/tmpl"
 ], function (Graph, Loader, Query, $) {
     var trackQuery,
         userQuery;
@@ -149,11 +149,12 @@ require([
             });
     }
     $(document).ready(function () {
+        var base = "http://localhost:9090/";
         var g = Graph([
-            "http://localhost:9090/demo-music/data/users.jsonld",
-            "http://localhost:9090/demo-music/data/artists.jsonld",
-            "http://localhost:9090/demo-music/data/records.ttl",
-            "http://localhost:9090/demo-music/data/tracks.ttl"
+            base + "data/users.jsonld",
+            base + "data/artists.jsonld",
+            base + "data/records.ttl",
+            base + "data/tracks.ttl"
         ]);
         Loader({
             success: function (err, data) {
@@ -167,10 +168,10 @@ require([
                         readyTracks(g);
                         readyUsers(g);
                     },
-                    uri: "demo-music/queries/users.rq"
+                    uri: base + "queries/users.rq"
                 })
             },
-            uri: "http://localhost:9090/demo-music/queries/tracks.rq"
+            uri: base + "queries/tracks.rq"
         });
     });
 });

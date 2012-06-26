@@ -1,8 +1,9 @@
 require([
-    "../src/graphite",
-    "jquery",
-    "tmpl"
+    "js/graphite",
+    "js/jquery",
+    "js/tmpl"
 ], function (Graphite, $) {
+    var base = "http://localhost:9090/";
     function appendBreadcrumb(graphite, label, options) {
         var item = $("#tmplBreadcrumbListItem").tmpl({
             Label: label
@@ -18,19 +19,16 @@ require([
         $("#Breadcrumb").html("");
         $("#TrackList").html("");
         appendBreadcrumb(graphite, "All");
-        graphite.query("demo-music/queries/tracks.rq");
-        if (options.user) {
-            appendBreadcrumb(graphite, "user: " + options.userName, { user: options.user });
-            graphite
-                .where("?user ma:listensTo ?t")
-                .filter("?user = <{0}>", options.user);
-        }
+        graphite.query(base + "queries/tracks.rq");
         if (options.album) {
             appendBreadcrumb(graphite, "album: " + options.album, { album: options.album });
             graphite.regex("?album", options.album, "i");
         }
         if (options.albumUrl) {
-            appendBreadcrumb(graphite, "album: " + options.albumName, { albumUrl: options.albumUrl });
+            appendBreadcrumb(graphite, "album: " + options.albumName, {
+                albumName: options.albumName,
+                albumUrl: options.albumUrl
+            });
             graphite.filter("?r = <{0}>", options.albumUrl);
         }
         if (options.artist) {
@@ -38,12 +36,24 @@ require([
             graphite.regex("?artist", options.artist, "i");
         }
         if (options.artistUrl) {
-            appendBreadcrumb(graphite, "artist: " + options.artistName, { artistUrl: options.artistUrl });
+            appendBreadcrumb(graphite, "artist: " + options.artistName, {
+                artistName: options.artistName,
+                artistUrl: options.artistUrl
+            });
             graphite.filter("?a = <{0}>", options.artistUrl);
         }
         if (options.track) {
             appendBreadcrumb(graphite, "track: " + options.track, { track: options.track });
             graphite.regex("?track", options.track, "i");
+        }
+        if (options.userUrl) {
+            appendBreadcrumb(graphite, "user: " + options.userName, {
+                userName: options.userName,
+                userUrl: options.userUrl
+            });
+            graphite
+                .where("?user ma:listensTo ?t")
+                .filter("?user = <{0}>", options.userUrl);
         }
         graphite.execute(function (artist, album, artistUrl, albumUrl, track, year, spotifyUrl) {
             $("#tmplTrackListItem").tmpl({
@@ -59,7 +69,7 @@ require([
     }
     function loadUsers (graphite) {
         graphite
-            .query("demo-music/queries/users.rq")
+            .query(base + "queries/users.rq")
             .execute(function (userUrl, name, gender) {
                 $("#tmplUserListItem")
                     .tmpl({
@@ -123,8 +133,8 @@ require([
                     user = link.data("user"),
                     name = link.html();
                 loadTracks(graphite, {
-                    user: user,
-                    userName: name
+                    userName: name,
+                    userUrl: user
                 });
                 return false;
             });
@@ -137,10 +147,10 @@ require([
     }
     $(document).ready(function () {
         var g = Graphite()
-            .load("demo-music/data/users.jsonld")
-            .load("demo-music/data/artists.jsonld")
-            .load("demo-music/data/records.ttl")
-            .load("demo-music/data/tracks.ttl");
+            .load(base + "data/users.jsonld")
+            .load(base + "data/artists.jsonld")
+            .load(base + "data/records.ttl")
+            .load(base + "data/tracks.ttl");
         loadUsers(g);
         loadTracks(g);
         readySearch(g);

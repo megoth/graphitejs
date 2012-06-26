@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>A demo for graphitejs</title>
+    <script data-main="appv2" src="js/require.js"></script>
+    <link rel="stylesheet" href="css/reset.css" type="text/css" />
+    <link rel="stylesheet" href="css/style.css" type="text/css" />
+</head>
+<body>
+<div id="Container">
+    <div id="Header">
+        <div class="logo">&nbsp;</div>
+        <div class="search">
+            <form id="Search">
+                <div class="form-container">
+                    <input name="track" placeholder="Name of track" type="text" />
+                </div>
+                <div class="form-container">
+                    <input name="album" placeholder="Name of album" type="text" />
+                </div>
+                <div class="form-container">
+                    <input name="artist" placeholder="Name of artist" type="text" />
+                </div>
+                <div class="form-container">
+                    <input type="submit" />
+                    <input type="reset" />
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="Main" class="clearfix">
+        <div id="Sidebar">
+            <h2>Users</h2>
+            <ul id="UserList"></ul>
+        </div>
+        <div id="Content">
+            <ol id="Breadcrumb"></ol>
+            <table id="Tracks">
+                <thead>
+                <tr>
+                    <th class="track">Track</th>
+                    <th class="artist">Artist</th>
+                    <th class="album">Album</th>
+                    <th class="links">Links</th>
+                </tr>
+                </thead>
+                <tbody id="TrackList"></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="push"></div>
+</div>
+<div id="Footer">Note: The application uses a jQuery-plugin named template, that sometimes fails to load, i.e. the
+whole app fails to load. If this happens, try reloading the page.</div>
+<script id="tmplBreadcrumbListItem" type="text/x-jquery-tmpl">
+    <li>
+        <a href="#">${Label}</a>
+    </li>
+</script>
+<script id="tmplTrackListItem" type="text/x-jquery-tmpl">
+    <tr>
+        <td>${Track}</td>
+        <td>
+            <a data-artist="${ArtistUrl}" href="#">${Artist}</a>
+        </td>
+        <td>
+            <a data-album="${AlbumUrl}" href="#">${Album}</a> (${Year})
+        </td>
+        <td>
+            <a class="spotify" href="${Spotify}" title="Open in Spotify">&nbsp;</a>
+        </td>
+    </tr>
+</script>
+<script id="tmplUserListItem" type="text/x-jquery-tmpl">
+    <li><a class="gender-${Gender}" href="#" data-user="${UserUrl}">${Name}</a></li>
+</script>
+</body>
+</html>

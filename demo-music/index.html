@@ -1,77 +1,71 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
     <title>A demo for graphitejs</title>
-    <script data-main="demo-music/appv1" src="../lib/require.js"></script>
-    <link rel="stylesheet" href="demo-music/css/reset.css" type="text/css" />
-    <link rel="stylesheet" href="demo-music/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="css/reset.css" type="text/css" />
+    <link rel="stylesheet" href="css/style.css" type="text/css" />
 </head>
 <body>
 <div id="Container">
     <div id="Header">
         <div class="logo">&nbsp;</div>
-        <div class="search">
-            <form id="Search">
-                <div class="form-container">
-                    <input name="track" placeholder="Name of track" type="text" />
-                </div>
-                <div class="form-container">
-                    <input name="album" placeholder="Name of album" type="text" />
-                </div>
-                <div class="form-container">
-                    <input name="artist" placeholder="Name of artist" type="text" />
-                </div>
-                <div class="form-container">
-                    <input type="submit" />
-                    <input type="reset" />
-                </div>
-            </form>
-        </div>
     </div>
     <div id="Main" class="clearfix">
         <div id="Sidebar">
-            <h2>Users</h2>
-            <ul id="UserList"></ul>
+            <h2>Demoes</h2>
+            <ul id="AppList">
+                <li>
+                    <a href="appv1.html">Version 1</a>
+                </li>
+                <li>
+                    <a href="appv2.html">Version 2</a>
+                </li>
+            </ul>
         </div>
         <div id="Content">
-            <ul id="Breadcrumb"></ul>
-            <table id="Tracks">
-                <thead>
-                <tr>
-                    <th class="track">Track</th>
-                    <th class="artist">Artist</th>
-                    <th class="album">Album</th>
-                    <th class="links">Links</th>
-                </tr>
-                </thead>
-                <tbody id="TrackList"></tbody>
-            </table>
+            <h1>Showcase for graphitejs - a music application</h1>
+            <p>This site showcases two versions of a demo-application made to show some functionality of
+                <a href="https://github.com/megoth/graphitejs">graphitejs</a>, the framework created as part
+            of Arne Hassel's master thesis.</p>
+            <p>Graphitejs is a framework written in and for JavaScript (JS), designed to offer a multitude of
+            interfaces toward handling data from the Semantic Web (SW). It loads and handles resources described with
+                <a href="http://www.w3.org/RDF/"><abbr title="Resource Description Framework">RDF</abbr></a>,
+                and enable querying by using <a href="http://www.w3.org/TR/sparql11-query/">SPARQL</a>.</p>
+            <p>The demo-application is a simple web-application that lists a table with tracks, the music group
+                that created it, and the album which it's available on.
+                It also loads a set of users, which filter the tracks they listens to.</p>
+            <p>The application's data is structured using
+            <a href="http://www.w3.org/TeamSubmission/turtle/">Turtle</a> and
+            <a href="http://json-ld.org/"><abbr title="JSON for Linked Data">JSON-LD</abbr></a>, two
+            serializations of RDF.</p>
+            <p>It uses several vocabularies, as listed below:</p>
+            <ul>
+                <li>
+                    <a href="http://dublincore.org/documents/2012/06/14/dcmi-terms/">
+                        Dublin Core Metadata Initiative</a> (dc: http://purl.org/dc/elements/1.1/)
+                </li>
+                <li>
+                    <a href="http://xmlns.com/foaf/spec/">
+                        Friend of a Friend</a> (foaf: http://xmlns.com/foaf/0.1/)
+                </li>
+                <li>
+                    <a href="http://musicontology.com/">
+                        Music Ontology Specification</a> (mo: http://purl.org/ontology/mo/)
+                </li>
+            </ul>
+            <p>In addition, I created my own vocabulary, specific to these demo-application, prefixed ma
+            and localized as http://example.org/music/v1#. The terms used are described below:</p>
+            <ul>
+                <li>ma:listensTo: a property stating the relation between a user and a track.</li>
+                <li>ma:spotify: a property stating the URI a track has to it's instance in Spotify, if any.</li>
+                <li>ma:User: a class, used to state a given resource as a user of the application.</li>
+            </ul>
+            <p>The application uses <a href="http://jquery.com/">jQuery</a> to manipulate the DOM, and the
+                jQuery-plugin <a href="http://api.jquery.com/jQuery.template/">jQuery.template()</a> to
+            handle the templating. The plugin doesn't always succeed to load, so you may have to refresh the
+            page.</p>
         </div>
     </div>
-    <div class="push"></div>
 </div>
-<div id="Footer">Footer</div>
-<script id="tmplBreadcrumbListItem" type="text/x-jquery-tmpl">
-    <li>
-        <a href="#">${Label}</a>
-    </li>
-</script>
-<script id="tmplTrackListItem" type="text/x-jquery-tmpl">
-    <tr>
-        <td>${Track}</td>
-        <td>
-            <a data-artist="${ArtistUrl}" href="#">${Artist}</a>
-        </td>
-        <td>
-            <a data-album="${AlbumUrl}" href="#">${Album}</a> (${Year})
-        </td>
-        <td>
-            <a class="spotify" href="${Spotify}" title="Open in Spotify">&nbsp;</a>
-        </td>
-    </tr>
-</script>
-<script id="tmplUserListItem" type="text/x-jquery-tmpl">
-    <li><a class="gender-${Gender}" href="#" data-user="${UserUrl}">${Name}</a></li>
-</script>
 </body>
 </html>

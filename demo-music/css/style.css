@@ -53,6 +53,16 @@ table thead th {
 * html .clearfix {
     height: 1%;
 }
+#AppList li a {
+    background-image: url('img/application_go.png');
+    background-position: 0.5em center;
+    background-repeat: no-repeat;
+    display: block;
+    padding: 0.5em 0 0.5em 2em;
+}
+#AppList li a:hover {
+    background-color: #DFEDA5;
+}
 #Breadcrumb {
     overflow: auto;
 }
@@ -89,6 +99,25 @@ table thead th {
 #Content {
     float: left;
     width: 75%;
+}
+#Content h1 {
+    border-bottom: solid 1px;
+    font-size: 2em;
+    font-weight: bold;
+    margin-top: 0.5em;
+}
+#Content abbr {
+    border-bottom: dotted 1px;
+}
+#Content p {
+    margin: 0.5em 0 1em;
+}
+#Content > ul {
+    margin: 1em 0.5em;
+}
+#Content > ul > li {
+    list-style-type: disc;
+    margin: 0 1em;
 }
 #Header {
     overflow: auto;
