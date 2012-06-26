@@ -8,6 +8,16 @@ define([
     "./loader/proxy",
     "./utils"
 ], function (HTTP, XHR, Proxy, Utils) {
+    /**
+     * @param {Object} options
+     * <ul>
+     *     <li>asynchronous: whether to load resource asynchronously or not; default set to true</li>
+     *     <li>method: which HTTP verb to call resource with; default set to GET</li>
+     *     <li>success: function to call if uri is successfully loaded; by default undefined. Function
+     *     has parameters err, data, status, headers</li>
+     *     <li>uri: adress to load resource from; by default set to document's URI</li>
+     * </ul>
+     */
     return function (options) {
         //buster.log("IN LOADER", options);
         var support = {

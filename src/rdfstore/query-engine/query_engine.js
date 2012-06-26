@@ -530,14 +530,13 @@ define([
     QueryEngine.QueryEngine.prototype.execute = function(query, callback, defaultDataset, namedDataset) {
         var syntaxTree;
         if (GraphiteUtils.isString(query)) {
-            //buster.log("IN QUERY ENGINE, QUERY ISN'T PARSED ALREADY");
+            //console.log("IN QUERY ENGINE, QUERY ISN'T PARSED ALREADY", query);
             query = Utils.normalizeUnicodeLiterals(query);
             syntaxTree = this.abstractQueryTree.parseQueryString(query);
         } else {
-            //buster.log("IN QUERY ENGINE, QUERY IS PARSED ALREADY");
+            //console.log("IN QUERY ENGINE, QUERY IS PARSED ALREADY");
             syntaxTree = query;
         }
-        //buster.log("IN ENGINE, SYNTAXTREE", syntaxTree == null, queryString);
         if(syntaxTree === null) {
             callback(false,"Error parsing query string");
         } else {
@@ -548,7 +547,6 @@ define([
                     if(that.lexicon["updateAfterWrite"]) {
                         that.lexicon["updateAfterWrite"]();
                     }
-                    //buster.log("UPDATE QUERY", success);
                     if(success) {
                         that.callbacksBackend.endGraphModification(function(){
                             callback(success, result);
@@ -881,7 +879,7 @@ define([
         } else if(pattern.kind === "ZERO_OR_MORE_PATH" || pattern.kind === 'ONE_OR_MORE_PATH') {
             return this.executeZeroOrMorePath(pattern, dataset, env);
         } else {
-            console.log("Cannot execute query pattern " + pattern.kind + ". Not implemented yet.");
+            //console.log("Cannot execute query pattern " + pattern.kind + ". Not implemented yet.");
             return null;
         }
     };
@@ -1197,7 +1195,7 @@ define([
                 return quads;
             }
         } else {
-            console.log("ERROR normalizing quad");
+            //console.log("ERROR normalizing quad");
             return null;
         }
     };
@@ -1594,12 +1592,12 @@ define([
                     that.callbacksBackend.nextGraphModification(Callbacks.added, [quad, normalized]);
                     return true;
                 } else {
-                    console.log("ERROR inserting quad");
+                    //console.log("ERROR inserting quad");
                     return false;
                 }
             }
         } else {
-            console.log("ERROR normalizing quad");
+            //console.log("ERROR normalizing quad");
             return false;
         }
     };
@@ -1614,11 +1612,11 @@ define([
                 that.callbacksBackend.nextGraphModification(Callbacks['deleted'], [quad, normalized]);
                 return true;
             } else {
-                console.log("ERROR unregistering quad");
+                //console.log("ERROR unregistering quad");
                 return false;
             }
         } else {
-            console.log("ERROR normalizing quad");
+            //console.log("ERROR normalizing quad");
             return false;
         }
     };

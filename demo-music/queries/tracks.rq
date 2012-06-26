@@ -1,0 +1,27 @@
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX ma: <http://example.org/music/v1#>
+PREFIX mo: <http://purl.org/ontology/mo/>
+
+SELECT
+    ?artist
+    (?a as ?artistUrl)
+    ?album
+    (?r as ?albumUrl)
+    ?track
+    ?year
+    ?spotifyUrl
+WHERE {
+    ?a foaf:name ?artist .
+    ?a a mo:MusicGroup .
+    ?a mo:produced ?r .
+    ?r dc:title ?album .
+    ?r mo:release ?year .
+    ?r mo:track ?t .
+    ?t dc:title ?track .
+    ?t mo:track_number ?trackNumber
+    OPTIONAL {
+        ?t ma:spotify ?spotifyUrl
+    }
+}
+ORDER BY ?artist ?album ?trackNumber

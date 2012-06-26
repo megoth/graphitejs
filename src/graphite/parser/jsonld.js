@@ -21,7 +21,7 @@ define([
             try {
                 json = JSON.parse(json);
             } catch (e) {
-                throw Error("No valid JSON-string given");
+                throw Error("No valid JSON-string given: " + json);
             }
         }
         //buster.log("JSON", json);
@@ -199,7 +199,6 @@ define([
                 predicate = node.getPredicate(triple[1]);
                 predicate = Dictionary.Symbol(predicate);
                 object = node.getObject(triple[2], predicate);
-                console.log("JSONLD, ADD TRIPLE, OBJECT", object);
                 if(object.type === "bnode") {
                     object = node.getBlankNode(object.value);
                 } else if (object.type === "uri") {

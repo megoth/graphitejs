@@ -1,0 +1,8 @@
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX ma: <http://example.org/music/v1#>
+
+SELECT ?name ?user
+WHERE {
+    ?user foaf:name ?name .
+    ?user a ma:User .
+}

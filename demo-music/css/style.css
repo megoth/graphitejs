@@ -1,0 +1,157 @@
+a {
+    color: black;
+}
+a.spotify {
+    background-image: url("img/spotify.png");
+    background-position: center center;
+    background-repeat: no-repeat;
+    display: block;
+    height: 16px;
+    text-decoration: none;
+    width: 16px;
+}
+a.spotify[href=""] {
+    display: none;
+}
+html, body {
+    background-color: #F1F7D7;
+    height: 100%;
+}
+form input {
+    background-color: white;
+    border: solid 1px black;
+}
+form input[type='reset']:hover,
+form input[type='submit']:hover {
+    background-color: #dddddd;
+}
+form .form-container {
+    overflow: auto;
+}
+form .form-container input {
+    float: right;
+}
+.clearfix:after {
+    content: ".";
+    display: block;
+    clear: both;
+    visibility: hidden;
+    line-height: 0;
+    height: 0;
+}
+.clearfix {
+    display: inline-block;
+}
+html[xmlns] .clearfix {
+    display: block;
+}
+table thead th {
+    border-bottom: solid 1px black;
+    font-weight: bold;
+    text-align: left;
+}
+* html .clearfix {
+    height: 1%;
+}
+#Breadcrumb {
+    overflow: auto;
+}
+#Breadcrumb li {
+    display: inline;
+    float: left;
+}
+#Breadcrumb li a {
+    background-image: url('img/tag_green.png');
+    background-position: left center;
+    background-repeat: no-repeat;
+    display: block;
+    padding: 0.5em 2em 0.5em 1em;
+}
+#Breadcrumb li:first-child a {
+    background-image: none;
+    padding-left: 0;
+}
+#Container {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 auto -4em;
+    max-width: 60em;
+    width: 100%;
+}
+#Container .push,
+#Footer {
+    height: 4em;
+    margin: 0 auto;
+    max-width: 60em;
+    width: 100%;
+}
+#Content {
+    float: left;
+    width: 75%;
+}
+#Header {
+    overflow: auto;
+    position: relative;
+}
+#Header .logo {
+    background-image: url('img/logo.png');
+    background-position: left top;
+    background-repeat: no-repeat;
+    float: left;
+    min-height: 150px;
+    width: 25%;
+}
+#Header .search {
+    bottom: 0;
+    position: absolute;
+    right: 0;
+    width: 25%;
+}
+#Main {
+    width: 100%;
+}
+#Sidebar {
+    float: left;
+    width: 25%;
+}
+#Sidebar h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+    border-bottom: solid 1px;
+    padding-top: 1em;
+}
+#Tracks {
+    width: 100%;
+}
+#Tracks td {
+    padding: 0.25em 0;
+}
+#Tracks tr:nth-child(even) {
+    background-color: #DFEDA5;
+}
+#Tracks .track {
+    width: 40%;
+}
+#Tracks .album {
+    width: 30%;
+}
+#Tracks .artist {
+    width: 20%;
+}
+#Tracks .links {
+    width: 10%;
+}
+#UserList li a {
+    background-image: url('img/user.png');
+    background-position: 0.25em center;
+    background-repeat: no-repeat;
+    display: block;
+    padding: 0.25em 0.25em 0.25em 1.5em;
+}
+#UserList li a:hover {
+    background-color: #DFEDA5;
+}
+#UserList li a.gender-Female {
+    background-image: url('img/user_female.png');
+}

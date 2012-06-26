@@ -16,126 +16,124 @@ define([
             return null;
         });
     }
-    function getExecuteFunction(queryKind) {
-        //buster.log("IN GRAPH, GET EXECUTE FUNCTION", queryKind);
-        var execute = {
-            "ask": function (promise, options) {
-                return function (success, result) {
-                    options.graph.clone().then(function (g) {
-                        promise.resolve(g);
-                    });
-                    if (options.callback) {
-                        options.callback(result);
-                    }
-                };
-            },
-            "construct": function (promise, options) {
-                return function (success, results) {
-                    graph(results.triples).then(function (g) {
-                        promise.resolve(g);
-                        if(options.callback) {
-                            options.callback(g);
-                        }
-                    });
-                }
-            },
-            "deletedata": function (promise, options) {
-                //buster.log("IN GRAPH, DELETE DATA", options.query);
-                if (options.callback) {
-                    graph().then(function (g) {
-                        g.execute(options.query).then(function (g) {
-                            options.callback(g);
-                        });
-                    });
-                }
-                return function () {
-                    //buster.log("IN GRAPH, EXECUTE DELETE DATA");
-                    options.graph.clone().then(function(g) {
-                        //buster.log("IN GRAPH, DELETE CLONED");
-                        promise.resolve(g);
-                    });
-                };
-            },
-            "insertdata": function (promise, options) {
-                //console.log("IN GRAPH, INSERT DATA", options.query);
-                if (options.callback) {
-                    graph().then(function (g) {
-                        g.execute(options.query).then(function (g) {
-                            options.callback(g);
-                        });
-                    });
-                }
-                return function () {
-                    options.graph.clone().then(function (g) {
-                        promise.resolve(g);
-                    });
-                };
-            },
-            "load": function (promise, options) {
-                var query;
-                //buster.log("BEFORE LOAD");
-                return function (success, results) {
-                    //console.log("GRAPH LOAD, RESULTS", success, results);
-                    query = "INSERT DATA " + results.toNT();
-                    options.graph.clone().then(function (g) {
-                        g.execute(query).then(function (g) {
-                            promise.resolve(g);
-                        });
-                    });
-                    if(options.callback) {
-                        graph().then(function (g) {
-                            //buster.log("ONCALLBACK QUERY", query);
-                            g.execute(query, function (g) {
-                                options.callback(g);
-                            });
-                        });
-                    }
-                };
-            },
-            "select": function (promise, options) {
-                return function (success, results) {
-                    //console.log("IN GRAPH, SELECT QUERY", results.length, results);
-                    if (results.length === 0) {
-                        console.debug("The query didn't return any results");
-                    }
-                    var vars, lvars;
-                    promise.resolve(options.graph);
-                    if (options.callback && options.callback.length > 0) {
-                        vars = Utils.extractArgumentMap(options.callback);
-                        Utils.each(results, function (args) {
-                            try {
-                                lvars = Utils.mapArgs(vars, args);
-                            } catch (e) {
-                                lvars = args;
-                            }
-                            //console.debug("IN GRAPH, SELECT", lvars);
-                            options.callback.apply(options.graph, bindVar(lvars));
-                        });
-                    } else if (options.callback) {
-                        Utils.each(results, options.callback);
-                    }
-                    if(options.onsuccess) {
-                        options.onsuccess();
-                    }
-                };
+    function executeAsk (promise, options) {
+        return function (success, result) {
+            promise.resolve(options.graph);
+            if (options.callback) {
+                options.callback(result);
             }
         };
-        return execute[queryKind];
     }
-    function getTriples (that) {
+    function executeConstruct (promise, options) {
+        return function (success, results) {
+            promise.resolve(options.graph);
+            if(options.callback) {
+                options.callback(Graph(results.triples));
+            }
+        }
+    }
+    function executeDeleteData (promise, options) {
+        console.log("IN GRAPH, DELETE DATA", options.query);
+        if (options.callback) {
+            Graph().execute(options.query).then(function (g) {
+                options.callback(g);
+            });
+        }
+        return function () {
+            //buster.log("IN GRAPH, EXECUTE DELETE DATA");
+            options.graph.clone().then(function(g) {
+                //buster.log("IN GRAPH, DELETE CLONED");
+                promise.resolve(g);
+            });
+        };
+    }
+    function executeInsertData (promise, options) {
+        //console.log("IN GRAPH, INSERT DATA", options.query);
+        if (options.callback) {
+            Graph().execute(options.query).then(function (g) {
+                options.callback(g);
+            });
+        }
+        return function () {
+            promise.resolve(options.graph);
+        };
+    }
+    function executeLoad (promise, options) {
+        var query;
+        //buster.log("BEFORE LOAD");
+        return function (success, results) {
+            //console.log("GRAPH LOAD, RESULTS", success, results);
+            query = "INSERT DATA " + results.toNT();
+            Graph(options.graph).execute(query).then(function (g) {
+                if(options.callback) {
+                    Graph().then(function (g) {
+                        //buster.log("ONCALLBACK QUERY", query);
+                        g.execute(query, function (g) {
+                            options.callback(g);
+                        });
+                    });
+                }
+                promise.resolve(g);
+            });
+        };
+    }
+    function executeSelect(promise, options) {
+        return function (success, results) {
+            //console.log("IN GRAPH, SELECT QUERY", results.length, results);
+            if (results.length === 0) {
+                console.debug("The query didn't return any results");
+            } else {
+                console.debug("IN QUERY, executeSelect", results);
+            }
+            var vars, lvars;
+            if (options.callback && options.callback.length > 0) {
+                vars = Utils.extractArgumentMap(options.callback);
+                Utils.each(results, function (args) {
+                    //console.debug("IN GRAPH, SELECT", args);
+                    try {
+                        lvars = Utils.mapArgs(vars, args);
+                    } catch (e) {
+                        lvars = args;
+                    }
+                    //console.debug("IN GRAPH, SELECT", lvars);
+                    options.callback.apply(options.graph, bindVar(lvars));
+                });
+            } else if (options.callback) {
+                Utils.each(results, options.callback);
+            }
+            if(options.onsuccess) {
+                options.onsuccess();
+            }
+            promise.resolve(options.graph);
+        };
+    }
+    function getExecuteFunction(query) {
+        var queryKind = getQueryKind(query);
+        //buster.log("IN GRAPH, GET EXECUTE FUNCTION", queryKind);
+        switch (queryKind) {
+            case "ask": return executeAsk;
+            case "construct": return executeConstruct;
+            case "deletedata": return executeDeleteData;
+            case "insertdata": return executeInsertData;
+            case "load": return executeLoad;
+            case "select": return executeSelect;
+            default: throw new Error("Query not supported!");
+        }
+    }
+    function getTriples (graph) {
         var deferred = When.defer(),
-            graph = Dictionary.Formula(),
+            formula = Dictionary.Formula(),
             subject,
             predicate,
             object;
-        that.engine.execute("SELECT * WHERE { ?s ?p ?o }", function (success, results) {
+        graph.engine.execute("SELECT * WHERE { ?s ?p ?o }", function (success, results) {
             Utils.each(results, function (t) {
                 subject = Dictionary.createSubject(t.s.value);
                 predicate = Dictionary.createPredicate(t.p.value);
                 object = Dictionary.createObject(t.o.value);
-                graph.add(subject, predicate, object);
+                formula.add(subject, predicate, object);
             });
-            deferred.resolve(graph);
+            deferred.resolve(formula);
         });
         return deferred;
     }
@@ -159,17 +157,50 @@ define([
         });
         return kind;
     }
+    function loadFormula(graph, resource, deferred) {
+        graph.engine.execute('INSERT DATA ' + resource.toNT(), function () {
+            deferred.resolve(graph);
+        });
+    }
+    function loadGraph(graph, resource, deferred) {
+        getTriples(resource).then(function (formula) {
+            graph.engine.execute('INSERT DATA ' + formula.toNT(), function () {
+                deferred.resolve(graph);
+            });
+        });
+    }
+    function loadStatements(graph, resource, deferred) {
+        graph.engine.execute('INSERT DATA {' + resource.join("\n") + '}', function () {
+            deferred.resolve(graph);
+        });
+    }
+    function loadUri(graph, uri, deferred) {
+        graph.engine.execute('LOAD <' + uri + '>', function (success, results) {
+            loadFormula(graph, results, deferred);
+        });
+    }
+    function loadUris(graph, uris, deferred) {
+        if (uris.length > 0) {
+            var uri = uris.pop(),
+                promise = When.defer();
+            loadUri(graph, uri, promise);
+            promise.then(function (graph) {
+                loadUris(graph, uris, deferred);
+            });
+        } else {
+            deferred.resolve(graph);
+        }
+    }
     /*
      * The graph object
      */
-    var graph = function (triples) {
-        return new graph.prototype.init(triples);
+    var Graph = function (data) {
+        return new Graph.prototype.init(data);
     };
-    graph.prototype = {
-        init: function (input) {
-            var deferred = When.defer(),
-                graph = this;
-            this.queries = 0;
+    Graph.prototype = {
+        init: function (data) {
+            var graph = this;
+            this.deferred = When.defer();
             new Lexicon.Lexicon(function(lexicon){
                 graph.lexicon = lexicon;
                 new QuadBackend.QuadBackend({
@@ -179,31 +210,15 @@ define([
                         backend: backend,
                         lexicon: lexicon
                     });
-                    if (input && Utils.isFunction(input.toNT)) {
-                        graph.engine.execute('INSERT DATA ' + input.toNT(), function () {
-                            deferred.resolve(graph);
-                        });
-                    } else if (input && Utils.isArray(input)) {
-                        graph.engine.execute('INSERT DATA {' + input.join("\n") + '}', function () {
-                            deferred.resolve(graph);
-                        });
-                    } else {
-                        deferred.resolve(graph);
+                    graph.deferred.resolve(graph);
+                    if (data) {
+                        graph.extend(data);
                     }
                 });
             });
-            return deferred;
         },
         clone: function () {
-            var deferred = When.defer();
-            getTriples(this).then(function (triples) {
-                //buster.log("PRECLONE", triples.toNT);
-                //buster.log("CLONE", triples.toNT());
-                graph(triples).then(function (g) {
-                    deferred.resolve(g);
-                });
-            });
-            return deferred;
+            return Graph(this);
         },
         /**
          * The execute method takes a query and a callback. It returns a promise
@@ -228,67 +243,67 @@ define([
          * </ul>
          *
          * @param query
-         * @param callback
+         * @param [callback]
          * @param [onsuccess]
          * @return {*}
          */
         execute: function (query, callback, onsuccess) {
+            query = query.retrieveTree ? query.retrieveTree() : query;
             var deferred = When.defer(),
-                queryKind = getQueryKind(query),
-                executeFunc = getExecuteFunction(queryKind);
-            //console.log("IN GRAPH, EXECUTING FUNCTION", queryKind, executeFunc);
+                executeFunc = getExecuteFunction(query);
+            //console.log("IN GRAPH, EXECUTING FUNCTION", query);
             if(executeFunc) {
-                //console.log("IN GRAPH, BEFORE QUERY EXECUTION", query);
-                this.engine.execute(query, executeFunc(deferred, {
-                    callback: callback,
-                    graph: this,
-                    onsuccess: onsuccess,
-                    query: query
-                }));
+                this.deferred.then(function (graph) {
+                    //console.log("IN GRAPH, BEFORE QUERY EXECUTION", query);
+                    graph.engine.execute(query, executeFunc(deferred, {
+                        callback: callback,
+                        graph: graph,
+                        onsuccess: onsuccess,
+                        query: query
+                    }));
+                });
+                this.deferred = deferred;
             } else {
-                //buster.log("IN GRAPH, QUERY NOT SUPPORTED", query);
+                console.log("IN GRAPH, QUERY NOT SUPPORTED", query);
                 throw new Error("Query not supported" + query);
             }
-            return deferred;
+            return this;
         },
-        /**
-         *
-         * @param {Function} [callback]
-         */
-        listStatements: function (parts, callback) {
-            if (!callback && Utils.isFunction(parts)) {
-                callback = parts;
-            }
-            return this.execute('SELECT * { ?subject ?predicate ?object }', callback);
-        },
-        /*
-        removeStatement: function (options, callback) {
-            var that = this;
-            if (!callback && Utils.isFunction(options)) {
-                callback = options;
-                options = null;
-            }
-            if (!options) {
-                this.engine.execute('CLEAR DEFAULT', function (success, results) {
-                    //buster.log(success, results);
-                    var list = that.listStatements();
-                    //buster.log(list);
-                });
-            }
-        },
-        */
-        size: function (callback) {
-            var promise = When.defer();
-            //buster.log("IN SIZE");
-            this.engine.execute("SELECT * WHERE { ?s ?p ?o }", function (success, results) {
-                if(callback) {
-                    callback(results.length);
+        extend: function (resource) {
+            var deferred = When.defer();
+            this.deferred.then(function (graph) {
+                if (resource instanceof Graph) {
+                    loadGraph(graph, resource, deferred);
+                } else if (Utils.isArray(resource)) {
+                    if (resource[0] && Utils.isUri(resource[0])) {
+                        loadUris(graph, resource, deferred);
+                    } else {
+                        loadStatements(graph, resource, deferred);
+                    }
+                } else if (Utils.isString(resource)) {
+                    loadUri(graph, resource, deferred);
+                } else if (resource.toNT) {
+                    loadFormula(graph, resource, deferred);
                 }
-                promise.resolve(results.length);
             });
-            return promise;
+            this.deferred = deferred;
+            return this;
+        },
+        size: function (callback) {
+            var deferred = When.defer();
+            this.deferred.then(function (graph) {
+                graph.engine.execute("SELECT * WHERE { ?s ?p ?o }", function (success, results) {
+                    callback(results.length);
+                    deferred.resolve(graph);
+                });
+            });
+            this.deferred = deferred;
+            return this;
+        },
+        then: function (callback) {
+            this.deferred.then(callback);
         }
     };
-    graph.prototype.init.prototype = graph.prototype;
-    return graph;
+    Graph.prototype.init.prototype = Graph.prototype;
+    return Graph;
 });

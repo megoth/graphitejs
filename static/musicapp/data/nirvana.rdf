@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF xmlns:rdf      = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs     = "http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:owl      = "http://www.w3.org/2002/07/owl#"
+         xmlns:bio      = "http://purl.org/vocab/bio/0.1/"
+         xmlns:dc       = "http://purl.org/dc/elements/1.1/"
+         xmlns:foaf     = "http://xmlns.com/foaf/0.1/"
+         xmlns:mo       = "http://purl.org/ontology/mo/"
+         xmlns:ov       = "http://open.vocab.org/terms/"
+         xmlns:rel      = "http://purl.org/vocab/relationship/"
+         xmlns:rev      = "http://purl.org/stuff/rev#"
+>
+
+<rdf:Description rdf:about="/music/artists/5b11f4ce-a62d-471e-81fc-a69a8278c7da.rdf">
+  <rdfs:label>Description of the artist Nirvana</rdfs:label>
+  <foaf:primaryTopic rdf:resource="/music/artists/5b11f4ce-a62d-471e-81fc-a69a8278c7da#artist"/>
+</rdf:Description>
+
+<mo:MusicArtist rdf:about="/music/artists/5b11f4ce-a62d-471e-81fc-a69a8278c7da#artist">
+    <rdf:type rdf:resource="http://purl.org/ontology/mo/MusicGroup" />
+  <foaf:name>Nirvana</foaf:name>
+  <ov:sortLabel>Nirvana</ov:sortLabel>
+  <rdfs:comment>90s US grunge band</rdfs:comment>
+  <bio:event>
+    <bio:Birth>
+      <bio:date rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">1988-02</bio:date>
+    </bio:Birth>
+  </bio:event>
+  <bio:event>
+    <bio:Death>
+      <bio:date rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">1994-04-05</bio:date>
+    </bio:Death>
+  </bio:event>
+  <foaf:page rdf:resource="/music/artists/5b11f4ce-a62d-471e-81fc-a69a8278c7da.html" />
+  <owl:sameAs rdf:resource="http://dbpedia.org/resource/Nirvana_(band)" />
+  <mo:musicbrainz rdf:resource="http://musicbrainz.org/artist/5b11f4ce-a62d-471e-81fc-a69a8278c7da.html" />
+  <mo:image rdf:resource="http://static.bbc.co.uk/music/images/artists/234x132/5b11f4ce-a62d-471e-81fc-a69a8278c7da.jpg" />
+
+
+    <foaf:homepage rdf:resource="http://www.hereisnirvana.com" />
+    <mo:fanpage rdf:resource="http://www.nirvanaclub.com/" />
+    <mo:fanpage rdf:resource="http://www.livenirvana.com" />
+    <mo:wikipedia rdf:resource="http://en.wikipedia.org/wiki/Nirvana_(band)" />
+    <mo:imdb rdf:resource="http://www.imdb.com/name/nm1110321/" />
+    <mo:myspace rdf:resource="http://www.myspace.com/nirvana" />
+
+  <mo:member rdf:resource="/music/artists/86d3f2c7-2a19-4249-ad7c-6feec74118d7#artist" />
+  <mo:member rdf:resource="/music/artists/e2f28104-72bb-4c8f-b0f9-78d4eaf492fd#artist" />
+  <mo:member rdf:resource="/music/artists/3c9b356d-d1db-4f4e-a7a3-2d00c1d70255#artist" />
+  <mo:member rdf:resource="/music/artists/258e917c-4cf0-4a1a-a07d-dacfe6b93398#artist" />
+  <mo:member rdf:resource="/music/artists/797dc323-fc39-4597-98cc-d10493f67326#artist" />
+  <mo:member rdf:resource="/music/artists/6740416b-a0ab-4a46-9ee5-8cd9c69c6442#artist" />
+  <mo:member rdf:resource="/music/artists/279575ec-fe30-455f-adb1-7a627a0badba#artist" />
+  <mo:member rdf:resource="/music/artists/4d5f891d-9bce-45ae-ad86-912dd27252fa#artist" />
+  <mo:member rdf:resource="/music/artists/ac05e29f-0561-4445-bb26-5562d2389531#artist" />
+  <mo:member rdf:resource="/music/artists/3402566b-20dc-47f1-973b-2af1dedae702#artist" />
+  <mo:member rdf:resource="/music/artists/3da65013-dfdd-40c7-b9c7-e4c829862c66#artist" />
+
+
+    <foaf:made>
+      <mo:Record>
+        <dc:title>Live at Reading</dc:title>
+        
+        <mo:musicbrainz rdf:resource="http://musicbrainz.org/release/1e2e031d-c942-4bd7-8b59-c9f10476a806.html" />
+        <rev:hasReview rdf:resource="/music/reviews/g4rj#review" />
+      </mo:Record>
+    </foaf:made>
+    <foaf:made>
+      <mo:Record>
+        <dc:title>Bleach</dc:title>
+        
+        <mo:musicbrainz rdf:resource="http://musicbrainz.org/release/fec5e33a-6e87-48d1-9fb4-c40969313924.html" />
+        <rev:hasReview rdf:resource="/music/reviews/cdx2#review" />
+      </mo:Record>
+    </foaf:made>
+    <foaf:made>
+      <mo:Record>
+        <dc:title>Nirvana</dc:title>
+        <owl:sameAs rdf:resource="http://dbpedia.org/resource/Nirvana_%28album%29" />
+        <mo:musicbrainz rdf:resource="http://musicbrainz.org/release/10bfa756-9237-4616-ac21-5f323a492327.html" />
+        <rev:hasReview rdf:resource="/music/reviews/rpqv#review" />
+      </mo:Record>
+    </foaf:made>
+    <foaf:made>
+      <mo:Record>
+        <dc:title>MTV Unplugged in New York</dc:title>
+        
+        <mo:musicbrainz rdf:resource="http://musicbrainz.org/release/e5edb300-0df6-4089-87ae-ab4bfd20b66d.html" />
+        <rev:hasReview rdf:resource="/music/reviews/8wvr#review" />
+      </mo:Record>
+    </foaf:made>
+    <foaf:made>
+      <mo:Record>
+        <dc:title>In Utero</dc:title>
+        
+        <mo:musicbrainz rdf:resource="http://musicbrainz.org/release/cc8a35fc-ef70-40b5-b410-c1b5a029a866.html" />
+        <rev:hasReview rdf:resource="/music/reviews/5b8c#review" />
+      </mo:Record>
+    </foaf:made>
+    <foaf:made>
+      <mo:Record>
+        <dc:title>Nevermind</dc:title>
+        <owl:sameAs rdf:resource="http://dbpedia.org/resource/Nevermind" />
+        <mo:musicbrainz rdf:resource="http://musicbrainz.org/release/8e061dc4-790e-4587-ba53-011e7852f88d.html" />
+        <rev:hasReview rdf:resource="/music/reviews/f8dp#review" />
+      </mo:Record>
+    </foaf:made>
+    <foaf:made>
+      <mo:Record>
+        <dc:title>Bleach</dc:title>
+        
+        <mo:musicbrainz rdf:resource="http://musicbrainz.org/release/7d166a44-cfb5-4b08-aacb-6863bbe677d6.html" />
+        <rev:hasReview rdf:resource="/music/reviews/bv63#review" />
+      </mo:Record>
+    </foaf:made>
+
+</mo:MusicArtist>
+
+<mo:MusicArtist rdf:about="/music/artists/86d3f2c7-2a19-4249-ad7c-6feec74118d7#artist">
+  <foaf:name>Aaron Burckhard</foaf:name>
+</mo:MusicArtist>
+<mo:MusicArtist rdf:about="/music/artists/e2f28104-72bb-4c8f-b0f9-78d4eaf492fd#artist">
+  <foaf:name>Chad Channing</foaf:name>
+</mo:MusicArtist>
+<mo:MusicArtist rdf:about="/music/artists/3c9b356d-d1db-4f4e-a7a3-2d00c1d70255#artist">
+  <foaf:name>Kurt Cobain</foaf:name>
+</mo:MusicArtist>
+<mo:MusicArtist rdf:about="/music/artists/258e917c-4cf0-4a1a-a07d-dacfe6b93398#artist">
+  <foaf:name>John Duncan</foaf:name>
+</mo:MusicArtist>
+<mo:MusicArtist rdf:about="/music/artists/797dc323-fc39-4597-98cc-d10493f67326#artist">
+  <foaf:name>Jason Everman</foaf:name>
+</mo:MusicArtist>
+<mo:MusicArtist rdf:about="/music/artists/6740416b-a0ab-4a46-9ee5-8cd9c69c6442#artist">
+  <foaf:name>Dave Foster</foaf:name>
+</mo:MusicArtist>
+<mo:MusicArtist rdf:about="/music/artists/279575ec-fe30-455f-adb1-7a627a0badba#artist">
+  <foaf:name>Lori Goldston</foaf:name>
+</mo:MusicArtist>
+<mo:MusicArtist rdf:about="/music/artists/4d5f891d-9bce-45ae-ad86-912dd27252fa#artist">
+  <foaf:name>Dave Grohl</foaf:name>
+</mo:MusicArtist>
+<mo:MusicArtist rdf:about="/music/artists/ac05e29f-0561-4445-bb26-5562d2389531#artist">
+  <foaf:name>Krist Novoselic</foaf:name>
+</mo:MusicArtist>
+<mo:MusicArtist rdf:about="/music/artists/3402566b-20dc-47f1-973b-2af1dedae702#artist">
+  <foaf:name>Dan Peters</foaf:name>
+</mo:MusicArtist>
+<mo:MusicArtist rdf:about="/music/artists/3da65013-dfdd-40c7-b9c7-e4c829862c66#artist">
+  <foaf:name>Pat Smear</foaf:name>
+</mo:MusicArtist>
+
+
+
+</rdf:RDF>

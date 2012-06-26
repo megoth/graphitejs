@@ -42,21 +42,17 @@ define([
             "Adding a triple fires a callback": function (done) {
                 var spy = sinon.spy();
                 this.api
-                    .addStatement(subJohn, preName, objJohnName, {
-                        callback: spy
-                    })
+                    .addStatement(subJohn, preName, objJohnName, spy)
                     .then(done(function () {
                         assert(spy.calledOnce);
                     }));
             },
             "Adding a triple fires a callback which contains a graph": function (done) {
                 this.api
-                    .addStatement(subJohn, preName, objJohnName, {
-                        callback: function (graph) {
-                            graph.size().then(done(function (size) {
-                                assert.equals(size, 1);
-                            }))
-                        }
+                    .addStatement(subJohn, preName, objJohnName, function (graph) {
+                        graph.size(done(function (size) {
+                            assert.equals(size, 1);
+                        }));
                     });
             },
             "Adding a blank node": function (done) {
@@ -93,13 +89,13 @@ define([
                 this.api
                     .base("http://xmlns.com/foaf/0.1/")
                     .where("?subject <age> ?object")
-                    .each(spy)
+                    .execute(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 2);
                 }))
             }
         },
-        ".each": {
+        "//.execute": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
@@ -107,7 +103,7 @@ define([
                 var spy = sinon.spy();
                 this.api
                     .where("?subject ?predicate ?object")
-                    .each(spy)
+                    .execute(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 6);
                 }));
@@ -116,14 +112,14 @@ define([
                 var spy = sinon.spy();
                 this.api
                     .where("?subject ?predicate ?object")
-                    .each(spy)
-                    .each(spy)
+                    .execute(spy)
+                    .execute(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 12);
                 }));
             }
         },
-        ".filter": {
+        "//.filter": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
@@ -132,7 +128,7 @@ define([
                 this.api
                     .where("?subject ?predicate ?object")
                     .filter('?object = "{0}"', objJohnName)
-                    .each(spy)
+                    .execute(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 2);
                 }));
@@ -143,13 +139,41 @@ define([
                     .where("?subject ?predicate ?object")
                     .filter('?object = "{0}"', objJohnName)
                     .filter("?subject = <{0}>", subJohn)
-                    .each(spy)
+                    .execute(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 1);
                 }));
             }
         },
-        ".listStatement": {
+        "//.group": {
+            setUp: function (done) {
+                addStatements.call(this.api, done);
+            },
+            "Single call": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .select("?subject")
+                    .where("?subject ?predicate ?object")
+                    .group("?subject")
+                    .execute(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 2);
+                }));
+            },
+            "Multiple calls": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .select("?predicate")
+                    .where("?subject ?predicate ?object")
+                    .group("?subject")
+                    .group("?predicate")
+                    .execute(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 3);
+                }));
+            }
+        },
+        "//.listStatement": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
@@ -193,6 +217,9 @@ define([
             }
         },
         ".load": {
+            setUp: function () {
+                buster.testRunner.timeout = 2000;
+            },
             "Single call": function (done) {
                 this.api
                     .load("http://localhost:8088/json-ld/simple.jsonld")
@@ -209,7 +236,7 @@ define([
                 }));
             }
         },
-        ".optional": {
+        "//.optional": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
@@ -218,7 +245,7 @@ define([
                 this.api
                     .where('?subject <{0}> ?name'.format(preName))
                     .optional('?subject <{0}> ?homepage'.format(preHomepage))
-                    .each(spy)
+                    .execute(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 3);
                 }))
@@ -228,7 +255,7 @@ define([
                 this.api
                     .where('?subject <{0}> ?name'.format(preName))
                     .optional('?subject <{0}> ?homepage . ?subject <{0}> ?age', preHomepage, preAge)
-                    .each(spy)
+                    .execute(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 3);
                 }))
@@ -237,7 +264,7 @@ define([
                 var spy = sinon.spy();
                 this.api
                     .where('?subject <{0}> ?name', preName)
-                    .each(spy)
+                    .execute(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 3);
                 }))
@@ -248,13 +275,13 @@ define([
                     .where('?subject <{0}> ?name'.format(preName))
                     .optional('?subject <{0}> ?homepage'.format(preHomepage))
                     .optional('?subject <{0}> ?age'.format(preAge))
-                    .each(spy)
+                    .execute(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 3);
                 }))
             }
         },
-        ".prefix": {
+        "//.prefix": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
@@ -263,7 +290,7 @@ define([
                 this.api
                     .prefix("foaf", "http://xmlns.com/foaf/0.1/")
                     .where("?subject foaf:age ?object")
-                    .each(spy)
+                    .execute(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 2);
                 }));
@@ -275,7 +302,7 @@ define([
                 this.api
                     .load("http://localhost:8088/json-ld/people/arne.jsonld")
                     .query("http://localhost:8088/sparql/api.test.rq")
-                    .each(spy)
+                    .execute(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 1);
                 }));
@@ -298,7 +325,7 @@ define([
                     var spy = sinon.spy();
                     this.api
                         .query("SELECT ?s WHERE { ?s ?p ?o }")
-                        .each(spy)
+                        .execute(spy)
                         .then(done(function () {
                         assert.equals(spy.callCount, 6);
                     }));
@@ -307,7 +334,7 @@ define([
                     var spy = sinon.spy();
                     this.api
                         .query("SELECT (COUNT(?s) as ?count) WHERE { ?s ?p ?o } GROUP BY ?s")
-                        .each(function (count) {
+                        .execute(function (count) {
                             assert.defined(count);
                             spy();
                         })
@@ -319,7 +346,7 @@ define([
                     var spy = sinon.spy();
                     this.api
                         .query("SELECT DISTINCT ?s WHERE { ?s ?p ?o }")
-                        .each(function (s) {
+                        .execute(function (s) {
                             assert.defined(s);
                             spy();
                         })
@@ -331,7 +358,7 @@ define([
                     var spy = sinon.spy();
                     this.api
                         .query("SELECT (SUM(?age) as ?totalAge) WHERE { ?s <http://xmlns.com/foaf/0.1/age> ?age }")
-                        .each(function (totalAge) {
+                        .execute(function (totalAge) {
                             assert.equals(totalAge, 99);
                             spy();
                         })
@@ -343,7 +370,7 @@ define([
                     var spy = sinon.spy();
                     this.api
                         .query("SELECT (AVG(?age) as ?avgAge) WHERE { ?s <http://xmlns.com/foaf/0.1/age> ?age }")
-                        .each(function (avgAge) {
+                        .execute(function (avgAge) {
                             assert.equals(avgAge, 49.5);
                             spy();
                         })
@@ -355,7 +382,7 @@ define([
                     var spy = sinon.spy();
                     this.api
                         .query("SELECT (MIN(?age) as ?minAge) WHERE { ?s <http://xmlns.com/foaf/0.1/age> ?age }")
-                        .each(function (minAge) {
+                        .execute(function (minAge) {
                             assert.equals(minAge, 42);
                             spy();
                         })
@@ -367,7 +394,7 @@ define([
                     var spy = sinon.spy();
                     this.api
                         .query("SELECT (MAX(?age) as ?maxAge) WHERE { ?s <http://xmlns.com/foaf/0.1/age> ?age }")
-                        .each(function (maxAge) {
+                        .execute(function (maxAge) {
                             assert.equals(maxAge, 57);
                             spy();
                         })
@@ -379,14 +406,39 @@ define([
                     var spy = sinon.spy();
                     this.api
                         .query("SELECT ?subject WHERE { ?subject <{0}> ?o }", "http://xmlns.com/foaf/0.1/age")
-                        .each(spy)
+                        .execute(spy)
                         .then(done(function () {
                         assert.equals(spy.callCount, 2);
                     }));
                 }
             }
         },
-        ".removeStatement": {
+        "//.regex": {
+            setUp: function (done) {
+                addStatements.call(this.api, done);
+            },
+            "Without flags": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .where("?subject ?predicate ?object")
+                    .regex("?object", "john")
+                    .execute(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 0);
+                }));
+            },
+            "With flags": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .where("?subject ?predicate ?object")
+                    .regex("?object", "john", "i")
+                    .execute(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 2);
+                }));
+            }
+        },
+        "//.removeStatement": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
@@ -410,53 +462,52 @@ define([
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
-            "Asterix variable": function (done) {
+            "//Asterix variable": function (done) {
                 this.api
                     .select("*")
                     .where("?subject ?predicate ?object")
-                    .each(function(subject, predicate, object) {
+                    .execute(function(subject, predicate, object) {
+                        console.log(arguments);
                         assert.defined(subject);
                         assert.defined(predicate);
                         assert.defined(object);
                     })
                     .then(done);
             },
-            "Single variable": function (done) {
+            "//Single variable": function (done) {
                 this.api
                     .select("?subject")
                     .where("?subject ?predicate ?object")
-                    .each(function (subject) {
+                    .execute(function (subject) {
                         assert.defined(subject);
                     })
                     .then(done);
             },
-            "Aliased variables": function (done) {
+            "//Aliased variables": function (done) {
                 this.api
                     .select("(?subject as ?s)")
                     .where("?subject ?predicate ?object")
-                    .each(function (s) {
+                    .execute(function (s) {
                         assert.defined(s);
                     })
                     .then(done);
             },
-            "Multiple variables": function (done) {
+            "//Multiple variables": function (done) {
                 this.api
                     .select("?subject (?predicate as ?s)")
                     .where("?subject ?predicate ?object")
-                    .each(function (subject, s) {
+                    .execute(function (subject, s) {
                         assert.defined(subject);
                         assert.defined(s);
                     })
                     .then(done);
             }
         },
-        ".size": {
-            "With callback": function (done) {
-                this.api
-                    .size(done(function (size) {
-                        assert.equals(size, 0);
-                    }));
-            }
+        ".size": function (done) {
+            this.api
+                .size(done(function (size) {
+                    assert.equals(size, 0);
+                }));
         },
         ".then": function (done) {
             this.api
@@ -464,7 +515,7 @@ define([
                 assert(true);
             }));
         },
-        ".where": {
+        "//.where": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
@@ -472,7 +523,7 @@ define([
                 var spy = sinon.spy();
                 this.api
                     .where('?subject <{0}> "{1}"'.format(preName, objJohnName))
-                    .each(spy)
+                    .execute(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 2);
                 }))
@@ -481,7 +532,7 @@ define([
                 var spy = sinon.spy();
                 this.api
                     .where('?subject <{0}> "{1}"', preName, objJohnName)
-                    .each(spy)
+                    .execute(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 2);
                 }))
@@ -491,13 +542,37 @@ define([
                 this.api
                     .where('?subject ?predicate "{0}"'.format(objJohnName))
                     .where('<{0}> ?predicate "{1}"'.format(subJohn, objJohnName))
-                    .each(spy)
+                    .execute(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 2);
                 }))
             }
         },
-        "Attempts on SPARQL injection": {
+        "//.where, no preloaded data": {
+            "Simple BGP": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .load("http://localhost:8088/json-ld/graphite-query/data.jsonld")
+                    .query("http://localhost:8088/sparql/graphite-query/simple-bgp.rq")
+                    .where("?user a foaf:Person")
+                    .execute(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 2);
+                }));
+            },
+            "With optional": function (done) {
+                var spy = sinon.spy();
+                this.api
+                    .load("http://localhost:8088/json-ld/graphite-query/data.jsonld")
+                    .query("http://localhost:8088/sparql/graphite-query/optional.rq")
+                    .where("?user foaf:knows <{0}>", "http://example.org/B")
+                    .execute(spy)
+                    .then(done(function () {
+                    assert.equals(spy.callCount, 1);
+                }))
+            }
+        },
+        "//Attempts on SPARQL injection": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
@@ -505,7 +580,7 @@ define([
                 var spy = sinon.spy();
                 this.api
                     .query('SELECT ?s WHERE { ?s <{0}> "{1}" }'.format(preName, 'John Lennon" . ?s ?p ?o . }#'))
-                    .each(spy)
+                    .execute(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 6);
                 }));
@@ -514,7 +589,7 @@ define([
                 var spy = sinon.spy();
                 this.api
                     .query('SELECT ?s WHERE { ?s <{0}> "{1}" }', preName, 'John Lennon" . ?s ?p "Tim Berners-Lee" . }#')
-                    .each(spy)
+                    .execute(spy)
                     .then(done(function () {
                     assert.equals(spy.callCount, 0);
                 }));

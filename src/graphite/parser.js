@@ -22,6 +22,11 @@ define([
     };
     /**
      * The parser object
+     * @param {String|Object} format The data to be parsed
+     * @param {String} format The MIME format of the data to be parsed
+     * @param {Object} options Various options available for the parser
+     * @param {Function} callback The function to call when the data is parsed; parameter is
+     * the graph assembled, given in form of Dictionary.Formula
      */
     return function (data, format, options, callback) {
         var graph,

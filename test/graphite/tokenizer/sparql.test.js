@@ -161,6 +161,20 @@ define([
             "expressionType": "aggregate",
             "token": "expression"
         },
+        tokenExpressenRegexArne = {
+            "expressionType": "regex",
+            "flags": undefined,
+            "pattern": tokenExpressionAtomicArne,
+            "text": tokenExpressionAtomicA,
+            "token": "expression"
+        },
+        tokenExpressionRegexArneWithFlagArne = {
+            "expressionType": "regex",
+            "flags": tokenExpressionAtomicArne,
+            "pattern": tokenExpressionAtomicArne,
+            "text": tokenExpressionAtomicA,
+            "token": "expression"
+        },
         tokenExpressionSumA = {
             "aggregateType": "sum",
             "distinct": "",
@@ -191,6 +205,14 @@ define([
         tokenFilterANotEqualsArne = {
             "token": "filter",
             "value": tokenExpressionANotEqualsArne
+        },
+        tokenFilterRegexArne = {
+            "token": "filter",
+            "value": tokenExpressenRegexArne
+        },
+        tokenFilterRegexArneWithFlagArne = {
+            "token": "filter",
+            "value": tokenExpressionRegexArneWithFlagArne
         },
         tokenDirectionAASC = {
             "direction": "ASC",
@@ -554,6 +576,16 @@ define([
             });
             assert.equals(Tokenizer.filter('FILTER(?a != "Arne")'), {
                 "filter": tokenFilterANotEqualsArne,
+                "remainder": ""
+            });
+        },
+        ".filter, with regex": function () {
+            assert.equals(Tokenizer.filter('FILTER regex(?a, "Arne")'), {
+                "filter": tokenFilterRegexArne,
+                "remainder": ""
+            });
+            assert.equals(Tokenizer.filter('FILTER regex(?a, "Arne", "Arne")'), {
+                "filter": tokenFilterRegexArneWithFlagArne,
                 "remainder": ""
             });
         },

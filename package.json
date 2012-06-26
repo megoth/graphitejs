@@ -16,7 +16,7 @@
         "url": "http://www.opensource.org/licenses/mit-license.php"
     },
     "dependencies": {
-        "buster": "0.5.3",
+        "buster": "0.6.0",
         "buster-amd": "0.2.0",
         "sinon": "1.3.4"
     }

@@ -1,0 +1,332 @@
+@prefix bio:  <http://purl.org/vocab/bio/0.1/> .
+@prefix dc:   <http://purl.org/dc/elements/1.1/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ma:   <http://example.org/music/v1#> .
+@prefix mo:   <http://purl.org/ontology/mo/> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+ma:trackFeelsLikeHomeRadioEdit a mo:Track ;
+    dc:title "Feels Like Home - Radio Edit" ;
+    ma:spotify "spotify:track:11TCCyvrdIhWMaRQuRETLI" ;
+    mo:track_number "1" .
+ma:trackDarkAndLongChristianSmithTronicTreatmentRemix a mo:Track ;
+    dc:title "Dark & Long - Christian Smith Tronic Treatment Remix" ;
+    ma:spotify "spotify:track:37vz9j2DwSxNpGMTBOLfzg" ;
+    mo:track_number "1" .
+ma:trackDarkAndLongChristianSmithHypnoticaDub a mo:Track ;
+    dc:title "Dark & Long - Christian Smith Hypnotica Dub" ;
+    ma:spotify "spotify:track:6Vcbl4XDYEVDsWpHB6kg7y" ;
+    mo:track_number "2" .
+ma:trackAsleepFromDay a mo:Track ;
+    dc:title "Asleep From Day" ;
+    ma:spotify "spotify:track:5uJ67HCzXoQLLnAFyakHPX" ;
+    mo:track_number "1" .
+ma:trackElvis a mo:Track ;
+    dc:title "Elvis" ;
+    ma:spotify "spotify:track:0VtnTQJ6MS0uawxFdZKkvc" ;
+    mo:track_number "2" .
+ma:trackConfusionInEdit a mo:Track ;
+    dc:title "Confusion - Inédit" ;
+    ma:spotify "spotify:track:0iAsVLtMFqoOsipcwFp1YA" ;
+    mo:track_number "3" .
+ma:trackTroublesWhatYouAreIn a mo:Track ;
+    dc:title "Trouble's What You Are In" ;
+    ma:spotify "spotify:track:6JHH8prFlNGas7Kh1I1wJW" ;
+    mo:track_number "4" .
+ma:trackWildRosesInEdit a mo:Track ;
+    dc:title "Wild Roses - Inédit" ;
+    ma:spotify "spotify:track:1iptJZE3mJo5khgDU0cRTg" ;
+    mo:track_number "5" .
+ma:trackRoadTrip a mo:Track ;
+    dc:title "Road Trip" ;
+    ma:spotify "spotify:track:6qPS11TwmlFxffCGy2IFka" ;
+    mo:track_number "6" .
+ma:trackHailinFromTheEdge a mo:Track ;
+    dc:title "Hailin' From The Edge" ;
+    ma:spotify "spotify:track:65y3jsULmZGCFqZaCn5bhu" ;
+    mo:track_number "7" .
+ma:trackGhostGirlInEdit a mo:Track ;
+    dc:title "Ghost Girl - Inédit" ;
+    ma:spotify "spotify:track:594V1RtORqgWfmHkfY4aEB" ;
+    mo:track_number "8" .
+ma:trackEverythinIsAlright a mo:Track ;
+    dc:title "Everythin Is Alright" ;
+    ma:spotify "spotify:track:5xicgtXa8WIzZ47M0fXfyv" ;
+    mo:track_number "9" .
+ma:track7AMInEdit a mo:Track ;
+    dc:title "7 A.M. - Inédit" ;
+    ma:spotify "spotify:track:52lpv8iRJfjZ0nV3jtK1GR" ;
+    mo:track_number "10" .
+ma:trackDownTheLine a mo:Track ;
+    dc:title "Down The Line" ;
+    ma:spotify "spotify:track:23COTqfgCZdvsfBAaHEUxE" ;
+    mo:track_number "11" .
+ma:trackLongLongLong a mo:Track ;
+    dc:title "Long, Long, Long" ;
+    ma:spotify "spotify:track:2Ke80Own4sAX1D8WeqqRzY" ;
+    mo:track_number "12" .
+ma:trackDayvanCowboy a mo:Track ;
+    dc:title "Dayvan Cowboy" ;
+    ma:spotify "spotify:track:3W8xrBFkxPV1DkDbM2KLkv" ;
+    mo:track_number "13" .
+ma:trackBetweenTheMiles a mo:Track ;
+    dc:title "Between The Miles" ;
+    ma:spotify "spotify:track:4CvkmpNWZns7mTGFxq4Lnm" ;
+    mo:track_number "14" .
+ma:trackEnterSandman a mo:Track ;
+    dc:title "Enter Sandman" ;
+    mo:track_number "1" .
+ma:trackSadButTrue a mo:Track ;
+    dc:title "Sad But True" ;
+    mo:track_number "2" .
+ma:trackHolierThanThou a mo:Track ;
+    dc:title "Holier Than Thou" ;
+    mo:track_number "3" .
+ma:trackTheUnforgiven a mo:Track ;
+    dc:title "The Unforgiven" ;
+    mo:track_number "4" .
+ma:trackWhereverIMayRoam a mo:Track ;
+    dc:title "Wherever I May Roam" ;
+    mo:track_number "5" .
+ma:trackDontThreadOnMe a mo:Track ;
+    dc:title "Don't Thread on Me" ;
+    mo:track_number "6" .
+ma:trackThroughTheNever a mo:Track ;
+    dc:title "Through the Never" ;
+    mo:track_number "7" .
+ma:trackNothingElseMatters a mo:Track ;
+    dc:title "Nothing Else Matters" ;
+    mo:track_number "8" .
+ma:trackOfWolfAndMan a mo:Track ;
+    dc:title "Of Wolf and Man" ;
+    mo:track_number "9" .
+ma:trackTheGodThatFailed a mo:Track ;
+    dc:title "The God That Failed" ;
+    mo:track_number "10" .
+ma:trackMyFriendOfMisery a mo:Track ;
+    dc:title "My Friend of Misery" ;
+    mo:track_number "11" .
+ma:trackTheStruggleWithin a mo:Track ;
+    dc:title "The Struggle Within" ;
+    mo:track_number "12" .
+ma:trackHitTheLights a mo:Track ;
+    dc:title "Hit the Lights" ;
+    mo:track_number "1" .
+ma:trackTheFourHorsemen a mo:Track ;
+    dc:title "The Four Horsemen" ;
+    mo:track_number "2" .
+ma:trackMotorbreath a mo:Track ;
+    dc:title "Motorbreath" ;
+    mo:track_number "3" .
+ma:trackJumpInTheFire a mo:Track ;
+    dc:title "Jump in the Fire" ;
+    mo:track_number "4" .
+ma:trackAnesthesiaPullingTeeth a mo:Track ;
+    dc:title "(Anesthesia) Pulling Teeth" ;
+    mo:track_number "5" .
+ma:trackWhiplash a mo:Track ;
+    dc:title "Whiplash" ;
+    mo:track_number "6" .
+ma:trackPhantomLord a mo:Track ;
+    dc:title "Phantom Lord" ;
+    mo:track_number "7" .
+ma:trackNoRemorse a mo:Track ;
+    dc:title "No Remorse" ;
+    mo:track_number "8" .
+ma:trackSeekAndDestroy a mo:Track ;
+    dc:title "Seek & Destroy" ;
+    mo:track_number "9" .
+ma:trackMetalMilitia a mo:Track ;
+    dc:title "Metal Militia" ;
+    mo:track_number "10" .
+ma:trackHush a mo:Track ;
+    dc:title "Hush - 1998 - Remaster" ;
+    ma:spotify "spotify:track:6do5qwBfDM2oqEzLMdISx1" ;
+    mo:track_number "1" .
+ma:trackKentuckyWoman a mo:Track ;
+    dc:title "Kentucky Woman - 1998 - Remaster" ;
+    ma:spotify "spotify:track:0khWdRqIQzaGBvwQAHCcuN" ;
+    mo:track_number "2" .
+ma:trackHallelujah a mo:Track ;
+    dc:title "Hallelujah - 2002 - Remaster" ;
+    ma:spotify "spotify:track:5vuJCtxni9GZJFiPfd8wfF" ;
+    mo:track_number "3" .
+ma:trackSpeedKing a mo:Track ;
+    dc:title "Speed King" ;
+    ma:spotify "spotify:track:2Muv4t7QzN60lPbmQ9jU83" ;
+    mo:track_number "4" .
+ma:trackBlackNightLiveInJapan a mo:Track ;
+    dc:title "Black Night - Live In Japan" ;
+    ma:spotify "spotify:track:3ZLPYbhsmWRpXQaLRNJJF3" ;
+    mo:track_number "5" .
+ma:trackStrangeKindOfWoman a mo:Track ;
+    dc:title "Strange Kind Of Woman - 2002 - Remaster" ;
+    ma:spotify "spotify:track:1HdjXOw4W0KOV8wnWZjAPa" ;
+    mo:track_number "6" .
+ma:trackChildInTimeLiveInJapan a mo:Track ;
+    dc:title "Child In Time - Live In Japan" ;
+    ma:spotify "spotify:track:3z5LK8brjwRbqJM5M9ftt8" ;
+    mo:track_number "7" .
+ma:trackFireball a mo:Track ;
+    dc:title "Fireball" ;
+    ma:spotify "spotify:track:0Kk9ucpKYg4LR8bZ3Ym5Aj" ;
+    mo:track_number "8" .
+ma:trackHighwayStar a mo:Track ;
+    dc:title "Highway Star - 1997 - Remaster" ;
+    ma:spotify "spotify:track:7pa3je7cQzwy8fMy5srSPi" ;
+    mo:track_number "9" .
+ma:trackNeverBefore a mo:Track ;
+    dc:title "Never Before" ;
+    ma:spotify "spotify:track:6hbkSw8Gsb8WrOQmHlH93a" ;
+    mo:track_number "10" .
+ma:trackSmokeOnTheWater a mo:Track ;
+    dc:title "Smoke on the Water - 1971 Recording" ;
+    ma:spotify "spotify:track:6xOhQgJVABkgj4RqiAd5y3" ;
+    mo:track_number "11" .
+ma:trackSpaceTruckin a mo:Track ;
+    dc:title "Space Truckin' - 1997 - Remaster" ;
+    ma:spotify "spotify:track:3vyHJcysWVT4jK0mGDU14z" ;
+    mo:track_number "12" .
+ma:trackWomanFromTokyo a mo:Track ;
+    dc:title "Woman From Tokyo" ;
+    ma:spotify "spotify:track:6zWXgTm7VaownnzqNidbEV" ;
+    mo:track_number "13" .
+ma:trackBurn a mo:Track ;
+    dc:title "Burn - Single Edit" ;
+    ma:spotify "spotify:track:1dFYhoTn7nB0HNt2T08Her" ;
+    mo:track_number "14" .
+ma:trackStormbringer a mo:Track ;
+    dc:title "Stormbringer" ;
+    ma:spotify "spotify:track:6zJ1wGgqBl84LnWorGcdtY" ;
+    mo:track_number "15" .
+ma:trackShineOnYouCrazyDiamond a mo:Track ;
+    dc:title "Shine On You Crazy Diamond" ;
+    ma:spotify "spotify:track:4MXj0JBvl6Fb3nRm1Ztl5i" ;
+    mo:track_number "1" .
+ma:trackSignsOfLife a mo:Track ;
+    dc:title "Signs of Life" ;
+    ma:spotify "spotify:track:5iuPwDbpiV6jkGeTF3hapO" ;
+    mo:track_number "2" .
+ma:trackLearningToFly a mo:Track ;
+    dc:title "Learning to Fly" ;
+    ma:spotify "spotify:track:0wwBwkTeyYLYuXt8If7sVS" ;
+    mo:track_number "3" .
+ma:trackANewMachine a mo:Track ;
+    dc:title "A New Machine" ;
+    ma:spotify "spotify:track:1if4dYcCFzlxwMakuZ5GjK" ;
+    mo:track_number "4" .
+ma:trackTerminalFrost a mo:Track ;
+    dc:title "Terminal Frost" ;
+    ma:spotify "spotify:track:0QkdGwCfebN0IK4WpRy3Gg" ;
+    mo:track_number "5" .
+ma:trackSorrow a mo:Track ;
+    dc:title "Sorrow" ;
+    ma:spotify "spotify:track:6koMxU1Pjfgn0ro3w2vktJ" ;
+    mo:track_number "6" .
+ma:trackTime a mo:Track ;
+    dc:title "Time" ;
+    ma:spotify "spotify:track:3bEKfjDaAS1JoTjstaV8WH" ;
+    mo:track_number "7" .
+ma:trackWelcomeToTheMachine a mo:Track ;
+    dc:title "Welcome to the Machine" ;
+    ma:spotify "spotify:track:6LXxOug1dkgL7zWF77MhvA" ;
+    mo:track_number "8" .
+ma:trackUsAndThem a mo:Track ;
+    dc:title "Us and Them" ;
+    ma:spotify "spotify:track:5yytcACkDPNpk8QYoI9KkW" ;
+    mo:track_number "9" .
+ma:trackMoney a mo:Track ;
+    dc:title "Money" ;
+    ma:spotify "spotify:track:7AgsRjF2KJs4ESfZrM4RC6" ;
+    mo:track_number "10" .
+ma:trackTrainsAndWinterRains a mo:Track ;
+    dc:title "Trains And Winter Rains" ;
+    ma:spotify "spotify:track:4Mtzx1fnXjkGVLbesFGeIs" ;
+    mo:track_number "1" .
+ma:trackMyMyTimeFlies a mo:Track ;
+    dc:title "My! My! Time Flies!" ;
+    ma:spotify "spotify:track:6dskcWWFb7goXznQl8AFm8" ;
+    mo:track_number "2" .
+ma:trackStarsAndMidnightBlue a mo:Track ;
+    dc:title "Stars And Midnight Blue" ;
+    ma:spotify "spotify:track:41C7qRFW0pSQQ0E8p7PRJF" ;
+    mo:track_number "3" .
+ma:trackAmarantine a mo:Track ;
+    dc:title "Amarantine" ;
+    ma:spotify "spotify:track:3LKMtb0kk6jwXgbBpiUUlG" ;
+    mo:track_number "4" .
+ma:trackSumiregusa a mo:Track ;
+    dc:title "Sumiregusa" ;
+    ma:spotify "spotify:track:5Gw5D4T7BDiVrLU5xZV1G7" ;
+    mo:track_number "5" .
+ma:trackTheRiverSings a mo:Track ;
+    dc:title "The River Sings" ;
+    ma:spotify "spotify:track:3sNXfkhCTumZsuVD1MNbdh" ;
+    mo:track_number "6" .
+ma:trackIfICouldBeWhereYouAre a mo:Track ;
+    dc:title "If I Could Be Where You Are" ;
+    ma:spotify "spotify:track:2hQ2Sz3cShpcUk2Jnd8ack" ;
+    mo:track_number "7" .
+ma:trackWildChild a mo:Track ;
+    dc:title "Wild Child" ;
+    ma:spotify "spotify:track:2BKlTJdbIpcN6NCHR1QR8h" ;
+    mo:track_number "8" .
+ma:trackOnlyTimeOriginalVersion a mo:Track ;
+    dc:title "Only Time - Original Version" ;
+    ma:spotify "spotify:track:4h1ccuE64pdkS4IxvjiHyM" ;
+    mo:track_number "9" .
+ma:trackDrifting a mo:Track ;
+    dc:title "Drifting" ;
+    ma:spotify "spotify:track:0H7YHOAhCgPqfaLrCs6c1L" ;
+    mo:track_number "10" .
+ma:trackFlorasSecret a mo:Track ;
+    dc:title "Flora's Secret" ;
+    ma:spotify "spotify:track:7ezlWh2wWF3Pi8gJHpEFRa" ;
+    mo:track_number "11" .
+ma:trackFallenEmbers a mo:Track ;
+    dc:title "Fallen Embers" ;
+    ma:spotify "spotify:track:6PNEWhqmQQSkZdEgWzirOO" ;
+    mo:track_number "12" .
+ma:trackOneByOne a mo:Track ;
+    dc:title "One By One" ;
+    ma:spotify "spotify:track:0IBxIwPdmZvFkdmSZF2gBN" ;
+    mo:track_number "13" .
+ma:trackPaxDeorum a mo:Track ;
+    dc:title "Pax Deorum - Remastered 2009" ;
+    ma:spotify "spotify:track:24XM3zB1IPY0lFGNdw1h1W" ;
+    mo:track_number "14" .
+ma:trackAthairArNeamh a mo:Track ;
+    dc:title "Athair Ar Neamh - Remastered 2009" ;
+    ma:spotify "spotify:track:0v4AECHijEC2VxeyLxBmDg" ;
+    mo:track_number "15" .
+ma:trackAnywhereIs a mo:Track ;
+    dc:title "Anywhere Is - Remastered 2009" ;
+    ma:spotify "spotify:track:3fAjDNdCQ4sTfOpQwFjHqG" ;
+    mo:track_number "16" .
+ma:trackOrinocoFlow a mo:Track ;
+    dc:title "Orinoco Flow - Remastered 2009 version" ;
+    ma:spotify "spotify:track:4k0nHgEyUdebSVapscpmqf" ;
+    mo:track_number "17" .
+ma:trackWatermark a mo:Track ;
+    dc:title "Watermark - Remastered 2009" ;
+    ma:spotify "spotify:track:6Cw0YmwiEnKVpW45QltRen" ;
+    mo:track_number "18" .
+ma:trackBoadicea a mo:Track ;
+    dc:title "Boadicea - Remastered 2009" ;
+    ma:spotify "spotify:track:6VAOH641sWf6w4Iw1RBYK3" ;
+    mo:track_number "19" .
+ma:trackMayItBe a mo:Track ;
+    dc:title "May It Be" ;
+    ma:spotify "spotify:track:0efVCd2usbdvcewm6JEd7U" ;
+    mo:track_number "20" .
+ma:trackCaribbeanBlue a mo:Track ;
+    dc:title "Caribbean Blue - Remastered 2009" ;
+    ma:spotify "spotify:track:11bWTqPwzkCvG7PTHy7EDZ" ;
+    mo:track_number "21" .
+ma:trackAniron a mo:Track ;
+    dc:title "Aniron" ;
+    ma:spotify "spotify:track:2gdp0c1l3uKH8zU0vnPvYf" ;
+    mo:track_number "22" .

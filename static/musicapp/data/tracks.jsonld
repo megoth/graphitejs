@@ -1,0 +1,33 @@
+[{
+    "@context": {
+        "bio": "http://purl.org/vocab/bio/0.1/",
+        "dc": "http://purl.org/dc/elements/1.1/",
+        "foaf": "http://xmlns.com/foaf/0.1/",
+        "ma": "http://example.org/music/v1#",
+        "mo": "http://purl.org/ontology/mo/",
+        "owl": "http://www.w3.org/2002/07/owl#",
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "xsd": "http://www.w3.org/2001/XMLSchema#"
+    },
+    "@id": "ma:trackFeelsLikeHomeRadioEdit",
+    "@type": "mo:Track",
+    "dc:title": "Feels Like Home - Radio Edit",
+    "ma:spotify": "spotify:track:11TCCyvrdIhWMaRQuRETLI"
+}, {
+    "@context": {
+        "bio": "http://purl.org/vocab/bio/0.1/",
+        "dc": "http://purl.org/dc/elements/1.1/",
+        "foaf": "http://xmlns.com/foaf/0.1/",
+        "ma": "http://example.org/music/v1#",
+        "mo": "http://purl.org/ontology/mo/",
+        "owl": "http://www.w3.org/2002/07/owl#",
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "xsd": "http://www.w3.org/2001/XMLSchema#"
+    },
+    "@id": "ma:DarkAndLongChristianSmithTronicTreatmentRemix",
+    "@type": "mo:Track",
+    "dc:title": "Dark & Long - Christian Smith Tronic Treatment Remix",
+    "ma:spotify": "spotify:track:37vz9j2DwSxNpGMTBOLfzg"
+}]

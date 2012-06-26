@@ -33,6 +33,7 @@ define([
         parenthesisLeft = /^\(/,
         parenthesisRight = /^\)/,
         prefixRegex = /^(PREFIX|prefix)/,
+        regexRegex = /^(REGEX|regex)/,
         semicolonRegex = /^;/,
         stringRegex = /^[a-zA-Z0-9]*/,
         sumRegex = /^(SUM|sum)/,
@@ -183,6 +184,37 @@ define([
             "remainder": literal.remainder
         };
     }
+    function expressionRegex(data) {
+        var flags, pattern, text;
+        data = expect(data, regexRegex);
+        data = expect(data, parenthesisLeft);
+        text = this.expression(data);
+        data = text.remainder;
+        text = text.expression;
+        data = expect(data, commaRegex);
+        data = ws(data);
+        pattern = this.expression(data);
+        data = pattern.remainder;
+        pattern = pattern.expression;
+        if (commaRegex.test(data)) {
+            data = expect(data, commaRegex);
+            data = ws(data);
+            flags = this.expression(data);
+            data = flags.remainder;
+            flags = flags.expression;
+        }
+        data = expect(data, parenthesisRight);
+        return {
+            "expression": {
+                "expressionType": "regex",
+                "flags": flags,
+                "pattern": pattern,
+                "text": text,
+                "token": "expression"
+            },
+            "remainder": data
+        }
+    }
     function expressionRelationalOp2(data, regex) {
         var op2;
         data = expect(data, regex);
@@ -254,27 +286,27 @@ define([
     function whereBGP(triplesContext, pattern, options) {
         switch (pattern.kind) {
             case "BGP":
-                console.log("IN SPARQL, WHERE BGP BGP");
+                //console.log("IN SPARQL, WHERE BGP BGP");
                 return {
                     "kind": "BGP",
                     "value": pattern.value.concat(triplesContext)
                 };
             case "EMPTY_PATTERN":
-                console.log("IN SPARQL, WHERE BGP EMPTY_PATTERN");
+                //console.log("IN SPARQL, WHERE BGP EMPTY_PATTERN");
                 return {
                     "kind": "BGP",
                     "value": triplesContext
                 };
             case "FILTER":
-                console.log("IN SPARQL, WHERE BGP FILTER");
+                //console.log("IN SPARQL, WHERE BGP FILTER");
                 pattern.value = whereBGP(triplesContext, pattern.value, options);
                 return pattern;
             case "JOIN":
-                console.log("IN SPARQL, WHERE BGP JOIN");
+                //console.log("IN SPARQL, WHERE BGP JOIN");
                 pattern.rvalue.value = pattern.rvalue.value.concat(triplesContext);
                 return pattern;
             case "LEFT_JOIN":
-                console.log("IN SPARQL, WHERE BGP LEFT_JOIN");
+                //console.log("IN SPARQL, WHERE BGP LEFT_JOIN");
                 return {
                     "kind": "JOIN",
                     "lvalue": pattern,
@@ -463,6 +495,8 @@ define([
                 return expressionAggregate.call(this, "min", data);
             } else if (sumRegex.test(data)) {
                 return expressionAggregate.call(this, "sum", data);
+            } else if (regexRegex.test(data)) {
+                return expressionRegex.call(this, data);
             } else if (stringRegex.test(data)) {
                 return expressionLiteral.call(this, data, options);
             } else {
@@ -478,10 +512,17 @@ define([
         filter: function (data, options) {
             var value;
             data = expect(data, filterRegex);
-            data = expect(data, parenthesisLeft);
-            value = this.expression(data, options);
-            data = expect(value.remainder, parenthesisRight);
             data = ws(data);
+            if (parenthesisLeft.test(data)) {
+                data = expect(data, parenthesisLeft);
+                data = ws(data);
+                value = this.expression(data, options);
+                data = expect(value.remainder, parenthesisRight);
+                data = ws(data);
+            } else {
+                value = this.expression(data, options);
+                data = value.remainder;
+            }
             return {
                 "filter": {
                     "token": "filter",
@@ -520,16 +561,15 @@ define([
          * @return {Object}
          */
         groupgraphpattern: function (data, filters, patterns, bgpindex, options) {
-            //console.log("IN SPARQL TOKENIZER, groupgraphpattern", patterns);
+            //console.log("IN SPARQL TOKENIZER, groupgraphpattern", patterns, bgpindex);
             options = options || {};
             var filter,
                 pattern,
                 triplesContext = [];
             if (variableRegex.test(data) || lesserRegex.test(data)) {
                 if (Utils.isNumber(bgpindex)) {
-                    buster.log(patterns, bgpindex);
                     triplesContext = patterns[bgpindex].triplesContext;
-                    console.log("IN SPARQL, GGP", triplesContext);
+                    //console.log("IN SPARQL, GGP", triplesContext);
                 } else {
                     bgpindex = patterns.length;
                 }
@@ -855,11 +895,11 @@ define([
                         };
                     }
                 } else {
-                    console.log("SOMETHING WENT WRONG...");
+                    //console.log("SOMETHING WENT WRONG...");
                     throw new Error("NOT SUPPORTED YET");
                 }
                 if (!curlyBracketRightRegex.test(data)) {
-                    console.log("SOMETHING WENT WRONG...");
+                    //console.log("SOMETHING WENT WRONG...");
                     throw new Error("NOT SUPPORTED YET");
                 }
             } else if (pattern === null) {
@@ -867,12 +907,13 @@ define([
                 bgpindex = token.bgpindex;
                 data = token.remainder;
                 token = token.groupgraphpattern;
-                console.log("IN SPARQL, WHERE", bgpindex);
+                //console.log("IN SPARQL, WHERE", bgpindex);
             } else {
                 throw new Error("NOT SUPPORTED!");
             }
             data = expect(data, curlyBracketRightRegex);
             data = ws(data);
+            //console.log("IN SPARQL, WHERE", token, data);
             where = {
                 "remainder": data,
                 "where": token

@@ -1,0 +1,10 @@
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX ma: <http://example.org/music/v1#>
+PREFIX mo: <http://purl.org/ontology/mo/>
+
+SELECT ?artist
+WHERE {
+    ?a foaf:name ?artist .
+    ?a a mo:MusicGroup .
+}

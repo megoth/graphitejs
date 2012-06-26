@@ -1,83 +1,58 @@
+/** @license MIT License (c) copyright B Cavalier & J Hann */
+
+/**
+ * when
+ * A lightweight CommonJS Promises/A and when() implementation
+ *
+ * when is part of the cujo.js family of libraries (http://cujojs.com/)
+ *
+ * Licensed under the MIT License at:
+ * http://www.opensource.org/licenses/mit-license.php
+ *
+ * @version 1.2.0
+ */
+
 define([], function() {
-    var freeze, reduceArray, undef;
+    var freeze, reduceArray, slice, undef;
 
-    /**
-     * No-Op function used in method replacement
-     * @private
-     */
-    function noop() {}
+    //
+    // Public API
+    //
 
-    /**
-     * Allocate a new Array of size n
-     * @private
-     * @param n {number} size of new Array
-     * @returns {Array}
-     */
-    function allocateArray(n) {
-        return new Array(n);
-    }
+    when.defer     = defer;
+    when.reject    = reject;
+    when.isPromise = isPromise;
 
-    /**
-     * Use freeze if it exists
-     * @function
-     * @private
-     */
+    when.all       = all;
+    when.some      = some;
+    when.any       = any;
+
+    when.map       = map;
+    when.reduce    = reduce;
+
+    when.chain     = chain;
+
+    /** Object.freeze */
     freeze = Object.freeze || function(o) { return o; };
-
-    // ES5 reduce implementation if native not available
-    // See: http://es5.github.com/#x15.4.4.21 as there are many
-    // specifics and edge cases.
-    reduceArray = [].reduce ||
-        function(reduceFunc /*, initialValue */) {
-            // ES5 dictates that reduce.length === 1
-
-            // This implementation deviates from ES5 spec in the following ways:
-            // 1. It does not check if reduceFunc is a Callable
-
-            var arr, args, reduced, len, i;
-
-            i = 0;
-            arr = Object(this);
-            len = arr.length >>> 0;
-            args = arguments;
-
-            // If no initialValue, use first item of array (we know length !== 0 here)
-            // and adjust i to start at second item
-            if(args.length <= 1) {
-                // Skip to the first real element in the array
-                for(;;) {
-                    if(i in arr) {
-                        reduced = arr[i++];
-                        break;
-                    }
-
-                    // If we reached the end of the array without finding any real
-                    // elements, it's a TypeError
-                    if(++i >= len) {
-                        throw new TypeError();
-                    }
-                }
-            } else {
-                // If initialValue provided, use it
-                reduced = args[1];
-            }
-
-            // Do the actual reduce
-            for(;i < len; ++i) {
-                // Skip holes
-                if(i in arr)
-                    reduced = reduceFunc(reduced, arr[i], i, arr);
-            }
-
-            return reduced;
-        };
 
     /**
      * Trusted Promise constructor.  A Promise created from this constructor is
      * a trusted when.js promise.  Any other duck-typed promise is considered
      * untrusted.
+     *
+     * @constructor
      */
     function Promise() {}
+
+    Promise.prototype = freeze({
+        always: function(alwaysback, progback) {
+            return this.then(alwaysback, alwaysback, progback);
+        },
+
+        otherwise: function(errback) {
+            return this.then(undef, errback);
+        }
+    });
 
     /**
      * Create an already-resolved promise for the supplied value
@@ -91,20 +66,16 @@ define([], function() {
         var p = new Promise();
 
         p.then = function(callback) {
-            checkCallbacks(arguments);
-
             var nextValue;
             try {
-                nextValue = callback && callback(value);
+                if(callback) nextValue = callback(value);
                 return promise(nextValue === undef ? value : nextValue);
             } catch(e) {
                 return rejected(e);
             }
         };
 
-        // Not frozen because this should never be exposed
-        // to callers
-        return p;
+        return freeze(p);
     }
 
     /**
@@ -120,8 +91,6 @@ define([], function() {
         var p = new Promise();
 
         p.then = function(callback, errback) {
-            checkCallbacks(arguments);
-
             var nextValue;
             try {
                 if(errback) {
@@ -136,25 +105,23 @@ define([], function() {
             }
         };
 
-        // Not frozen because this should never be exposed
-        // to callers
-        return p;
+        return freeze(p);
     }
 
     /**
-     * Helper that checks arrayOfCallbacks to ensure that each element is either
-     * a function, or null or undefined.
+     * Returns a rejected promise for the supplied promiseOrValue. If
+     * promiseOrValue is a value, it will be the rejection value of the
+     * returned promise.  If promiseOrValue is a promise, its
+     * completion value will be the rejected value of the returned promise
      *
-     * @param arrayOfCallbacks {Array} array to check
-     * @throws {Error} if any element of arrayOfCallbacks is something other than
-     * a Functions, null, or undefined.
+     * @param promiseOrValue {*} the rejected value of the returned {@link Promise}
+     *
+     * @return {Promise} rejected {@link Promise}
      */
-    function checkCallbacks(arrayOfCallbacks) {
-        var arg, i = arrayOfCallbacks.length;
-        while(i) {
-            arg = arrayOfCallbacks[--i];
-            if (arg != null && typeof arg != 'function') throw new Error('callback is not a function');
-        }
+    function reject(promiseOrValue) {
+        return when(promiseOrValue, function(value) {
+            return rejected(value);
+        });
     }
 
     /**
@@ -189,11 +156,6 @@ define([], function() {
          * @throws {Error} if any argument is not null, undefined, or a Function
          */
         _then = function unresolvedThen(callback, errback, progback) {
-            // Check parameters and fail immediately if any supplied parameter
-            // is not null/undefined and is also not a function.
-            // That is, any non-null/undefined parameter must be a function.
-            checkCallbacks(arguments);
-
             var deferred = defer();
 
             listeners.push(function(promise) {
@@ -311,19 +273,12 @@ define([], function() {
          * parts
          * @class Deferred
          * @name Deferred
-         * @augments Resolver
-         * @augments Promise
          */
         deferred = {};
 
         // Promise and Resolver parts
         // Freeze Promise and Resolver APIs
 
-        /**
-         * The Promise API
-         * @namespace Promise
-         * @name Promise
-         */
         promise = new Promise();
         promise.then = deferred.then = then;
 
@@ -337,11 +292,9 @@ define([], function() {
 
         /**
          * The {@link Resolver} for this {@link Deferred}
-         * @namespace Resolver
-         * @name Resolver
          * @memberOf Deferred
          * @name resolver
-         * @type {Resolver}
+         * @class Resolver
          */
         deferred.resolver = freeze({
             resolve:  (deferred.resolve  = resolve),
@@ -462,76 +415,82 @@ define([], function() {
      * @returns {Promise}
      */
     function some(promisesOrValues, howMany, callback, errback, progressHandler) {
-        var toResolve, results, ret, deferred, resolver, rejecter, handleProgress, len, i;
 
-        len = promisesOrValues.length >>> 0;
+        checkCallbacks(2, arguments);
 
-        toResolve = Math.max(0, Math.min(howMany, len));
-        results = [];
-        deferred = defer();
-        ret = when(deferred, callback, errback, progressHandler);
+        return when(promisesOrValues, function(promisesOrValues) {
 
-        // Wrapper so that resolver can be replaced
-        function resolve(val) {
-            resolver(val);
-        }
+            var toResolve, results, ret, deferred, resolver, rejecter, handleProgress, len, i;
 
-        // Wrapper so that rejecter can be replaced
-        function reject(err) {
-            rejecter(err);
-        }
+            len = promisesOrValues.length >>> 0;
 
-        // Wrapper so that progress can be replaced
-        function progress(update) {
-            handleProgress(update);
-        }
+            toResolve = Math.max(0, Math.min(howMany, len));
+            results = [];
+            deferred = defer();
+            ret = when(deferred, callback, errback, progressHandler);
 
-        function complete() {
-            resolver = rejecter = handleProgress = noop;
-        }
+            // Wrapper so that resolver can be replaced
+            function resolve(val) {
+                resolver(val);
+            }
 
-        // No items in the input, resolve immediately
-        if (!toResolve) {
-            deferred.resolve(results);
+            // Wrapper so that rejecter can be replaced
+            function reject(err) {
+                rejecter(err);
+            }
 
-        } else {
-            // Resolver for promises.  Captures the value and resolves
-            // the returned promise when toResolve reaches zero.
-            // Overwrites resolver var with a noop once promise has
-            // be resolved to cover case where n < promises.length
-            resolver = function(val) {
-                // This orders the values based on promise resolution order
-                // Another strategy would be to use the original position of
-                // the corresponding promise.
-                results.push(val);
+            // Wrapper so that progress can be replaced
+            function progress(update) {
+                handleProgress(update);
+            }
 
-                if (!--toResolve) {
+            function complete() {
+                resolver = rejecter = handleProgress = noop;
+            }
+
+            // No items in the input, resolve immediately
+            if (!toResolve) {
+                deferred.resolve(results);
+
+            } else {
+                // Resolver for promises.  Captures the value and resolves
+                // the returned promise when toResolve reaches zero.
+                // Overwrites resolver var with a noop once promise has
+                // be resolved to cover case where n < promises.length
+                resolver = function(val) {
+                    // This orders the values based on promise resolution order
+                    // Another strategy would be to use the original position of
+                    // the corresponding promise.
+                    results.push(val);
+
+                    if (!--toResolve) {
+                        complete();
+                        deferred.resolve(results);
+                    }
+                };
+
+                // Rejecter for promises.  Rejects returned promise
+                // immediately, and overwrites rejecter var with a noop
+                // once promise to cover case where n < promises.length.
+                // TODO: Consider rejecting only when N (or promises.length - N?)
+                // promises have been rejected instead of only one?
+                rejecter = function(err) {
                     complete();
-                    deferred.resolve(results);
-                }
-            };
+                    deferred.reject(err);
+                };
 
-            // Rejecter for promises.  Rejects returned promise
-            // immediately, and overwrites rejecter var with a noop
-            // once promise to cover case where n < promises.length.
-            // TODO: Consider rejecting only when N (or promises.length - N?)
-            // promises have been rejected instead of only one?
-            rejecter = function(err) {
-                complete();
-                deferred.reject(err);
-            };
+                handleProgress = deferred.progress;
 
-            handleProgress = deferred.progress;
-
-            // TODO: Replace while with forEach
-            for(i = 0; i < len; ++i) {
-                if(i in promisesOrValues) {
-                    when(promisesOrValues[i], resolve, reject, progress);
+                // TODO: Replace while with forEach
+                for(i = 0; i < len; ++i) {
+                    if(i in promisesOrValues) {
+                        when(promisesOrValues[i], resolve, reject, progress);
+                    }
                 }
             }
-        }
 
-        return ret;
+            return ret;
+        });
     }
 
     /**
@@ -541,7 +500,7 @@ define([], function() {
      *
      * @memberOf when
      *
-     * @param promisesOrValues {Array} array of anything, may contain a mix
+     * @param promisesOrValues {Array|Promise} array of anything, may contain a mix
      *      of {@link Promise}s and values
      * @param [callback] {Function}
      * @param [errback] {Function}
@@ -550,12 +509,12 @@ define([], function() {
      * @returns {Promise}
      */
     function all(promisesOrValues, callback, errback, progressHandler) {
-        var results, promise;
 
-        results = allocateArray(promisesOrValues.length);
-        promise = reduce(promisesOrValues, reduceIntoArray, results);
+        checkCallbacks(1, arguments);
 
-        return when(promise, callback, errback, progressHandler);
+        return when(promisesOrValues, function(promisesOrValues) {
+            return _reduce(promisesOrValues, reduceIntoArray, []);
+        }).then(callback, errback, progressHandler);
     }
 
     function reduceIntoArray(current, val, i) {
@@ -570,7 +529,7 @@ define([], function() {
      *
      * @memberOf when
      *
-     * @param promisesOrValues {Array} array of anything, may contain a mix
+     * @param promisesOrValues {Array|Promise} array of anything, may contain a mix
      *      of {@link Promise}s and values
      * @param [callback] {Function}
      * @param [errback] {Function}
@@ -581,7 +540,7 @@ define([], function() {
     function any(promisesOrValues, callback, errback, progressHandler) {
 
         function unwrapSingleResult(val) {
-            return callback(val[0]);
+            return callback ? callback(val[0]) : val[0];
         }
 
         return some(promisesOrValues, 1, unwrapSingleResult, errback, progressHandler);
@@ -594,7 +553,7 @@ define([], function() {
      *
      * @memberOf when
      *
-     * @param promisesOrValues {Array} array of anything, may contain a mix
+     * @param promise {Array|Promise} array of anything, may contain a mix
      *      of {@link Promise}s and values
      * @param mapFunc {Function} mapping function mapFunc(value) which may return
      *      either a {@link Promise} or value
@@ -602,18 +561,32 @@ define([], function() {
      * @returns {Promise} a {@link Promise} that will resolve to an array containing
      *      the mapped output values.
      */
-    function map(promisesOrValues, mapFunc) {
+    function map(promise, mapFunc) {
+        return when(promise, function(array) {
+            return _map(array, mapFunc);
+        });
+    }
 
-        var results, i;
+    /**
+     * Private map helper to map an array of promises
+     * @private
+     *
+     * @param promisesOrValues {Array}
+     * @param mapFunc {Function}
+     * @return {Promise}
+     */
+    function _map(promisesOrValues, mapFunc) {
+
+        var results, len, i;
 
         // Since we know the resulting length, we can preallocate the results
         // array to avoid array expansions.
-        i = promisesOrValues.length;
-        results = allocateArray(i);
+        len = promisesOrValues.length >>> 0;
+        results = new Array(len);
 
         // Since mapFunc may be async, get all invocations of it into flight
         // asap, and then use reduce() to collect all the results
-        for(;i >= 0; --i) {
+        for(i = 0; i < len; i++) {
             if(i in promisesOrValues)
                 results[i] = when(promisesOrValues[i], mapFunc);
         }
@@ -623,19 +596,20 @@ define([], function() {
         // of size len instead of just 1.  Since all() uses reduce()
         // anyway, avoid the additional allocation by calling reduce
         // directly.
-        return reduce(results, reduceIntoArray, results);
+        return _reduce(results, reduceIntoArray, results);
     }
 
     /**
      * Traditional reduce function, similar to `Array.prototype.reduce()`, but
-     * input may contain {@link Promise}s and/or values, but reduceFunc
+     * input may contain {@link Promise}s and/or values, and reduceFunc
      * may return either a value or a {@link Promise}, *and* initialValue may
      * be a {@link Promise} for the starting value.
      *
      * @memberOf when
      *
-     * @param promisesOrValues {Array} array of anything, may contain a mix
-     *      of {@link Promise}s and values
+     * @param promise {Array|Promise} array of anything, may contain a mix
+     *      of {@link Promise}s and values.  May also be a {@link Promise} for
+     *      an array.
      * @param reduceFunc {Function} reduce function reduce(currentValue, nextValue, index, total),
      *      where total is the total number of items being reduced, and will be the same
      *      in each call to reduceFunc.
@@ -643,7 +617,23 @@ define([], function() {
      *
      * @returns {Promise} that will resolve to the final reduced value
      */
-    function reduce(promisesOrValues, reduceFunc, initialValue) {
+    function reduce(promise, reduceFunc, initialValue) {
+        var args = slice.call(arguments, 1);
+        return when(promise, function(array) {
+            return _reduce.apply(undef, [array].concat(args));
+        });
+    }
+
+    /**
+     * Private reduce to reduce an array of promises
+     * @private
+     *
+     * @param promisesOrValues {Array}
+     * @param reduceFunc {Function}
+     * @param initialValue {*}
+     * @return {Promise}
+     */
+    function _reduce(promisesOrValues, reduceFunc, initialValue) {
 
         var total, args;
 
@@ -665,9 +655,9 @@ define([], function() {
             }
         ];
 
-        if (arguments.length >= 3) args.push(initialValue);
+        if (arguments.length > 2) args.push(initialValue);
 
-        return promise(reduceArray.apply(promisesOrValues, args));
+        return reduceArray.apply(promisesOrValues, args);
     }
 
     /**
@@ -687,28 +677,95 @@ define([], function() {
 
         return when(promiseOrValue,
             function(val) {
-                resolver.resolve(useResolveValue ? resolveValue : val);
+                if(useResolveValue) val = resolveValue;
+                resolver.resolve(val);
+                return val;
             },
-            resolver.reject,
+            function(e) {
+                resolver.reject(e);
+                return rejected(e);
+            },
             resolver.progress
         );
     }
 
     //
-    // Public API
+    // Utility functions
     //
 
-    when.defer     = defer;
+    /**
+     * Helper that checks arrayOfCallbacks to ensure that each element is either
+     * a function, or null or undefined.
+     *
+     * @private
+     *
+     * @param arrayOfCallbacks {Array} array to check
+     * @throws {Error} if any element of arrayOfCallbacks is something other than
+     * a Functions, null, or undefined.
+     */
+    function checkCallbacks(start, arrayOfCallbacks) {
+        var arg, i = arrayOfCallbacks.length;
+        while(i > start) {
+            arg = arrayOfCallbacks[--i];
+            if (arg != null && typeof arg != 'function') throw new Error('callback is not a function');
+        }
+    }
 
-    when.isPromise = isPromise;
-    when.some      = some;
-    when.all       = all;
-    when.any       = any;
+    /**
+     * No-Op function used in method replacement
+     * @private
+     */
+    function noop() {}
 
-    when.reduce    = reduce;
-    when.map       = map;
+    slice = [].slice;
 
-    when.chain     = chain;
+    // ES5 reduce implementation if native not available
+    // See: http://es5.github.com/#x15.4.4.21 as there are many
+    // specifics and edge cases.
+    reduceArray = [].reduce ||
+        function(reduceFunc /*, initialValue */) {
+            // ES5 dictates that reduce.length === 1
+
+            // This implementation deviates from ES5 spec in the following ways:
+            // 1. It does not check if reduceFunc is a Callable
+
+            var arr, args, reduced, len, i;
+
+            i = 0;
+            arr = Object(this);
+            len = arr.length >>> 0;
+            args = arguments;
+
+            // If no initialValue, use first item of array (we know length !== 0 here)
+            // and adjust i to start at second item
+            if(args.length <= 1) {
+                // Skip to the first real element in the array
+                for(;;) {
+                    if(i in arr) {
+                        reduced = arr[i++];
+                        break;
+                    }
+
+                    // If we reached the end of the array without finding any real
+                    // elements, it's a TypeError
+                    if(++i >= len) {
+                        throw new TypeError();
+                    }
+                }
+            } else {
+                // If initialValue provided, use it
+                reduced = args[1];
+            }
+
+            // Do the actual reduce
+            for(;i < len; ++i) {
+                // Skip holes
+                if(i in arr)
+                    reduced = reduceFunc(reduced, arr[i], i, arr);
+            }
+
+            return reduced;
+        };
 
     return when;
 });
