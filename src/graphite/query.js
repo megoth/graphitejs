@@ -30,7 +30,7 @@ define([
             args.push(cleanArg);
             queryString = String.prototype.format.apply(queryString, args);
         }
-        console.debug("IN QUERY, FORMAT QUERY STRING", queryString);
+        //console.debug("IN QUERY, FORMAT QUERY STRING", queryString);
         return queryString;
     }
     function initiateQuery(queryString, deferred) {
@@ -53,7 +53,7 @@ define([
         deferred.resolve(true);
     }
     function tokenWhere(pattern) {
-        console.log("IN QUERY, tokenWhere", this);
+        //console.log("IN QUERY, tokenWhere", this);
         var where = Tokenizer.where("WHERE {" + pattern + "}", {
             bgpindex: this.bgpindex,
             pattern: this.pattern
@@ -107,7 +107,7 @@ define([
         },
         filter: function (filter) {
             filter = format(filter, arguments, 1);
-            console.log("IN QUERY, filter", filter);
+            //console.log("IN QUERY, filter", filter);
             tokenWhere.call(this, "FILTER(" + filter + ")");
             return this;
         },
@@ -162,7 +162,7 @@ define([
             if (this.unitGroup) {
                 this.syntaxTree.units[this.unitindex].group = this.unitGroup;
             }
-            console.log("IN QUERY, retrieveTree assembled", this.syntaxTree);
+            //console.log("IN QUERY, retrieveTree assembled", this.syntaxTree);
             return this.syntaxTree;
         },
         select: function (projection) {

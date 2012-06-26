@@ -6,10 +6,10 @@ define([
         if(Utils.isBoolean(value)) {
             return Dictionary.Symbol.prototype.XSDboolean;
         } else if (Utils.isInteger(value)) {
-            //buster.log("IN DICTIONARY, DATATYPE IS INTEGER", value);
+            //console.log("IN DICTIONARY, DATATYPE IS INTEGER", value);
             return Dictionary.Symbol.prototype.XSDinteger;
         } else if (Utils.isDouble(value)) {
-            //buster.log("IN DICTIONARY, DATATYPE IS DOUBLE", value);
+            //console.log("IN DICTIONARY, DATATYPE IS DOUBLE", value);
             return Dictionary.Symbol.prototype.XSDfloat;
         }
     }
@@ -29,7 +29,7 @@ define([
                 if (options["isBlankNode"]) {
                     return this.BlankNode(object);
                 }
-                //buster.log("IN DICTIONARY, OBJECT FALLS TO LITERAL");
+                //console.log("IN DICTIONARY, OBJECT FALLS TO LITERAL");
                 return this.Literal(object);
             }
             if (object && options.base) {
@@ -39,7 +39,7 @@ define([
                 return this.Symbol(object);
             }
             if (object) {
-                //buster.log("IN DICTIONARY, OBJECT IS LITERAL", object);
+                //console.log("IN DICTIONARY, OBJECT IS LITERAL", object);
                 return this.Literal(object);
             }
             return this.BlankNode();
@@ -237,7 +237,7 @@ define([
                 }
             }
         }
-        //buster.log("IN DICTIONARY, FORMULA LITERAL DATATYPE", dt);
+        //console.log("IN DICTIONARY, FORMULA LITERAL DATATYPE", dt);
         return Dictionary.Literal(''+val, lang, dt)
     };
     Dictionary.Formula.prototype.bnode = function (id) {
@@ -261,15 +261,15 @@ define([
     Dictionary.Formula.prototype.init.prototype = Dictionary.Formula.prototype;
     //	Literal
     Dictionary.Literal = function (value, lang, datatype) {
-        //buster.log("IN DICTIONARY, LITERAL INIT", value, lang, datatype);
+        //console.log("IN DICTIONARY, LITERAL INIT", value, lang, datatype);
         return new Dictionary.Literal.prototype.init(value, lang, datatype);
     };
     Dictionary.Literal.prototype.init = function (value, lang, datatype) {
         this.value = value;
         this.lang = lang;
-        //buster.log("IN DICTIONARY, LITERAL DATATYPE BEFORE", datatype);
+        //console.log("IN DICTIONARY, LITERAL DATATYPE BEFORE", datatype);
         this.datatype = datatype || _getDatatype(value);
-        //buster.log("IN DICTIONARY, LITERAL DATATYPE AFTER", this.datatype);
+        //console.log("IN DICTIONARY, LITERAL DATATYPE AFTER", this.datatype);
         return this;
     };
     //Dictionary.Literal.prototype.termType = 'literal';
@@ -284,7 +284,7 @@ define([
         str = str.replace(/\n/g, '\\n');    // escape newlines
         str = '"' + str + '"';  //';
         if (this.datatype){
-            //buster.log("DATATYPE", this.datatype, this.datatype.toNT);
+            //console.log("DATATYPE", this.datatype, this.datatype.toNT);
             str = str + '^^{0}'.format(this.datatype.toNT());
         } else if (this.lang) {
             str = str + "@{0}".format(this.lang);
@@ -333,9 +333,9 @@ define([
         return this;
     };
     Dictionary.Statement.prototype.toString = Dictionary.Statement.prototype.toNT = function () {
-        //buster.log("SUBJECT", this.subject, this.subject.toNT);
-        //buster.log("PREDICATE", this.predicate, this.predicate.toNT);
-        //buster.log("OBJECT", this.object, this.object.toNT);
+        //console.log("SUBJECT", this.subject, this.subject.toNT);
+        //console.log("PREDICATE", this.predicate, this.predicate.toNT);
+        //console.log("OBJECT", this.object, this.object.toNT);
         return (this.subject.toNT() + " "
             + this.predicate.toNT() + " "
             +  this.object.toNT() +" .");
@@ -419,7 +419,7 @@ define([
             return Dictionary.Literal(val);
         }
         if (typeof val == 'number') {
-            //buster.log("IN DICTIONARY, NUMBER");
+            //console.log("IN DICTIONARY, NUMBER");
             var dt;
             if ((''+val).indexOf('e')>=0) {
                 dt = Dictionary.Symbol.prototype.XSDfloat;

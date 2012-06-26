@@ -1,4 +1,4 @@
-/*global buster, module, require*/
+/*global //console, module, require*/
 if (typeof module === "object" && typeof require === "function") {
 	var ModuleHttp = require("http");
 }
@@ -19,7 +19,7 @@ define([
      * </ul>
      */
     return function (options) {
-        //buster.log("IN LOADER", options);
+        //console.log("IN LOADER", options);
         var support = {
             "http": typeof ModuleHttp !== "undefined",
             "xhr": typeof XMLHttpRequest !== "undefined"

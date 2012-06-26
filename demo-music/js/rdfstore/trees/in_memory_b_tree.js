@@ -678,7 +678,7 @@ define([], function () {
                 if (that.comparator(alreadySeen[i], data) === 0) {
                     var error = " !!! duplicated key " + data;
                     if (showOutput === true) {
-                        console.log(error);
+                        //console.log(error);
                     }
                     errors.push(error);
                 }
@@ -689,15 +689,15 @@ define([], function () {
         var that = this;
         this.walkNodes(function (n) {
             if (showOutput === true) {
-                console.log("--- Node at " + n.level + " level");
-                console.log(" - leaf? " + n.isLeaf);
-                console.log(" - num actives? " + n.numberActives);
-                console.log(" - keys: ");
+                //console.log("--- Node at " + n.level + " level");
+                //console.log(" - leaf? " + n.isLeaf);
+                //console.log(" - num actives? " + n.numberActives);
+                //console.log(" - keys: ");
             }
             for (var i = n.numberActives; i < n.keys.length; i++) {
                 if (n.keys[i] != null) {
                     if (showOutput === true) {
-                        console.log(" * warning : redundant key data");
+                        //console.log(" * warning : redundant key data");
                         errors.push(" * warning : redundant key data");
                     }
                 }
@@ -706,7 +706,7 @@ define([], function () {
             for (var i = n.numberActives + 1; i < n.children.length; i++) {
                 if (n.children[i] != null) {
                     if (showOutput === true) {
-                        console.log(" * warning : redundant children data");
+                        //console.log(" * warning : redundant children data");
                         errors.push(" * warning : redundant key data");
                     }
                 }
@@ -718,19 +718,19 @@ define([], function () {
                     var maxLeft = that._diskRead(n.children[i]).keys[that._diskRead(n.children[i]).numberActives - 1 ].key;
                     var minRight = that._diskRead(n.children[i + 1]).keys[0].key;
                     if (showOutput === true) {
-                        console.log("   " + n.keys[i].key + "(" + maxLeft + "," + minRight + ")");
+                        //console.log("   " + n.keys[i].key + "(" + maxLeft + "," + minRight + ")");
                     }
                     if (that.comparator(n.keys[i].key, maxLeft) === -1) {
                         var error = " !!! value max left " + maxLeft + " > key " + n.keys[i].key;
                         if (showOutput === true) {
-                            console.log(error);
+                            //console.log(error);
                         }
                         errors.push(error);
                     }
                     if (that.comparator(n.keys[i].key, minRight) === 1) {
                         var error = " !!! value min right " + minRight + " < key " + n.keys[i].key;
                         if (showOutput === true) {
-                            console.log(error);
+                            //console.log(error);
                         }
                         errors.push(error);
                     }
@@ -745,14 +745,14 @@ define([], function () {
                     if (length != n.level) {
                         var error = " !!! Leaf node with wrong level value";
                         if (showOutput === true) {
-                            console.log(error);
+                            //console.log(error);
                         }
                         errors.push(error);
                     }
                 }
                 for (var i = 0; i < n.numberActives; i++) {
                     if (showOutput === true) {
-                        console.log(" " + n.keys[i].key);
+                        //console.log(" " + n.keys[i].key);
                     }
                     foundInArray(n.keys[i].key);
                     alreadySeen.push(n.keys[i].key);
@@ -765,14 +765,14 @@ define([], function () {
                     if (showOutput === true) {
                         var error = " !!!! MAX num keys restriction violated ";
                     }
-                    console.log(error);
+                    //console.log(error);
                     errors.push(error);
                 }
                 if (n.numberActives < (that.order - 1)) {
                     if (showOutput === true) {
                         var error = " !!!! MIN num keys restriction violated ";
                     }
-                    console.log(error);
+                    //console.log(error);
                     errors.push(error);
                 }
 

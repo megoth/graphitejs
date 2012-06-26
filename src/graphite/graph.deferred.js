@@ -53,7 +53,7 @@ define([
                 };
             case "load":
                 return function (success, results) {
-                    console.log("IN GRAPH, getExecuteFunction", results);
+                    //console.log("IN GRAPH, getExecuteFunction", results);
                     graph1 = graph.clone();
                     deferred.resolve(graph1);
                     /*
@@ -88,7 +88,7 @@ define([
                     deferred.resolve(graph);
                 };
             default:
-                console.log("Query not supported", queryKind);
+                //console.log("Query not supported", queryKind);
                 throw new Error("Query not supported: " + queryKind);
                 deferred.resolve(graph);
         }

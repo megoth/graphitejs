@@ -24,7 +24,7 @@ define([
                 throw Error("No valid JSON-string given: " + json);
             }
         }
-        //buster.log("JSON", json);
+        //console.log("JSON", json);
         var pg = PseudoGraph(options);
         pg.createNode(json);
         pg.loadContexts(function () {
@@ -143,7 +143,7 @@ define([
             }
             this.triples = [];
             for(var i = 0, len = predicates.length; i < len; i++) {
-                //buster.log("TRIPLE", i, predicates[i], objects[i]);
+                //console.log("TRIPLE", i, predicates[i], objects[i]);
                 this.triples.push([this.subject, predicates[i], objects[i]]);
             }
             return this;
@@ -185,7 +185,7 @@ define([
                 subject,
                 predicate,
                 object;
-            //buster.log("TRIPLES ASSEMBLING", this.triples);
+            //console.log("TRIPLES ASSEMBLING", this.triples);
             Utils.each(this.triples, function (triple) {
                 //console.log("TRIPLE ASSEMBLING", triple);
                 subject = node.getSubject(triple[0]);
@@ -427,7 +427,7 @@ define([
             var graph = Dictionary.Formula(this.options.graph),
                 cl = this.contextLoader;
             Utils.each(this.nodes, function (node) {
-                //buster.log("NODE ASSEMBLING", node);
+                //console.log("NODE ASSEMBLING", node);
                 node.deriveContexts(cl.contexts);
                 node.addTriples(graph);
             });

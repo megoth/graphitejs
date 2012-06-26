@@ -68,18 +68,18 @@ define([
             uri: uri,
             accept: this.acceptHeaderValue,
             success: function (err, data, status, xhr) {
-                //buster.log("RDFLOADER LOAD", data);
+                //console.log("RDFLOADER LOAD", data);
                 if(!err) {
-                    //buster.log("DATA RETRIEVED");
+                    //console.log("DATA RETRIEVED");
                     var mime = getMime(xhr.getResponseHeader("Content-Type") || xhr.getResponseHeader("content-type"));
                     if(!mime || mime === "octet-stream") {
                         mime = GUtils.last(uri.split("."));
                     }
-                    //buster.log("MIME", mime);
+                    //console.log("MIME", mime);
                     Parser(data, mime, {
                         graph: graph
                     }, function (graph) {
-                        //buster.log("GRAPH", graph, graph.toQuads);
+                        //console.log("GRAPH", graph, graph.toQuads);
                         callback(true, graph);
                     });
                 } else {
@@ -101,8 +101,8 @@ define([
                 callback(false, "parsing error");
             }
         } catch(e) {
-            console.log(e.message);
-            console.log(e.stack);
+            //console.log(e.message);
+            //console.log(e.stack);
             callback(false, "parsing error with mime type : " + e);
         }
     };

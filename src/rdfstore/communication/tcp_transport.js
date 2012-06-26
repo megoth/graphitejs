@@ -60,7 +60,7 @@ define([], function () {
         });
 
         request.on('error', function(e) {
-            console.log('problem with request: ' + e.message);
+            //console.log('problem with request: ' + e.message);
         });
 
         request.end();

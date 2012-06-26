@@ -557,7 +557,7 @@ define([
                     }
                 });
             } else if(syntaxTree.token === 'query' && syntaxTree.kind == 'query') {
-                //buster.log("IN QUERY ENGINE, KIND QUERY");
+                //console.log("IN QUERY ENGINE, KIND QUERY");
                 this.executeQuery(syntaxTree, callback, defaultDataset, namedDataset);
             }
         }
@@ -1243,12 +1243,12 @@ define([
                         'uri': Utils.lexicalFormBaseUri(aqt.destinyGraph, queryEnv)
                     };
                 }
-                //buster.log("IN ENGINE, LOAD", aqt.sourceGraph, graph);
+                //console.log("IN ENGINE, LOAD", aqt.sourceGraph, graph);
                 this.rdfLoader.load(aqt.sourceGraph.value, graph, function(success, result){
-                    //buster.log("IN ENGINE, LOAD SUCCESS", success, result);
+                    //console.log("IN ENGINE, LOAD SUCCESS", success, result);
                     if(success == false) {
-                        //buster.log("Error loading graph");
-                        //buster.log(result);
+                        //console.log("Error loading graph");
+                        //console.log(result);
                         callback(false, "error batch loading quads");
                     } else {
                         that.batchLoad(result.toQuads());

@@ -1622,7 +1622,7 @@ define([
                 depth = (opts && opts.depth) || rdf.databank.defaults.depth;
             url = (typeof data === 'string' && data.substring(1, 7) === 'http://') ? URI(data) : data;
             if (url.scheme) {
-                buster.log("DO SOMETHING HERE");
+                //console.log("DO SOMETHING HERE");
                 /*
                  if (!queue(this, url, { success: success, error: error })) {
                  script = '<script type="text/javascript" src="' + proxy + '?id=' + this.id + '&amp;depth=' + depth + '&amp;url=' + encodeURIComponent(url.resolve('').toString()) + '"></script>';

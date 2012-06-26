@@ -44,8 +44,7 @@
     },
     "@id": "ma:artistBoardsOfCanada",
     "@type": "mo:MusicGroup",
-    "foaf:name": "Boards of Canada",
-    "mo:produced": "ma:recordInTheAir"
+    "foaf:name": "Boards of Canada"
 }, {
     "@context": {
         "bio": "http://purl.org/vocab/bio/0.1/",

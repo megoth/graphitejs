@@ -31,7 +31,7 @@ define([
     return function (data, format, options, callback) {
         var graph,
             parts;
-        //buster.log("IN PARSER", format, parsers[format]);
+        //console.log("IN PARSER", format, parsers[format]);
         if (!callback && Utils.isFunction(options)) {
             callback = options;
             options = {};

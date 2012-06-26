@@ -6,7 +6,7 @@ var nodePath = require('path'),
     nodeFs = require('fs'),
     nodeUrl = require("url"),
     mime = require('mime'),
-    path = "./",
+    path = "./demo-music/",
     port = 9090;
 nodeHttp.createServer(function (request, response) {
     var uri = nodeUrl.parse(request.url).pathname;
@@ -22,7 +22,7 @@ nodeHttp.createServer(function (request, response) {
             return;
         }
         if (nodeFs.statSync(filename).isDirectory()) {
-            filename += '/index.html';
+            filename += 'index.html';
         }
         nodeFs.readFile(filename, "binary", function (err, file) {
             if (err) {
@@ -44,5 +44,5 @@ nodeHttp.createServer(function (request, response) {
         });
     });
 }).listen(port);
-console.log('Demo application v1 running at http://localhost:9090/demo-music');
+console.log('Demo application v1 running at http://localhost:9090/');
 

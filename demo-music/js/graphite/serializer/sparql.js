@@ -20,7 +20,6 @@ define([
             case "var":
             case "variable": return sparql.assembleVariable(node);
             default:
-                buster.log("DEFAULT", node);
                 return node;
         }
     };
@@ -35,7 +34,7 @@ define([
         ].join("");
     };
     sparql.assembleAggregate = function (node) {
-        buster.log("assembleAggregate", node);
+        //console.log("assembleAggregate", node);
         return "{0}({1}{2})".format(
             node.aggregateType.toUpperCase(),
             node.distinct ? "DISTINCT " : "",
@@ -183,7 +182,7 @@ define([
         }
     };
     sparql.assembleFilter = function (node) {
-        //buster.log("FILTER", node);
+        //console.log("FILTER", node);
         return "FILTER {0}".format(
             sparql.assemble(node.value)
         );
@@ -229,7 +228,7 @@ define([
         );
     };
     sparql.assembleLoad = function (node) {
-        buster.log("assembleLoad", node);
+        //console.log("assembleLoad", node);
         return "LOAD {0}{1}".format(
             sparql.assemble(node.sourceGraph),
             node.destinyGraph ? "INTO GRAPH " + sparql.assemble(node.destinyGraph) : ""
@@ -268,10 +267,10 @@ define([
         }
     };
     sparql.assemblePathAlternative = function (node) {
-        buster.log("assemblePathAlternative", node);
+        //console.log("assemblePathAlternative", node);
     };
     sparql.assemblePathElement = function (node) {
-        buster.log("assemblePathElement", node);
+        //console.log("assemblePathElement", node);
         return "({0}){1}".format(
             sparql.assemble(node.value),
             Utils.isArray(node.modifier)
@@ -282,17 +281,17 @@ define([
         );
     };
     sparql.assemblePathInversePath = function (node) {
-        buster.log("assemblePathInversePath", node);
+        //console.log("assemblePathInversePath", node);
         return "^({0})".format(assemble(node.value));
     };
     sparql.assemblePathSequence = function (node) {
-        buster.log("assemblePathSequence", node);
+        //console.log("assemblePathSequence", node);
         return Utils.map(node.value, function (v) {
             return sparql.assemble(v);
         }).join("/");
     };
     sparql.assembleProjection = function (node) {
-        //buster.log("PROJECTION", node.projection);
+        //console.log("PROJECTION", node.projection);
         return "SELECT {0}\n".format(
             Utils.map(node.projection, function (project) {
                 return sparql.assemble(project);
@@ -348,7 +347,7 @@ define([
             graphs = {};
         Utils.each(tripleContext, function (triple) {
             graphName = triple.graph ? sparql.assemble(triple.graph) : "default";
-            buster.log("GRAPH NAME", graphName);
+            //console.log("GRAPH NAME", graphName);
             if (!graphs[graphName]) {
                 graphs[graphName] = [];
             }
@@ -385,7 +384,7 @@ define([
                 case "named": return sparql.assembleUsingNamed(n);
                 case "default": return sparql.assembleUsingDefault(n);
                 default:
-                    buster.log(n);
+                    //console.log(n);
                     throw new Error("NOT SUPPORTING USING " + n.kind);
             }
         }).join("");
@@ -405,7 +404,7 @@ define([
             case "*":
                 return node.kind;
             default:
-                //buster.log("VARIABLE", node);
+                //console.log("VARIABLE", node);
                 return "?" + node.value;
         }
     };

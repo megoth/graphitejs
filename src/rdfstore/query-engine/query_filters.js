@@ -69,8 +69,8 @@ define([
                 }
             }
         } else {
-            console.log("ERROR");
-            console.log(filterExpr);
+            //console.log("ERROR");
+            //console.log(filterExpr);
             throw("Cannot find bound expressions in a no expression token");
         }
     };
@@ -226,7 +226,7 @@ define([
                     result.value = ''+result.value;
                     return result;
                 } else if(aggregator.expression.aggregateType === 'sum') {
-                    buster.log("IN QUERY FILTERS");
+                    //console.log("IN QUERY FILTERS");
                     var distinct = {};
                     var aggregated = {token: 'literal', type:"http://www.w3.org/2001/XMLSchema#integer", value:'0'};
                     for(var i=0; i< bindingsGroup.length; i++) {
@@ -755,7 +755,7 @@ define([
             }
         } else {
             // @todo
-            console.log("not implemented yet");
+            //console.log("not implemented yet");
             throw("value not supported in operations yet");
         }
     };

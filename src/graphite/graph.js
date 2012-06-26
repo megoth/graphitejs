@@ -33,16 +33,16 @@ define([
         }
     }
     function executeDeleteData (promise, options) {
-        console.log("IN GRAPH, DELETE DATA", options.query);
+        //console.log("IN GRAPH, DELETE DATA", options.query);
         if (options.callback) {
             Graph().execute(options.query).then(function (g) {
                 options.callback(g);
             });
         }
         return function () {
-            //buster.log("IN GRAPH, EXECUTE DELETE DATA");
+            //console.log("IN GRAPH, EXECUTE DELETE DATA");
             options.graph.clone().then(function(g) {
-                //buster.log("IN GRAPH, DELETE CLONED");
+                //console.log("IN GRAPH, DELETE CLONED");
                 promise.resolve(g);
             });
         };
@@ -60,14 +60,14 @@ define([
     }
     function executeLoad (promise, options) {
         var query;
-        //buster.log("BEFORE LOAD");
+        //console.log("BEFORE LOAD");
         return function (success, results) {
             //console.log("GRAPH LOAD, RESULTS", success, results);
             query = "INSERT DATA " + results.toNT();
             Graph(options.graph).execute(query).then(function (g) {
                 if(options.callback) {
                     Graph().then(function (g) {
-                        //buster.log("ONCALLBACK QUERY", query);
+                        //console.log("ONCALLBACK QUERY", query);
                         g.execute(query, function (g) {
                             options.callback(g);
                         });
@@ -81,9 +81,9 @@ define([
         return function (success, results) {
             //console.log("IN GRAPH, SELECT QUERY", results.length, results);
             if (results.length === 0) {
-                console.debug("The query didn't return any results");
+                //console.debug("The query didn't return any results");
             } else {
-                console.debug("IN QUERY, executeSelect", results);
+                //console.debug("IN QUERY, executeSelect", results);
             }
             var vars, lvars;
             if (options.callback && options.callback.length > 0) {
@@ -109,7 +109,7 @@ define([
     }
     function getExecuteFunction(query) {
         var queryKind = getQueryKind(query);
-        //buster.log("IN GRAPH, GET EXECUTE FUNCTION", queryKind);
+        //console.log("IN GRAPH, GET EXECUTE FUNCTION", queryKind);
         switch (queryKind) {
             case "ask": return executeAsk;
             case "construct": return executeConstruct;
@@ -264,7 +264,7 @@ define([
                 });
                 this.deferred = deferred;
             } else {
-                console.log("IN GRAPH, QUERY NOT SUPPORTED", query);
+                //console.log("IN GRAPH, QUERY NOT SUPPORTED", query);
                 throw new Error("Query not supported" + query);
             }
             return this;

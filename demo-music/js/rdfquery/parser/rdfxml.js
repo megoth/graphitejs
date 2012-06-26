@@ -53,7 +53,7 @@ define([
         },
         getAttributeNS = function(elem, namespace, name){
             var basename
-            //buster.log("TEST", elem.getAttributeNS);
+            //console.log("TEST", elem.getAttributeNS);
             if (elem.getAttributeNS) {
                 return elem.getAttributeNS(namespace, name);
             } else {
@@ -175,7 +175,7 @@ define([
                             tmpObject1 = Utils.last(graph.statements);
                             parseRdfXmlDescription(p, false, graph, base, lang);
                             tmpObject2 = Utils.last(graph.statements);
-                            //buster.log("TMP OBJECT 1", tmpObject1);
+                            //console.log("TMP OBJECT 1", tmpObject1);
                             if (tmpObject1 && tmpObject1 !== tmpObject2) {
                                 object = tmpObject2;
                             } else {
@@ -196,7 +196,7 @@ define([
                                     tmpObject1 = Utils.last(graph.statements);
                                     parseRdfXmlDescription(o, true, graph, base, lang);
                                     tmpObject2 = Utils.last(graph.statements);
-                                    //buster.log("TMP OBJECT 2", tmpObject1);
+                                    //console.log("TMP OBJECT 2", tmpObject1);
                                     if (tmpObject1 && tmpObject1 !== tmpObject2) {
                                         collectionItem = tmpObject2;
                                     } else {
@@ -225,7 +225,7 @@ define([
                                 tmpObject1 = Utils.last(graph.statements);
                                 parseRdfXmlDescription(o, true, graph, base, lang);
                                 tmpObject2 = Utils.last(graph.statements);
-                                //buster.log("TMP OBJECT 3", tmpObject1);
+                                //console.log("TMP OBJECT 3", tmpObject1);
                                 if (tmpObject1 && tmpObject1 !== tmpObject2) {
                                     object = tmpObject2;
                                 } else {
@@ -240,7 +240,7 @@ define([
                         tmpObject1 = Utils.last(graph.statements);
                         parseRdfXmlDescription(p, false, graph, base, lang);
                         tmpObject2 = Utils.last(graph.statements);
-                        //buster.log("TMP OBJECT 4", tmpObject1, graph.statements, tmpObject2);
+                        //console.log("TMP OBJECT 4", tmpObject1, graph.statements, tmpObject2);
                         if (tmpObject1 && tmpObject1 !== tmpObject2) {
                             object = tmpObject2;
                         } else {

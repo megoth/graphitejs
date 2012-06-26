@@ -410,7 +410,7 @@ define([
             if(success){
                 callback(results);
             } else {
-                console.log("ERROR in query callback "+results);
+                //console.log("ERROR in query callback "+results);
             }
         });
 

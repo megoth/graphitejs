@@ -101,16 +101,19 @@ table thead th {
     width: 75%;
 }
 #Content h1 {
-    border-bottom: solid 1px;
     font-size: 2em;
     font-weight: bold;
     margin-top: 0.5em;
+}
+#Content h2 {
+    font-size: 1.5em;
+    font-weight: bold;
 }
 #Content abbr {
     border-bottom: dotted 1px;
 }
 #Content p {
-    margin: 0.5em 0 1em;
+    margin: 0.5em 0.5em 1em;
 }
 #Content > ul {
     margin: 1em 0.5em;
@@ -145,10 +148,15 @@ table thead th {
     width: 25%;
 }
 #Sidebar h2 {
+    border-bottom: solid 1px;
     font-size: 1.5em;
     font-weight: bold;
-    border-bottom: solid 1px;
     padding-top: 1em;
+}
+#Sidebar h3 {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 1em 0 0.5em;
 }
 #Tracks {
     width: 100%;

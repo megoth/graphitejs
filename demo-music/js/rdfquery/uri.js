@@ -30,7 +30,7 @@ define([
             if (m === null) {
                 throw "Malformed URI: " + u;
             }
-            //buster.log("PARSED URI, the match", m);
+            //console.log("PARSED URI, the match", m);
             return {
                 scheme: m[1] ? m[2].toLowerCase() : undefined,
                 authority: m[3] ? m[4] : undefined,
@@ -126,11 +126,11 @@ define([
          */
         fragment: undefined,
         init: function (relative, base) {
-            //buster.log("IN URI", relative, base);
+            //console.log("IN URI", relative, base);
             var r = {};
             base = base || {};
             Utils.extend(this, parseURI(relative));
-            //buster.log("URI PARSED");
+            //console.log("URI PARSED");
             if (this.scheme === undefined) {
                 this.scheme = base.scheme;
                 if (this.authority !== undefined) {

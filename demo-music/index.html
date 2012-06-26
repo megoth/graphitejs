@@ -12,7 +12,7 @@
     </div>
     <div id="Main" class="clearfix">
         <div id="Sidebar">
-            <h2>Demoes</h2>
+            <h3>Demoes</h3>
             <ul id="AppList">
                 <li>
                     <a href="appv1.html">Version 1</a>
@@ -27,13 +27,24 @@
             <p>This site showcases two versions of a demo-application made to show some functionality of
                 <a href="https://github.com/megoth/graphitejs">graphitejs</a>, the framework created as part
             of Arne Hassel's master thesis.</p>
-            <p>Graphitejs is a framework written in and for JavaScript (JS), designed to offer a multitude of
-            interfaces toward handling data from the Semantic Web (SW). It loads and handles resources described with
+            <p>Graphitejs is a <a href="https://github.com/amdjs/amdjs-api/wiki/AMD">
+                <abbr title="Asynchronous Module Definition">AMD</abbr></a>-based framework written in and for
+                JavaScript (JS), designed to offer a multitude of interfaces toward handling data from the
+                Semantic Web (SW). It loads and handles resources described with
                 <a href="http://www.w3.org/RDF/"><abbr title="Resource Description Framework">RDF</abbr></a>,
                 and enable querying by using <a href="http://www.w3.org/TR/sparql11-query/">SPARQL</a>.</p>
             <p>The demo-application is a simple web-application that lists a table with tracks, the music group
                 that created it, and the album which it's available on.
                 It also loads a set of users, which filter the tracks they listens to.</p>
+            <h2>Requirements</h2>
+            <p>Graphitejs requires the use of <a href="http://www.w3.org/TR/XMLHttpRequest/">XMLHttpRequest
+                Level 2</a>, which is supported by most modern browsers (yes, even IE; at least IE9+).</p>
+            <h2>Differences between version 1 and 2</h2>
+            <p>Version 1 is built by using the API-module in graphitejs. This works like a facade-object, tying the
+                two most important modules together, namely the Graph- and Query-module. In version 2 the facade is
+                discarded, and the application uses the Graph-, Query-, and Loader-module directly.</p>
+            <p>This switching of modules are easily handled by <a href="http://requirejs.org/">require.js</a>.</p>
+            <h2>Underlying structure</h2>
             <p>The application's data is structured using
             <a href="http://www.w3.org/TeamSubmission/turtle/">Turtle</a> and
             <a href="http://json-ld.org/"><abbr title="JSON for Linked Data">JSON-LD</abbr></a>, two

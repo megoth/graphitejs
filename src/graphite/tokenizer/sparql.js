@@ -116,7 +116,7 @@ define([
      * @return {Object}
      */
     function bpgPart(data, options) {
-        //buster.log("BPGPART", data);
+        //console.log("BPGPART", data);
         var lToken, part;
         if (typeRegex.test(data)) {
             data = expect(data, typeRegex);
@@ -339,7 +339,7 @@ define([
         if ((opts.required || false) && !wsRegex.test(data)) {
             throw("Invalid sparql: Required whitespace is missing!");
         }
-        //buster.log("IN SPARQL, WS", data);
+        //console.log("IN SPARQL, WS", data);
         return data.replace(wsRegex, '');
     }
     return {
@@ -360,7 +360,7 @@ define([
             }
         },
         base: function (data) {
-            //buster.log("In tokenizer (SPARQL)", data);
+            //console.log("In tokenizer (SPARQL)", data);
             var value = uriRegex.exec(data)[0];
             return {
                 "base": token.base(value),
@@ -376,9 +376,9 @@ define([
          */
         basicgraphpattern: function (data, triplesContext, options) {
             options = options || {};
-            //buster.log("STARTING BGP", data, subject);
-            //buster.log("IN SPARQL, BGP", data);
-            //buster.log(options);
+            //console.log("STARTING BGP", data, subject);
+            //console.log("IN SPARQL, BGP", data);
+            //console.log(options);
             var subject = !options.subject ? bpgPart.call(this, data, options) : {
                     "remainder": data,
                     "token": options.subject
@@ -399,7 +399,7 @@ define([
             }
             triplesContext = triplesContext || [];
             triplesContext.push(value);
-            //buster.log("IN SPARQL, BGP, parsed triple", triplesContext);
+            //console.log("IN SPARQL, BGP, parsed triple", triplesContext);
             if (dotRegex.test(remainder)) {
                 remainder = ws(remainder.substr(1));
             } else if (semicolonRegex.test(remainder)) {
@@ -775,7 +775,7 @@ define([
          * @return {Object}
          */
         "uri": function (data, options) {
-            //buster.log(options);
+            //console.log(options);
             var uri = {
                 "prefix": null,
                 "suffix": null,
