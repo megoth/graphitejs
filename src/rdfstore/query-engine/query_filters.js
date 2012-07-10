@@ -1,7 +1,7 @@
 define([
     "./../../graphite/utils",
     "./../trees/utils"
-], function (GraphiteUtils, Utils) {
+], function (Utils, TreeUtils) {
     var QueryFilters = {};
     QueryFilters.checkFilters = function(pattern, bindings, nullifyErrors, dataset, queryEnv, queryEngine) {
         var filters = pattern.filter;
@@ -33,25 +33,25 @@ define([
                 var op2 = filterExpr.op2;
                 return QueryFilters.boundVars(op1)+QueryFilters.boundVars(op2);
             } else if(expressionType == 'conditionalor' || expressionType == 'conditionaland') {
-                return GraphiteUtils.map(filterExpr.operands, function (operand) {
+                return Utils.map(filterExpr.operands, function (operand) {
                     return QueryFilters.boundVars(operand);
                 });
             } else if(expressionType == 'builtincall') {
                 if(filterExpr.args == null) {
                     return [];
                 }
-                return GraphiteUtils.map(filterExpr.args, function (arg) {
+                return Utils.map(filterExpr.args, function (arg) {
                     return QueryFilters.boundVars(arg);
                 });
             } else if(expressionType == 'multiplicativeexpression') {
                 acum = QueryFilters.boundVars(filterExpr.factor);
-                GraphiteUtils.each(filterExpr.factors, function (factor) {
+                Utils.each(filterExpr.factors, function (factor) {
                     acum = acum.concat(QueryFilters.boundVars(factor.expression))
                 });
                 return acum;
             } else if(expressionType == 'additiveexpression') {
                 acum = QueryFilters.boundVars(filterExpr.summand);
-                GraphiteUtils.each(filterExpr.summands, function (summand) {
+                Utils.each(filterExpr.summands, function (summand) {
                     acum = acum.concat(QueryFilters.boundVars(summand.expression));
                 });
                 return acum;
@@ -79,7 +79,7 @@ define([
         var filteredBindings = [];
         var ebv;
         var thisDenormBindings;
-        GraphiteUtils.each(bindings, function (binding, i) {
+        Utils.each(bindings, function (binding, i) {
             thisDenormBindings = denormBindings[i];
             ebv = QueryFilters.runFilter(filterExpr, thisDenormBindings, queryEngine, dataset, env);
             // ebv can be directly a RDFTerm (e.g. atomic expression in filter)
@@ -128,7 +128,7 @@ define([
             } else if(aggregator.expression.expressionType === 'aggregate') {
                 if(aggregator.expression.aggregateType === 'max') {
                     var max = null;
-                    GraphiteUtils.each(bindingsGroup, function (bindings) {
+                    Utils.each(bindingsGroup, function (bindings) {
                         var ebv = QueryFilters.runFilter(aggregator.expression.expression, bindings, queryEngine, dataset, env);
                         if(!QueryFilters.isEbvError(ebv)) {
                             if(max === null) {
@@ -147,7 +147,7 @@ define([
                     }
                 } else if(aggregator.expression.aggregateType === 'min') {
                     var min = null;
-                    GraphiteUtils.each(bindingsGroup, function (bindings) {
+                    Utils.each(bindingsGroup, function (bindings) {
                         var ebv = QueryFilters.runFilter(aggregator.expression.expression, bindings, queryEngine, dataset, env);
                         if(!QueryFilters.isEbvError(ebv)) {
                             if(min === null) {
@@ -169,8 +169,8 @@ define([
                     var count = 0;
                     if(aggregator.expression.expression === '*') {
                         if(aggregator.expression.distinct != null && aggregator.expression.distinct != '') {
-                            GraphiteUtils.each(bindingsGroup, function (bindings) {
-                                var key = Utils.hashTerm(bindings);
+                            Utils.each(bindingsGroup, function (bindings) {
+                                var key = TreeUtils.hashTerm(bindings);
                                 if(distinct[key] == null) {
                                     distinct[key] = true;
                                     count++;
@@ -180,11 +180,11 @@ define([
                             count = bindingsGroup.length;
                         }
                     } else {
-                        GraphiteUtils.each(bindingsGroup, function (bindings) {
+                        Utils.each(bindingsGroup, function (bindings) {
                             var ebv = QueryFilters.runFilter(aggregator.expression.expression, bindings, queryEngine, dataset, env);
                             if(!QueryFilters.isEbvError(ebv)) {
                                 if(aggregator.expression.distinct != null && aggregator.expression.distinct != '') {
-                                    var key = Utils.hashTerm(ebv);
+                                    var key = TreeUtils.hashTerm(ebv);
                                     if(distinct[key] == null) {
                                         distinct[key] = true;
                                         count++;
@@ -205,7 +205,7 @@ define([
                         var ebv = QueryFilters.runFilter(aggregator.expression.expression, bindings, queryEngine, dataset, env);
                         if(!QueryFilters.isEbvError(ebv)) {
                             if(aggregator.expression.distinct != null && aggregator.expression.distinct != '') {
-                                var key = Utils.hashTerm(ebv);
+                                var key = TreeUtils.hashTerm(ebv);
                                 if(distinct[key] == null) {
                                     distinct[key] = true;
                                     if(QueryFilters.isNumeric(ebv)) {
@@ -234,7 +234,7 @@ define([
                         var ebv = QueryFilters.runFilter(aggregator.expression.expression, bindings, queryEngine, dataset, env);
                         if(!QueryFilters.isEbvError(ebv)) {
                             if(aggregator.expression.distinct != null && aggregator.expression.distinct != '') {
-                                var key = Utils.hashTerm(ebv);
+                                var key = TreeUtils.hashTerm(ebv);
                                 if(distinct[key] == null) {
                                     distinct[key] = true;
                                     if(QueryFilters.isNumeric(ebv)) {
@@ -297,7 +297,7 @@ define([
                         } else {
                             // type can be parsed as a hash using namespaces
 
-                            filterExpr.value.type =  Utils.lexicalFormBaseUri(filterExpr.value.type, env);
+                            filterExpr.value.type =  TreeUtils.lexicalFormBaseUri(filterExpr.value.type, env);
                             return filterExpr.value
                         }
                     }
@@ -368,7 +368,7 @@ define([
 
             }
         } else if(v1.token === 'uri' && v2.token === 'uri') {
-            return Utils.lexicalFormBaseUri(v1, env) == Utils.lexicalFormBaseUri(v2, env);
+            return TreeUtils.lexicalFormBaseUri(v1, env) == TreeUtils.lexicalFormBaseUri(v2, env);
         } else if(v1.token === 'blank' && v2.token === 'blank') {
             return v1.value == v2.value;
         } else {
@@ -736,7 +736,7 @@ define([
             } else if (val.type == "http://www.w3.org/2001/XMLSchema#date" ||
                 val.type == "http://www.w3.org/2001/XMLSchema#dateTime" ) {
                 try {
-                    var d = Utils.parseISO8601(val.value);
+                    var d = TreeUtils.parseISO8601(val.value);
                     return(d);
                 } catch(e) {
                     return null;
@@ -860,7 +860,7 @@ define([
                 return QueryFilters.ebvFalse();
             }
 
-            var comp = Utils.compareDateComponents(op1.value, op2.value);
+            var comp = TreeUtils.compareDateComponents(op1.value, op2.value);
             if(comp != null) {
                 if(comp == 0) {
                     return QueryFilters.ebvTrue();
@@ -899,7 +899,7 @@ define([
                 return QueryFilters.ebvFalse();
             }
 
-            var comp = Utils.compareDateComponents(op1.value, op2.value);
+            var comp = TreeUtils.compareDateComponents(op1.value, op2.value);
             if(comp != null) {
                 if(comp == 1) {
                     return QueryFilters.ebvTrue();
@@ -968,7 +968,7 @@ define([
                 return QueryFilters.ebvFalse();
             }
 
-            var comp = Utils.compareDateComponents(op1.value, op2.value);
+            var comp = TreeUtils.compareDateComponents(op1.value, op2.value);
             if(comp != null) {
                 if(comp == -1) {
                     return QueryFilters.ebvTrue();
@@ -1006,7 +1006,7 @@ define([
                 return QueryFilters.ebvFalse();
             }
 
-            var comp = Utils.compareDateComponents(op1.value, op2.value);
+            var comp = TreeUtils.compareDateComponents(op1.value, op2.value);
             if(comp != null) {
                 if(comp != -1) {
                     return QueryFilters.ebvTrue();
@@ -1045,7 +1045,7 @@ define([
                 return QueryFilters.ebvFalse();
             }
 
-            var comp = Utils.compareDateComponents(op1.value, op2.value);
+            var comp = TreeUtils.compareDateComponents(op1.value, op2.value);
             if(comp != null) {
                 if(comp != 1) {
                     return QueryFilters.ebvTrue();
@@ -1412,7 +1412,7 @@ define([
             return literal;
         } else {
             // type can be parsed as a hash using namespaces
-            literal.value.type =  Utils.lexicalFormBaseUri(literal.value.type, env);
+            literal.value.type =  TreeUtils.lexicalFormBaseUri(literal.value.type, env);
             return literal;
         }
     };
@@ -1426,7 +1426,7 @@ define([
                 ops.push(QueryFilters.runFilter(args[i], bindings, queryEngine, dataset, env))
             }
 
-            var fun = Utils.lexicalFormBaseUri(iriref, env);
+            var fun = TreeUtils.lexicalFormBaseUri(iriref, env);
 
             if(fun == "http://www.w3.org/2001/XMLSchema#integer" ||
                 fun == "http://www.w3.org/2001/XMLSchema#decimal" ||
@@ -1576,7 +1576,7 @@ define([
                         from.type == "http://www.w3.org/2001/XMLSchema#date") {
                         from.type = fun;
                         if(typeof(from.value) != 'string') {
-                            from.value = Utils.iso8601(from.value);
+                            from.value = TreeUtils.iso8601(from.value);
                         }
                         return from;
                     } else if(from.type == null) {
@@ -1588,7 +1588,7 @@ define([
                     }
                 } else if(from.token === 'uri') {
                     return {token: 'literal',
-                        value: Utils.lexicalFormBaseUri(from, env),
+                        value: TreeUtils.lexicalFormBaseUri(from, env),
                         type: fun,
                         lang: null};
                 } else {
@@ -1600,7 +1600,7 @@ define([
                     return from;
                 } else if(from.type == "http://www.w3.org/2001/XMLSchema#string" || from.type == null) {
                     try {
-                        from.value = Utils.iso8601(Utils.parseStrictISO8601(from.value));
+                        from.value = TreeUtils.iso8601(Utils.parseStrictISO8601(from.value));
                         from.type = fun;
                         return from;
                     } catch(e) {

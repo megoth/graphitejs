@@ -1,8 +1,7 @@
 /*global define */
 define([
-    "./utils",
     "./queryparser/sparql"
-], function (Utils, SPARQL) {
+], function (SPARQL) {
     "use strict";
     var parsers = {
         "sparql": SPARQL

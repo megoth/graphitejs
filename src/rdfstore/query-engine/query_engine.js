@@ -1,5 +1,5 @@
 define([
-    "./../sparql-parser/abstract_query_tree",
+    "./abstract_query_tree",
     "./../trees/utils",
     "./../rdf-persistence/quad_index_common",
     "./query_plan_sync_dpsize",
@@ -8,7 +8,7 @@ define([
     "./../communication/rdf_loader",
     "./callbacks",
     "./../../graphite/utils"
-], function (AbstractQueryTree, Utils, QuadIndexCommon, QueryPlan, QueryFilters, RDFJSInterface, RDFLoader, Callbacks, GraphiteUtils) {
+], function (AbstractQueryTree, TreeUtils, QuadIndexCommon, QueryPlan, QueryFilters, RDFJSInterface, RDFLoader, Callbacks, Utils) {
     var QueryEngine = {};
     QueryEngine.QueryEngine = function(params) {
         if(arguments.length != 0) {
@@ -316,14 +316,14 @@ define([
     };
     QueryEngine.QueryEngine.prototype.termCost = function(term, env) {
         if(term.token === 'uri') {
-            var uri = Utils.lexicalFormBaseUri(term, env);
+            var uri = TreeUtils.lexicalFormBaseUri(term, env);
             if(uri == null) {
                 return(0);
             } else {
                 return(this.lexicon.resolveUriCost(uri));
             }
         } else if(term.token === 'literal') {
-            var lexicalFormLiteral = Utils.lexicalFormLiteral(term, env);
+            var lexicalFormLiteral = TreeUtils.lexicalFormLiteral(term, env);
             return(this.lexicon.resolveLiteralCost(lexicalFormLiteral));
         } else if(term.token === 'blank') {
             var label = term.value;
@@ -340,7 +340,7 @@ define([
             oid,
             label;
         if(term.token === 'uri') {
-            uri = Utils.lexicalFormBaseUri(term, env);
+            uri = TreeUtils.lexicalFormBaseUri(term, env);
             if(uri == null) {
                 return(null);
             } else {
@@ -351,7 +351,7 @@ define([
                 }
             }
         } else if(term.token === 'literal') {
-            lexicalFormLiteral = Utils.lexicalFormLiteral(term, env);
+            lexicalFormLiteral = TreeUtils.lexicalFormLiteral(term, env);
             if(shouldIndex) {
                 return this.lexicon.registerLiteral(lexicalFormLiteral);
             } else {
@@ -472,7 +472,7 @@ define([
         for(var i=0; i<bindingsList.length; i++) {
             var denorm = {};
             var bindings = bindingsList[i];
-            var variables = Utils.keys(bindings);
+            var variables = TreeUtils.keys(bindings);
             for(var j=0; j<variables.length; j++) {
                 var oid = bindings[variables[j]];
                 if(oid == null) {
@@ -498,7 +498,7 @@ define([
         return denormList;
     };
     QueryEngine.QueryEngine.prototype.denormalizeBindings = function(bindings, env) {
-        var variables = Utils.keys(bindings),
+        var variables = TreeUtils.keys(bindings),
             envOut = env.outCache,
             oid,
             val;
@@ -530,9 +530,9 @@ define([
      */
     QueryEngine.QueryEngine.prototype.execute = function(query, callback, defaultDataset, namedDataset) {
         var syntaxTree;
-        if (GraphiteUtils.isString(query)) {
+        if (Utils.isString(query)) {
             //console.log("IN QUERY ENGINE, QUERY ISN'T PARSED ALREADY", query);
-            query = Utils.normalizeUnicodeLiterals(query);
+            query = TreeUtils.normalizeUnicodeLiterals(query);
             syntaxTree = this.abstractQueryTree.parseQueryString(query);
         } else {
             //console.log("IN QUERY ENGINE, QUERY IS PARSED ALREADY");
@@ -947,7 +947,7 @@ define([
                     //console.log(vxDenorm);
                     //console.log(nextPath.value);
                     pattern.path = this.abstractQueryTree.replace(nextPath, last, vxDenorm, env);
-                    nextPath = Utils.clone(pattern.path);
+                    nextPath = TreeUtils.clone(pattern.path);
                     intermediate = this.executeZeroOrMorePath(pattern, dataset, env);
                     for(j=0; j<intermediate.length; j++) {
                         nextBinding = intermediate[j];
@@ -1237,11 +1237,11 @@ define([
                 callback(true);
             } else if(aqt.kind === 'load') {
                 var graph = {
-                    'uri': Utils.lexicalFormBaseUri(aqt.sourceGraph, queryEnv)
+                    'uri': TreeUtils.lexicalFormBaseUri(aqt.sourceGraph, queryEnv)
                 };
                 if(aqt.destinyGraph != null) {
                     graph = {
-                        'uri': Utils.lexicalFormBaseUri(aqt.destinyGraph, queryEnv)
+                        'uri': TreeUtils.lexicalFormBaseUri(aqt.destinyGraph, queryEnv)
                     };
                 }
                 //console.log("IN ENGINE, LOAD", aqt.sourceGraph, graph);
@@ -1475,7 +1475,7 @@ define([
             quad;
         aqt.insert = aqt.insert == null ? [] : aqt.insert;
         aqt.delete = aqt.delete == null ? [] : aqt.delete;
-        Utils.seq(function(k) {
+        TreeUtils.seq(function(k) {
                 // select query
                 var defaultGraph = [];
                 var namedGraph = [];
@@ -1634,7 +1634,7 @@ define([
             graphs = this.lexicon.registeredGraphs(true);
             if(graphs!=null) {
                 foundErrorDeleting = false;
-                Utils.repeat(0, graphs.length,function(k,env) {
+                TreeUtils.repeat(0, graphs.length,function(k,env) {
                     graph = graphs[env._i];
                     floop = arguments.callee;
                     if(!foundErrorDeleting) {
@@ -1662,7 +1662,7 @@ define([
         } else {
             // destinyGraph is an URI
             if(destinyGraph.token == 'uri') {
-                graphUri = Utils.lexicalFormBaseUri(destinyGraph,queryEnv);
+                graphUri = TreeUtils.lexicalFormBaseUri(destinyGraph,queryEnv);
                 if(graphUri != null) {
                     this.execute("DELETE { GRAPH <"+graphUri+"> { ?s ?p ?o } } WHERE { GRAPH <"+graphUri+"> { ?s ?p ?o } }", callback);
                 } else {

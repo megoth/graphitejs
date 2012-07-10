@@ -1,8 +1,8 @@
 define([
-    "./sparql_parser",
-    "./../../graphite/utils",
-    "./../trees/utils"
-], function (SparqlParser, GraphiteUtils, Utils) {
+    "./../../graphite/queryparser",
+    "./../trees/utils",
+    "./../../graphite/utils"
+], function (QueryParser, TreeUtils, Utils) {
     var AbstractQueryTree = {};
     /**
      * @doc
@@ -14,7 +14,7 @@ define([
     };
     AbstractQueryTree.AbstractQueryTree.prototype.parseQueryString = function(query_string) {
         //noinspection UnnecessaryLocalVariableJS,UnnecessaryLocalVariableJS
-        return SparqlParser.parser.parse(query_string);
+        return QueryParser("sparql").parse(query_string).syntaxTree;
     };
     AbstractQueryTree.AbstractQueryTree.prototype.parseExecutableUnit = function(executableUnit) {
         if(executableUnit.kind === 'select') {
@@ -111,11 +111,11 @@ define([
                         if(bgpTransformed.y.token === 'var' && bgpTransformed.y.value.indexOf("fresh:")===0 &&
                             bgpTransformed.x.token === 'var' && bgpTransformed.x.value.indexOf("fresh:")===0) {
                             //console.log("ADDING EXTRA PATTERN 1)");
-                            GraphiteUtils.each(bgp.value, function (value) {
+                            Utils.each(bgp.value, function (value) {
                                 //console.log(bgp.value[j]);
                                 if(value.object && value.object.token === 'var' && value.object.value === bgpTransformed.x.value) {
                                     //console.log(" YES 1)");
-                                    optionalPattern = Utils.clone(value);
+                                    optionalPattern = TreeUtils.clone(value);
                                     optionalPattern.object = bgpTransformed.y;
                                 }
                             });
@@ -125,7 +125,7 @@ define([
                                 //console.log(bgp.value[j]);
                                 if(bgp.value[j].subject && bgp.value[j].subject.token === 'var' && bgp.value[j].subject.value === bgpTransformed.y.value) {
                                     //console.log(" YES 2)");
-                                    optionalPattern = Utils.clone(bgp.value[j]);
+                                    optionalPattern = TreeUtils.clone(bgp.value[j]);
                                     optionalPattern.subject = bgpTransformed.x;
                                 }
                             }
@@ -212,11 +212,11 @@ define([
                     object: nextObject
                 };
                 if(currentGraph != null) {
-                    chain.graph = Utils.clone(currentGraph);
+                    chain.graph = TreeUtils.clone(currentGraph);
                 }
                 restTriples.push(chain);
                 if(i!=pathExpression.predicate.value.length-1) {
-                    currentSubject = Utils.clone(nextObject);
+                    currentSubject = TreeUtils.clone(nextObject);
                 }
             }
             var bgp = {kind: 'BGP', value: restTriples};
@@ -233,7 +233,7 @@ define([
             },
             parsedPattern,
             that = this;
-        GraphiteUtils.each(node.patterns, function (pattern) {
+        Utils.each(node.patterns, function (pattern) {
             if(pattern.token === 'optionalgraphpattern') {
                 parsedPattern = that.build(pattern.value, env);
                 if(parsedPattern.kind === 'FILTER') {
@@ -376,10 +376,10 @@ define([
         return aqt;
     };
     function _bindTripleContext(triples, bindings) {
-        GraphiteUtils.each(triples, function (triple, i) {
+        Utils.each(triples, function (triple, i) {
             delete triple['graph'];
             delete triple['variables'];
-            GraphiteUtils.each(triple, function (comp, p) {
+            Utils.each(triple, function (comp, p) {
                 if(comp.token === 'var' && bindings[comp.value] != null) {
                     triples[i][p] = bindings[comp.value];
                 }
@@ -395,27 +395,27 @@ define([
                 filterExpr.op1 = _bindFilter.call(that, filterExpr.op1, bindings);
                 filterExpr.op2 = _bindFilter.call(that, filterExpr.op2, bindings);
             } else if(expressionType == 'conditionalor' || expressionType == 'conditionaland') {
-                GraphiteUtils.map(filterExpr.operands, function (operand) {
+                Utils.map(filterExpr.operands, function (operand) {
                     return _bindFilter.call(that, operand, bindings);
                 });
             } else if(expressionType == 'additiveexpression') {
                 filterExpr.summand = _bindFilter.call(that, filterExpr.summand, bindings);
-                GraphiteUtils.each(filterExpr.summands, function (summand) {
+                Utils.each(filterExpr.summands, function (summand) {
                     summand.expression = _bindFilter.call(that, summand.expression, bindings);
                 });
             } else if(expressionType == 'builtincall') {
-                GraphiteUtils.map(filterExpr.args, function (arg) {
+                Utils.map(filterExpr.args, function (arg) {
                     return _bindFilter.call(that, arg, bindings);
                 });
             } else if(expressionType == 'multiplicativeexpression') {
                 filterExpr.factor = _bindFilter.call(that, filterExpr.factor, bindings);
-                GraphiteUtils.each(filterExpr.factors, function (factor) {
+                Utils.each(filterExpr.factors, function (factor) {
                     factor.expression = _bindFilter.call(that, factor.expression, bindings);
                 });
             } else if(expressionType == 'unaryexpression') {
                 filterExpr.expression = _bindFilter.call(that, filterExpr.expression, bindings);
             } else if(expressionType == 'irireforfunction') {
-                GraphiteUtils.map(filterExpr.args, function (arg) {
+                Utils.map(filterExpr.args, function (arg) {
                     return _bindFilter.call(that, arg, bindings);
                 });
             } else if(expressionType == 'atomic') {
@@ -441,7 +441,7 @@ define([
     AbstractQueryTree.AbstractQueryTree.prototype.replace = function(aqt, from, to, ns) {
         if(aqt.graph != null && aqt.graph.token && aqt.graph.token === from.token &&
             aqt.graph.value == from.value) {
-            aqt.graph = Utils.clone(to);
+            aqt.graph = TreeUtils.clone(to);
         }
         if(aqt.filter != null) {
             var acum = [];
@@ -458,10 +458,10 @@ define([
         } else if(aqt.kind === 'ZERO_OR_MORE_PATH') {
             aqt.path = _replaceTripleContext(aqt.path, from,to, ns);
             if(aqt.x && aqt.x.token === from.token && aqt.value === from.value) {
-                aqt.x = Utils.clone(to);
+                aqt.x = TreeUtils.clone(to);
             }
             if(aqt.y && aqt.y.token === from.token && aqt.value === from.value) {
-                aqt.y = Utils.clone(to);
+                aqt.y = TreeUtils.clone(to);
             }
         } else if(aqt.kind === 'UNION') {
             aqt.value[0] = this.replace(aqt.value[0],from,to, ns);
@@ -481,8 +481,8 @@ define([
         return aqt;
     };
     function _replaceTripleContext(triples, from, to, ns) {
-        GraphiteUtils.each(triples, function (triple, i) {
-            GraphiteUtils.each(triple, function (comp, p) {
+        Utils.each(triples, function (triple, i) {
+            Utils.each(triple, function (comp, p) {
                 if(comp.token === 'var' && from.token === 'var' && comp.value === from.value) {
                     triples[i][p] = to;
                 } else if(comp.token === 'blank' && from.token === 'blank' && comp.value === from.value) {
@@ -490,7 +490,7 @@ define([
                 } else {
                     if((comp.token === 'literal' || comp.token ==='uri') &&
                         (from.token === 'literal' || from.token ==='uri') &&
-                        comp.token === from.token && Utils.lexicalFormTerm(comp,ns)[comp.token] === Utils.lexicalFormTerm(from,ns)[comp.token]) {
+                        comp.token === from.token && TreeUtils.lexicalFormTerm(comp,ns)[comp.token] === TreeUtils.lexicalFormTerm(from,ns)[comp.token]) {
                         triples[i][p] = to;
                     }
                 }
@@ -505,27 +505,27 @@ define([
                 filterExpr.op1 = _replaceFilter(filterExpr.op1, from, to, ns);
                 filterExpr.op2 = _replaceFilter(filterExpr.op2, from, to, ns);
             } else if(expressionType == 'conditionalor' || expressionType == 'conditionaland') {
-                GraphiteUtils.map(filterExpr.operands, function (operand) {
+                Utils.map(filterExpr.operands, function (operand) {
                     return _replaceFilter(operand, from, to, ns);
                 });
             } else if(expressionType == 'additiveexpression') {
                 filterExpr.summand = _replaceFilter(filterExpr.summand, from, to, ns);
-                GraphiteUtils.each(filterExpr.summands, function (summand) {
+                Utils.each(filterExpr.summands, function (summand) {
                     summand.expression = _replaceFilter(summand.expression, from, to, ns);
                 });
             } else if(expressionType == 'builtincall') {
-                GraphiteUtils.map(filterExpr.args, function (arg) {
+                Utils.map(filterExpr.args, function (arg) {
                     return _replaceFilter(arg, from, to, ns);
                 });
             } else if(expressionType == 'multiplicativeexpression') {
                 filterExpr.factor = _replaceFilter(filterExpr.factor, from, to, ns);
-                GraphiteUtils.each(filterExpr.factors, function (factor) {
+                Utils.each(filterExpr.factors, function (factor) {
                     factor.expression = _replaceFilter(factor.expression, from, to, ns);
                 });
             } else if(expressionType == 'unaryexpression') {
                 filterExpr.expression = _replaceFilter(filterExpr.expression, from, to, ns);
             } else if(expressionType == 'irireforfunction') {
-                GraphiteUtils.map(filterExpr.factors.args, function (arg) {
+                Utils.map(filterExpr.factors.args, function (arg) {
                     return _replaceFilter(arg, from, to, ns);
                 });
             } else if(expressionType == 'atomic') {

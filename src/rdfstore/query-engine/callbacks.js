@@ -1,11 +1,11 @@
 
 define([
-    "../trees/utils",
+    "./abstract_query_tree",
     "../rdf-persistence/quad_index_common",
     "./rdf_js_interface",
-    "../sparql-parser/abstract_query_tree"
-], function (Utils, QuadIndexCommon, RDFJSInterface, AbstractQueryTree) {
-    var Callbacks = {}
+    "../trees/utils"
+], function (AbstractQueryTree, QuadIndexCommon, RDFJSInterface, TreeUtils) {
+    var Callbacks = {};
     Callbacks.ANYTHING = {'token': 'var',
         'value': '_'};
 
@@ -173,7 +173,7 @@ define([
     Callbacks.CallbacksBackend.prototype.unsubscribeEmpty = function(event, callback) {
         var callbacks = this.emptyNotificationsMap[event];
         if(callbacks != null) {
-            callbacks = Utils.remove(callbacks, callback);
+            callbacks = TreeUtils.remove(callbacks, callback);
         }
         this.emptyNotificationsMap[event] = callbacks;
     };
@@ -267,7 +267,7 @@ define([
             var index = matchingIndices[i];
             var indexComponents = this.componentOrders[index];
             for(var j=0; j<indexComponents.length; j++) {
-                if(Utils.include(indexKey, indexComponents[j])===false) {
+                if(TreeUtils.include(indexKey, indexComponents[j])===false) {
                     break;
                 }
                 if(j==indexKey.length-1) {
@@ -423,7 +423,7 @@ define([
         if(id != null) {
             delete this.queriesInverseMap[query];
             delete this.queriesMap[id];
-            this.queriesList = Utils.remove(this.queriesList, id);
+            this.queriesList = TreeUtils.remove(this.queriesList, id);
         }
     };
 
@@ -437,8 +437,8 @@ define([
             var filteredIds = [];
             for(var j=0; j<matched.length; j++) {
                 var queryId = matched[j];
-                if(Utils.include(this.pendingQueries,queryId)) {
-                    Utils.remove(this.pendingQueries,queryId);
+                if(TreeUtils.include(this.pendingQueries,queryId)) {
+                    TreeUtils.remove(this.pendingQueries,queryId);
                     this.matchedQueries.push(queryId);
                 }
                 // removing IDs for queries no longer being observed
@@ -462,7 +462,7 @@ define([
         var floop, query, queryId, queryCallback;
         var toDispatchMap = {};
 
-        Utils.repeat(0, this.matchedQueries.length,
+        TreeUtils.repeat(0, this.matchedQueries.length,
             function(k, env){
                 floop = arguments.callee;
                 queryId = that.matchedQueries[env._i];
@@ -471,7 +471,7 @@ define([
                     toDispatchMap[queryId] = true;
                     query = that.queriesMap[queryId];
                     queryCallback = that.queriesCallbacksMap[queryId];
-                    Utils.recur(function(){
+                    TreeUtils.recur(function(){
                         that.engine.execute(query,
                             function(success, results){
                                 if(success) {
