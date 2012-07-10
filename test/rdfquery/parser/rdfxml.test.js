@@ -5,7 +5,7 @@ define([
     "../../utils"
 ], function (Parser, Utils, When, TestUtils) {
     function badAssertion (results) {
-        buster.log("RESULTS", results);
+        //console.log("RESULTS", results);
         Utils.each(results, function (r) {
             assert(r);
         });

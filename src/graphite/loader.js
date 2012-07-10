@@ -1,13 +1,11 @@
-/*global //console, module, require*/
-if (typeof module === "object" && typeof require === "function") {
-	var ModuleHttp = require("http");
-}
+/*global define*/
 define([
     "./loader/http",
     "./loader/xhr",
     "./loader/proxy",
     "./utils"
 ], function (HTTP, XHR, Proxy, Utils) {
+    "use strict";
     /**
      * @param {Object} options
      * <ul>

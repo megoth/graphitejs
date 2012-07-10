@@ -1,34 +1,31 @@
-/*global assert, buster, graphite, module, require*/
-if (typeof module === "object" && typeof require === "function") {
-    var buster = require("buster");
-}
-
+/*global assert, buster, define */
 define(["src/rdfstore/trees/utils"], function (utils) {
+    "use strict";
     buster.testCase("RDFStore Utils", {
         "testSeq": function (done) {
             var acum = [];
-            utils.seq(function(k){
+            utils.seq(function (k) {
                 acum.push(1);
                 k();
-            }, function(k){
+            }, function (k) {
                 acum.push(2);
                 k();
-            })(function(){
+            })(function () {
                 assert.equals(acum.length, 2);
                 assert.equals(acum[0], 1);
                 assert.equals(acum[1], 2);
                 done();
             });
         },
-        "testRecur": function (done){
+        "testRecur": function (done) {
             var counter = 0;
-            var testRec = function(){
+            var testRec = function () {
                 counter++;
                 if(counter == utils.stackCounterLimit) {
                     assert.equals(counter, 1000);
                     done();
                 } else {
-                    utils.recur(function(){ testRec(); });
+                    utils.recur(function () { testRec(); });
                 }
             };
             testRec();

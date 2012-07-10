@@ -1,18 +1,17 @@
 define([
-    "./tcp_transport",
-    "./n3_parser",
-    "./jsonld_parser",
     "../trees/utils",
     "../../graphite/loader",
     "../../graphite/parser",
     "../../graphite/utils"
-], function (NetworkTransport, N3Parser, JSONLDParser, Utils, Loader, Parser, GUtils) {
+], function (TreeUtils, Loader, Parser, Utils) {
     function getMime(responseHeader) {
         return responseHeader.split("application/")[1];
     }
 
     var RDFLoader = {};
-    RDFLoader.RDFLoader = function (params) {
+    RDFLoader.RDFLoader = function () {
+    //RDFLoader.RDFLoader = function (params) {
+        /*
         var that = this;
         this.precedences = ["text/turtle", "text/n3", "application/json"];
         this.parsers = {
@@ -21,13 +20,13 @@ define([
             "application/json": JSONLDParser.parser
         };
         if (params != null) {
-            Utils.each(params["parsers"], function (mime) {
+            TreeUtils.each(params["parsers"], function (mime) {
                 that.parsers[mime] = params["parsers"][mime];
             });
         }
         if (params && params["precedences"] != null) {
             this.precedences = params["precedences"];
-            Utils.each(params["parsers"], function (mime) {
+            TreeUtils.each(params["parsers"], function (mime) {
                 if (!Utils.include(that.precedences, mime)) {
                     that.precedences.push(mime);
                 }
@@ -41,6 +40,7 @@ define([
                 this.acceptHeaderValue = this.acceptHeaderValue + this.precedences[i];
             }
         }
+        */
     };
     /*
     RDFLoader.RDFLoader.prototype.registerParser = function(mediaType, parser) {
@@ -73,7 +73,7 @@ define([
                     //console.log("DATA RETRIEVED");
                     var mime = getMime(xhr.getResponseHeader("Content-Type") || xhr.getResponseHeader("content-type"));
                     if(!mime || mime === "octet-stream") {
-                        mime = GUtils.last(uri.split("."));
+                        mime = Utils.last(uri.split("."));
                     }
                     //console.log("MIME", mime);
                     Parser(data, mime, {
@@ -91,7 +91,7 @@ define([
     RDFLoader.RDFLoader.prototype.tryToParse = function(parser, graph, input, callback) {
         try {
             if(typeof(input) === 'string') {
-                input = Utils.normalizeUnicodeLiterals(input);
+                input = TreeUtils.normalizeUnicodeLiterals(input);
             }
             var parsed = parser.parse(input, graph);
 

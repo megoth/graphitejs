@@ -2,7 +2,7 @@ define([
     "./../rdfquery/uri",
     "./utils"
 ], function (Uri, Utils) {
-    function _getDatatype(value) {
+    function getDataType(value) {
         if(Utils.isBoolean(value)) {
             return Dictionary.Symbol.prototype.XSDboolean;
         } else if (Utils.isInteger(value)) {
@@ -12,6 +12,7 @@ define([
             //console.log("IN DICTIONARY, DATATYPE IS DOUBLE", value);
             return Dictionary.Symbol.prototype.XSDfloat;
         }
+        return null;
     }
     var Dictionary = {
         /**
@@ -78,6 +79,53 @@ define([
                 return this.Symbol(Uri(subject, base).toString());
             }
             return this.BlankNode();
+        },
+        //      Convert Javascript representation to RDF term object
+        //
+        createTerm: function (val, graph) {
+            if (typeof val == 'object') {
+                if (val instanceof Date) {
+                    var d2=function (x) {
+                        return(''+(100+x)).slice(1,3);
+                    };  // format as just two digits
+                    return Dictionary.Literal(
+                        ''+ val.getUTCFullYear() + '-'+
+                            d2(val.getUTCMonth()+1) +'-'+d2(val.getUTCDate())+
+                            'T'+d2(val.getUTCHours())+':'+d2(val.getUTCMinutes())+
+                            ':'+d2(val.getUTCSeconds())+'Z',
+                        undefined, Dictionary.Symbol.prototype.XSDdateTime);
+                } else if (val instanceof Array) {
+                    var x = Dictionary.Collection(graph);
+                    for (var i=0; i<val.length; i++) {
+                        x.append(Dictionary.createTerm(val[i], graph));
+                    }
+                    return x;
+                } else {
+                    return val;
+                }
+            }
+            if (typeof val == 'string') {
+                return Dictionary.Literal(val);
+            }
+            if (typeof val == 'number') {
+                //console.log("IN DICTIONARY, NUMBER");
+                var dt;
+                if ((''+val).indexOf('e')>=0) {
+                    dt = Dictionary.Symbol.prototype.XSDfloat;
+                } else if ((''+val).indexOf('.')>=0) {
+                    dt = Dictionary.Symbol.prototype.XSDdecimal;
+                } else {
+                    dt = Dictionary.Symbol.prototype.XSDinteger;
+                }
+                return Dictionary.Literal(val, undefined, dt);
+            }
+            if (typeof val == 'boolean') {
+                return Dictionary.Literal(val ? "1": "0", undefined, Dictionary.Symbol.prototype.XSDboolean);
+            }
+            if (typeof val == 'undefined') {
+                return undefined;
+            }
+            throw ("Can't make term from " + val + " of type " + typeof val);
         }
     };
     //	Blank Node
@@ -268,7 +316,7 @@ define([
         this.value = value;
         this.lang = lang;
         //console.log("IN DICTIONARY, LITERAL DATATYPE BEFORE", datatype);
-        this.datatype = datatype || _getDatatype(value);
+        this.datatype = datatype || getDataType(value);
         //console.log("IN DICTIONARY, LITERAL DATATYPE AFTER", this.datatype);
         return this;
     };
@@ -323,9 +371,9 @@ define([
         return new Dictionary.Statement.prototype.init(subject, predicate, object, why, graph);
     };
     Dictionary.Statement.prototype.init = function (subject, predicate, object, why, graph) {
-        this.subject = Dictionary.term(subject, graph);
-        this.predicate = Dictionary.term(predicate, graph);
-        this.object = Dictionary.term(object, graph);
+        this.subject = Dictionary.createTerm(subject, graph);
+        this.predicate = Dictionary.createTerm(predicate, graph);
+        this.object = Dictionary.createTerm(object, graph);
         if (typeof why !='undefined') {
             this.why = why;
         }
@@ -391,52 +439,5 @@ define([
     Dictionary.Symbol.prototype.XSDdateTime = Dictionary.Symbol('http://www.w3.org/2001/XMLSchema#dateTime');
     Dictionary.Symbol.prototype.integer = Dictionary.Symbol('http://www.w3.org/2001/XMLSchema#integer'); // Used?
     Dictionary.Symbol.prototype.init.prototype = Dictionary.Symbol.prototype;
-    //      Convert Javascript representation to RDF term object
-    //
-    Dictionary.term = function (val, graph) {
-        if (typeof val == 'object') {
-            if (val instanceof Date) {
-                var d2=function (x) {
-                    return(''+(100+x)).slice(1,3);
-                };  // format as just two digits
-                return Dictionary.Literal(
-                    ''+ val.getUTCFullYear() + '-'+
-                        d2(val.getUTCMonth()+1) +'-'+d2(val.getUTCDate())+
-                        'T'+d2(val.getUTCHours())+':'+d2(val.getUTCMinutes())+
-                        ':'+d2(val.getUTCSeconds())+'Z',
-                    undefined, Dictionary.Symbol.prototype.XSDdateTime);
-            } else if (val instanceof Array) {
-                var x = Dictionary.Collection(graph);
-                for (var i=0; i<val.length; i++) {
-                    x.append(Dictionary.term(val[i], graph));
-                }
-                return x;
-            } else {
-                return val;
-            }
-        }
-        if (typeof val == 'string') {
-            return Dictionary.Literal(val);
-        }
-        if (typeof val == 'number') {
-            //console.log("IN DICTIONARY, NUMBER");
-            var dt;
-            if ((''+val).indexOf('e')>=0) {
-                dt = Dictionary.Symbol.prototype.XSDfloat;
-            } else if ((''+val).indexOf('.')>=0) {
-                dt = Dictionary.Symbol.prototype.XSDdecimal;
-            } else {
-                dt = Dictionary.Symbol.prototype.XSDinteger;
-            }
-            return Dictionary.Literal(val, undefined, dt);
-        }
-        if (typeof val == 'boolean') {
-            return Dictionary.Literal(val ? "1": "0", undefined, Dictionary.Symbol.prototype.XSDboolean);
-        }
-        if (typeof val == 'undefined') {
-            return undefined;
-        }
-        throw ("Can't make term from " + val + " of type " + typeof val);
-    };
     return Dictionary;
 });

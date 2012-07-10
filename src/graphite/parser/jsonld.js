@@ -1,43 +1,70 @@
+/*global define*/
 define([
     "../loader",
     "../dictionary",
     "../utils",
     "../when"
 ], function (Loader, Dictionary, Utils, When) {
+    "use strict";
+    function assignType(predicates, objects, obj) {
+        if (Utils.isArray(obj)) {
+            Utils.each(obj, function (type) {
+                assignType(predicates, objects, type);
+            });
+        } else {
+            predicates.push("rdf:type");
+            objects.push(obj);
+        }
+    }
     var curieRegex = /^[a-zA-Z0-9]+:[a-zA-Z0-9]+/,
         literalStringRegex = /^[a-zA-Z0-9\s:_#\*\$&\-]*/,
-        uriRegex = /^http:\/\/[a-zA-Z0-9#_\-.\/]+/;
-    /*
-     * The JSON-LD parser object
-     * 
-     * @param {Object} json The JSON-LD to parse
-     * @param {Object} options A given set of options
-     * @param {Function} callback A callback-function to run when the graph is assembled
-     */
-    var jsonld = function (json, options, callback) {
-        if (!json || Utils.isNumber(json)) {
-            throw Error("No valid JSON-object given");
-        } else if (Utils.isString(json)) {
-            try {
-                json = JSON.parse(json);
-            } catch (e) {
-                throw Error("No valid JSON-string given: " + json);
+        uriRegex = /^http:\/\/[a-zA-Z0-9#_\-.\/]+/,
+        ContextLoader = function () {
+            return new ContextLoader.prototype.init();
+        },
+        /**
+         *
+         * @param pseudoGraph
+         * @param properties
+         * @param contexts
+         * @param options
+         * @constructor
+         */
+        Node = function (pseudoGraph, properties, contexts, bnodes, options) {
+            return new Node.prototype.init(pseudoGraph, properties, contexts, bnodes, options);
+        },
+        /**
+         *
+         * @param options
+         * @constructor
+         */
+        PseudoGraph = function (options) {
+            return new PseudoGraph.prototype.init(options);
+        },
+        /*
+         * The JSON-LD parser object
+         *
+         * @param {Object} json The JSON-LD to parse
+         * @param {Object} options A given set of options
+         * @param {Function} callback A callback-function to run when the graph is assembled
+         */
+        JSONLD = function (json, options, callback) {
+            if (!json || Utils.isNumber(json)) {
+                throw new Error("No valid JSON-object given");
+            } else if (Utils.isString(json)) {
+                try {
+                    json = JSON.parse(json);
+                } catch (e) {
+                    throw new Error("No valid JSON-string given: " + json);
+                }
             }
-        }
-        //console.log("JSON", json);
-        var pg = PseudoGraph(options);
-        pg.createNode(json);
-        pg.loadContexts(function () {
-            callback(pg.assembleTriples());
-        });
-    };
-    /**
-     *
-     * @constructor
-     */
-    var ContextLoader = function () {
-        return new ContextLoader.prototype.init();
-    };
+            //console.log("JSON", json);
+            var pg = new PseudoGraph(options);
+            pg.createNode(json);
+            pg.loadContexts(function () {
+                callback(pg.assembleTriples());
+            });
+        };
     ContextLoader.prototype = {
         /**
          * Initialize the ContextLoader
@@ -61,29 +88,18 @@ define([
             var cl = this;
 
             When.all(this.promises).then(function (contexts) {
-                if(contexts) {
+                if (contexts) {
                     Utils.each(contexts, function (context) {
                         cl.contexts.push(context);
                     });
                 }
                 callback();
             }, function (err) {
-                throw "There was an error:" + err;
+                throw new Error("There was an error:" + err);
             });
         }
     };
     ContextLoader.prototype.init.prototype = ContextLoader.prototype;
-    /**
-     *
-     * @param pseudoGraph
-     * @param properties
-     * @param contexts
-     * @param options
-     * @constructor
-     */
-    var Node = function (pseudoGraph, properties, contexts, bnodes, options) {
-        return new Node.prototype.init(pseudoGraph, properties, contexts, bnodes, options);
-    };
     Node.prototype = {
         /**
          *
@@ -94,6 +110,13 @@ define([
          * @return {*}
          */
         init: function (pseudoGraph, properties, contexts, bnodes, options) {
+            var promise,
+                index,
+                rest,
+                obj,
+                node = {},
+                objects = [],
+                predicates = [];
             this.contexts = Utils.clone(contexts);
             this.context = {
                 "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -102,26 +125,27 @@ define([
             };
             this.options = options;
             this.bnodes = bnodes;
-            var obj,
-                node = {};
-            if(obj = Utils.extract(properties, "@context")) {
-                var promise = this.getPromise(obj);
-                var index = pseudoGraph.contextLoader.add(promise);
+            obj = Utils.extract(properties, "@context");
+            if (obj) {
+                promise = this.getPromise(obj);
+                index = pseudoGraph.contextLoader.add(promise);
                 this.contexts.push(index);
             }
-            var objects = [];
-            var predicates = [];
-            if(obj = Utils.extract(properties, "@type")) {
+            obj = Utils.extract(properties, "@type");
+            if (obj) {
                 assignType(predicates, objects, obj);
             }
-            if(obj = Utils.extract(properties, "@language")) {
+            obj = Utils.extract(properties, "@language");
+            if (obj) {
                 this.lang = obj;
             }
-            if(obj = Utils.extract(properties, "@value")) {
+            obj = Utils.extract(properties, "@value");
+            if (obj) {
                 this.value = obj;
             }
-            if(obj = Utils.extract(properties, "@list")) {
-                var rest = "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil";
+            obj = Utils.extract(properties, "@list");
+            if (obj) {
+                rest = "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil";
                 Utils.each(obj.reverse(), function (obj) {
                     node = pseudoGraph.createNode({
                         "rdf:first": obj,
@@ -131,10 +155,10 @@ define([
                     rest = node.subject;
                 });
                 Utils.extend(this, node);
-                return undefined
+                return undefined;
             }
             this.subject = Utils.extract(properties, "@id");
-            if(Utils.size(properties) > 0) {
+            if (Utils.size(properties) > 0) {
                 this.subject = this.subject || "_:" + Math.random();
                 node = this;
                 Utils.each(properties, function (obj, property) {
@@ -142,10 +166,9 @@ define([
                 });
             }
             this.triples = [];
-            for(var i = 0, len = predicates.length; i < len; i++) {
-                //console.log("TRIPLE", i, predicates[i], objects[i]);
-                this.triples.push([this.subject, predicates[i], objects[i]]);
-            }
+            Utils.each(predicates, function (predicate, i) {
+                this.triples.push([this.subject, predicate, objects[i]]);
+            }.bind(this));
             return this;
         },
         /**
@@ -157,20 +180,22 @@ define([
          * @param {Object|Array|String} obj The object to add
          */
         addProperty: function (pseudoGraph, predicates, objects, property, obj) {
+            var node,
+                object;
             if (!Utils.isObject(obj)) {
                 predicates.push(property);
                 objects.push(obj);
             } else if (Utils.isArray(obj)) {
-                var node = this;
+                node = this;
                 Utils.each(obj, function (o) {
                     node.addProperty(pseudoGraph, predicates, objects, property, o);
                 });
             } else {
                 predicates.push(property);
-                if(obj["@value"]) {
+                if (obj["@value"]) {
                     objects.push(pseudoGraph.createNode(obj));
                 } else {
-                    var object = pseudoGraph.createNode(obj, this.contexts);
+                    object = pseudoGraph.createNode(obj, this.contexts);
                     objects.push(object.subject);
                 }
             }
@@ -194,15 +219,15 @@ define([
                 } else if (subject.type === "uri") {
                     subject = Dictionary.Symbol(subject.value);
                 } else {
-                    throw new Error ("Unrecognized type of subject" + subject.type);
+                    throw new Error("Unrecognized type of subject" + subject.type);
                 }
                 predicate = node.getPredicate(triple[1]);
                 predicate = Dictionary.Symbol(predicate);
                 object = node.getObject(triple[2], predicate);
-                if(object.type === "bnode") {
+                if (object.type === "bnode") {
                     object = node.getBlankNode(object.value);
                 } else if (object.type === "uri") {
-                    object = Dictionary.Symbol(object.value)
+                    object = Dictionary.Symbol(object.value);
                 } else {
                     //console.log("IN JSONLD, OBJECT", object);
                     object = Dictionary.Literal(object.value, object.lang, object.datatype);
@@ -241,11 +266,11 @@ define([
          */
         getLoader: function (options) {
             var loader;
-            if(this.options && this.options.loader) {
+            if (this.options && this.options.loader) {
                 loader = this.options.loader;
             }
-            if(!loader) {
-                loader = Loader(options);
+            if (!loader) {
+                loader = new Loader(options);
             }
             return loader;
         },
@@ -257,20 +282,20 @@ define([
          * @returns {string} The expanded object
          */
         getObject: function (object, predicate) {
-            var value, tmp;
-            if(Utils.isInteger(object)) {
+            var value, tmp, pre;
+            if (Utils.isInteger(object)) {
                 object = {
                     value: object,
                     type: "literal",
                     datatype: "http://www.w3.org/TR/xmlschema-2/#integer"
                 };
-            } else if(Utils.isDouble(object)) {
+            } else if (Utils.isDouble(object)) {
                 object = {
                     value: object,
                     type: "literal",
                     datatype: "http://www.w3.org/TR/xmlschema-2/#double"
                 };
-            } else if(Utils.isBoolean(object)) {
+            } else if (Utils.isBoolean(object)) {
                 object = {
                     value: object,
                     type: "literal",
@@ -281,7 +306,7 @@ define([
                     value: object,
                     type: "bnode"
                 };
-            } else if(Utils.isString(object)) {
+            } else if (Utils.isString(object)) {
                 value = literalStringRegex.exec(object)[0];
                 if (uriRegex.test(value)) {
                     value = this.getUri(value);
@@ -298,11 +323,11 @@ define([
                     type: Utils.isUri(value) ? "uri" : "literal"
                 };
             }
-            if(this.context) {
+            if (this.context) {
                 object.lang = object.lang || this.context["@language"];
-                if(this.context[predicate]) {
-                    var pre = this.context[predicate];
-                    if(pre["@type"]) {
+                if (this.context[predicate]) {
+                    pre = this.context[predicate];
+                    if (pre["@type"]) {
                         pre["@id"] = pre["@id"] || self.getUri(predicate);
                         object.datatype = (pre["@type"] !== "@id") ? pre["@type"] : pre["@id"];
                     }
@@ -317,7 +342,7 @@ define([
          * @returns {string} The expanded predicate
          */
         getPredicate: function (predicate) {
-            if(this.context) {
+            if (this.context) {
                 predicate = Utils.isUri(predicate)
                     ? predicate
                     : this.getUri(predicate);
@@ -332,21 +357,21 @@ define([
          */
         getPromise: function (obj) {
             var deferred = When.defer();
-            if(Utils.isString(obj)) {
+            if (Utils.isString(obj)) {
                 this.getLoader({
                     uri: obj,
                     success: function (err, result) {
                         deferred.resolve(err ? err : JSON.parse(result)["@context"]);
                     }
                 });
-            } else if(Utils.isArray(obj)) {
+            } else if (Utils.isArray(obj)) {
                 var promises = [],
                     node = this;
                 Utils.each(obj, function (nObj) {
                     promises.push(node.getPromise(nObj));
                 });
                 When.all(promises).then(function () {
-                    if(arguments[0]) {
+                    if (arguments[0]) {
                         var result = {};
                         Utils.each(arguments[0], function (context) {
                             Utils.extend(result, context);
@@ -390,7 +415,7 @@ define([
         getUri: function (curie) {
             var context = Utils.clone(this.context);
             Utils.each(context, function (obj, key) {
-                if(obj.hasOwnProperty("@id")) {
+                if (obj.hasOwnProperty("@id")) {
                     context[key] = obj["@id"];
                 }
             });
@@ -398,14 +423,6 @@ define([
         }
     };
     Node.prototype.init.prototype = Node.prototype;
-    /**
-     *
-     * @param options
-     * @constructor
-     */
-    var PseudoGraph = function (options) {
-        return new PseudoGraph.prototype.init(options);
-    };
     PseudoGraph.prototype = {
         /**
          * Initialize the pseudograph
@@ -451,7 +468,7 @@ define([
         createNode: function (nodes, contexts) {
             contexts = contexts || [];
             var pg = this;
-            if(Utils.isArray(nodes)) {
+            if (Utils.isArray(nodes)) {
                 Utils.each(nodes, function (node) {
                     pg.createNode(node, contexts);
                 });
@@ -465,15 +482,5 @@ define([
         }
     };
     PseudoGraph.prototype.init.prototype = PseudoGraph.prototype;
-    function assignType(predicates, objects, obj) {
-        if(Utils.isArray(obj)) {
-            Utils.each(obj, function (type) {
-                assignType(predicates, objects, type);
-            });
-        } else {
-            predicates.push("rdf:type");
-            objects.push(obj);
-        }
-    }
-    return jsonld;
+    return JSONLD;
 });

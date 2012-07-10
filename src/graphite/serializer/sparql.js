@@ -1,33 +1,47 @@
+/*global define */
 define([
     "../utils"
 ], function (Utils) {
+    "use strict";
     var sparql = function (syntaxTree) {
-        return sparql.assemble(syntaxTree)
+        return sparql.assemble(syntaxTree);
     };
     sparql.assemble = function (node) {
         switch (node.token) {
-            case "basicgraphpattern": return sparql.assembleBasicGraphPattern(node);
-            case "blank": return sparql.assembleBlank(node);
-            case "executableunit": return sparql.assembleExecutableUnit(node);
-            case "expression": return sparql.assembleExpression(node);
-            case "filter": return sparql.assembleFilter(node);
-            case "groupgraphpattern": return sparql.assembleGroupGraphPattern(node);
-            case "literal": return sparql.assembleLiteral(node);
-            case "optionalgraphpattern": return sparql.assembleOptionalGraphPattern(node);
-            case "path": return sparql.assemblePath(node);
-            case "query": return sparql.assembleQuery(node);
-            case "uri": return sparql.assembleUri(node);
-            case "var":
-            case "variable": return sparql.assembleVariable(node);
-            default:
-                return node;
+        case "basicgraphpattern":
+            return sparql.assembleBasicGraphPattern(node);
+        case "blank":
+            return sparql.assembleBlank(node);
+        case "executableunit":
+            return sparql.assembleExecutableUnit(node);
+        case "expression":
+            return sparql.assembleExpression(node);
+        case "filter":
+            return sparql.assembleFilter(node);
+        case "groupgraphpattern":
+            return sparql.assembleGroupGraphPattern(node);
+        case "literal":
+            return sparql.assembleLiteral(node);
+        case "optionalgraphpattern":
+            return sparql.assembleOptionalGraphPattern(node);
+        case "path":
+            return sparql.assemblePath(node);
+        case "query":
+            return sparql.assembleQuery(node);
+        case "uri":
+            return sparql.assembleUri(node);
+        case "var":
+        case "variable":
+            return sparql.assembleVariable(node);
+        default:
+            return node;
         }
     };
     sparql.assembleAdditiveExpression = function (node) {
         return [
             "(",
             sparql.assemble(node.summand),
-            Utils.map(node.summands, function(summand) {
+            Utils.map(node.summands, function (summand) {
                 return " {0} {1}".format(summand.operator, sparql.assemble(summand.expression));
             }).join(""),
             ")"
@@ -44,7 +58,7 @@ define([
     sparql.assembleAlias = function (node) {
         return node.token === "var"
             ? sparql.assembleVariable(node)
-            : node.value
+            : node.value;
     };
     sparql.assembleAsk = function (node) {
         return "ASK WHERE { {0} }".format(
@@ -71,17 +85,26 @@ define([
     };
     sparql.assembleBuiltinCall = function (node) {
         switch (node.builtincall) {
-            case "bnode": return sparql.assembleBuiltinCallBNode(node);
-            case "datatype": return sparql.assembleBuiltinCallDatatype(node);
-            case "exists": return sparql.assembleBuiltinCallExists(node);
-            case "if": return sparql.assembleBuiltinCallIf(node);
-            case "iri": return sparql.assembleBuiltinCallIri(node);
-            case "lang": return sparql.assembleBuiltinCallLang(node);
-            case "notexists": return sparql.assembleBuiltinCallNotExists(node);
-            case "str": return sparql.assembleBuiltinCallStr(node);
-            case "uri": return sparql.assembleBuiltinCallUri(node);
-            default:
-                throw new Error ("assembleBuiltinCall not supported " + node.builtincall);
+        case "bnode":
+            return sparql.assembleBuiltinCallBNode(node);
+        case "datatype":
+            return sparql.assembleBuiltinCallDatatype(node);
+        case "exists":
+            return sparql.assembleBuiltinCallExists(node);
+        case "if":
+            return sparql.assembleBuiltinCallIf(node);
+        case "iri":
+            return sparql.assembleBuiltinCallIri(node);
+        case "lang":
+            return sparql.assembleBuiltinCallLang(node);
+        case "notexists":
+            return sparql.assembleBuiltinCallNotExists(node);
+        case "str":
+            return sparql.assembleBuiltinCallStr(node);
+        case "uri":
+            return sparql.assembleBuiltinCallUri(node);
+        default:
+            throw new Error("assembleBuiltinCall not supported " + node.builtincall);
         }
     };
     sparql.assembleBuiltinCallBNode = function (node) {
@@ -145,40 +168,56 @@ define([
         return "CREATE GRAPH " + sparql.assemble(node.destinyGraph);
     };
     sparql.assembleDelete = function (node) {
-        if (!node.delete) {
+        if (!node["delete"]) {
             return null;
         }
-        return "DELETE\n{\n" + sparql.assembleTripleContext(node.delete) + "\n}\n";
+        return "DELETE\n{\n" + sparql.assembleTripleContext(node["delete"]) + "\n}\n";
     };
     sparql.assembleDeleteData = function (node) {
-        return "DELETE DATA\n{\n{0}\n}\n".format(assembleTripleContext(node.quads));
+        return "DELETE DATA\n{\n{0}\n}\n".format(sparql.assembleTripleContext(node.quads));
     };
     sparql.assembleExecutableUnit = function (node) {
-        switch(node.kind) {
-            case "ask": return sparql.assembleAsk(node);
-            case "create": return sparql.assembleCreate(node);
-            case "deletedata": return sparql.assembleDeleteData(node);
-            case "load": return sparql.assembleLoad(node);
-            case "select": return sparql.assembleSelect(node);
-            case "insertdata": return sparql.assembleInsertData(node);
-            default:
-                throw new Error("No support for executable kind " + node.kind);
+        switch (node.kind) {
+        case "ask":
+            return sparql.assembleAsk(node);
+        case "create":
+            return sparql.assembleCreate(node);
+        case "deletedata":
+            return sparql.assembleDeleteData(node);
+        case "load":
+            return sparql.assembleLoad(node);
+        case "select":
+            return sparql.assembleSelect(node);
+        case "insertdata":
+            return sparql.assembleInsertData(node);
+        default:
+            throw new Error("No support for executable kind " + node.kind);
         }
     };
     sparql.assembleExpression = function (node) {
-        switch(node.expressionType) {
-            case "additiveexpression": return sparql.assembleAdditiveExpression(node);
-            case "aggregate": return sparql.assembleAggregate(node);
-            case "atomic": return sparql.assembleAtomic(node);
-            case "builtincall": return sparql.assembleBuiltinCall(node);
-            case "conditionaland": return sparql.assembleConditionalAnd(node);
-            case "conditionalor": return sparql.assembleConditionalOr(node);
-            case "irireforfunction": return sparql.assembleIriRefOrFunction(node);
-            case "multiplicativeexpression": return sparql.assembleMultiplicativeExpression(node);
-            case "relationalexpression": return sparql.assembleRelationalExpression(node);
-            case "unaryexpression": return sparql.assembleUnaryExpression(node);
-            default:
-                throw new Error("NO SUPPORT FOR expressionType " + node.expressionType);
+        switch (node.expressionType) {
+        case "additiveexpression":
+            return sparql.assembleAdditiveExpression(node);
+        case "aggregate":
+            return sparql.assembleAggregate(node);
+        case "atomic":
+            return sparql.assembleAtomic(node);
+        case "builtincall":
+            return sparql.assembleBuiltinCall(node);
+        case "conditionaland":
+            return sparql.assembleConditionalAnd(node);
+        case "conditionalor":
+            return sparql.assembleConditionalOr(node);
+        case "irireforfunction":
+            return sparql.assembleIriRefOrFunction(node);
+        case "multiplicativeexpression":
+            return sparql.assembleMultiplicativeExpression(node);
+        case "relationalexpression":
+            return sparql.assembleRelationalExpression(node);
+        case "unaryexpression":
+            return sparql.assembleUnaryExpression(node);
+        default:
+            throw new Error("NO SUPPORT FOR expressionType " + node.expressionType);
         }
     };
     sparql.assembleFilter = function (node) {
@@ -188,7 +227,7 @@ define([
         );
     };
     sparql.assembleGroup = function (node) {
-        if (!node.group || node.group.length == 0) {
+        if (!node.group || node.group.length === 0) {
             return null;
         }
         return "GROUP BY " + Utils.map(node.group, function (g) {
@@ -213,7 +252,7 @@ define([
         return "INSERT\n{\n" + sparql.assembleTripleContext(node.insert) + "\n}\n";
     };
     sparql.assembleInsertData = function (node) {
-        return "INSERT DATA\n{\n{0}\n}\n".format(assembleTripleContext(node.quads));
+        return "INSERT DATA\n{\n{0}\n}\n".format(sparql.assembleTripleContext(node.quads));
     };
     sparql.assembleIriRefOrFunction = function (node) {
         return sparql.assembleUri(node.iriref);
@@ -238,7 +277,7 @@ define([
         return [
             sparql.assemble(node.factor),
             Utils.map(node.factors, function (factor) {
-                return " {0} {1}".format(factor.operator,assemble(factor.expression));
+                return " {0} {1}".format(factor.operator, sparql.assemble(factor.expression));
             }).join("")
         ].join("");
     };
@@ -258,15 +297,19 @@ define([
     };
     sparql.assemblePath = function (node) {
         switch (node.kind) {
-            case "alternative": return sparql.assemblePathAlternative(node);
-            case "element": return sparql.assemblePathElement(node);
-            case "inversePath": return sparql.assemblePathInversePath(node);
-            case "sequence": return sparql.assemblePathSequence(node);
-            default:
-                throw new Error("assemblePath not supported " + node.kind);
+        case "alternative":
+            return sparql.assemblePathAlternative(node);
+        case "element":
+            return sparql.assemblePathElement(node);
+        case "inversePath":
+            return sparql.assemblePathInversePath(node);
+        case "sequence":
+            return sparql.assemblePathSequence(node);
+        default:
+            throw new Error("assemblePath not supported " + node.kind);
         }
     };
-    sparql.assemblePathAlternative = function (node) {
+    sparql.assemblePathAlternative = function () {
         //console.log("assemblePathAlternative", node);
     };
     sparql.assemblePathElement = function (node) {
@@ -275,14 +318,14 @@ define([
             sparql.assemble(node.value),
             Utils.isArray(node.modifier)
                 ? Utils.map(Utils.flatten(node.modifier), function (mod) {
-                return sparql.assemble(mod)
-            }).join("")
+                    return sparql.assemble(mod);
+                }).join("")
                 : sparql.assemble(node.modifier)
         );
     };
     sparql.assemblePathInversePath = function (node) {
         //console.log("assemblePathInversePath", node);
-        return "^({0})".format(assemble(node.value));
+        return "^({0})".format(sparql.assemble(node.value));
     };
     sparql.assemblePathSequence = function (node) {
         //console.log("assemblePathSequence", node);
@@ -381,11 +424,13 @@ define([
         }
         return Utils.map(node.using, function (n) {
             switch (n.kind) {
-                case "named": return sparql.assembleUsingNamed(n);
-                case "default": return sparql.assembleUsingDefault(n);
-                default:
-                    //console.log(n);
-                    throw new Error("NOT SUPPORTING USING " + n.kind);
+            case "named":
+                return sparql.assembleUsingNamed(n);
+            case "default":
+                return sparql.assembleUsingDefault(n);
+            default:
+                //console.log(n);
+                throw new Error("NOT SUPPORTING USING " + n.kind);
             }
         }).join("");
     };
@@ -397,31 +442,32 @@ define([
     };
     sparql.assembleVariable = function (node) {
         switch (node.kind) {
-            case "aliased":
-                return "({0} AS {1})".format(assembleExpression(node.expression), sparql.assembleAlias(node.alias));
-            case "var":
-                return sparql.assemble(node.value);
-            case "*":
-                return node.kind;
-            default:
-                //console.log("VARIABLE", node);
-                return "?" + node.value;
+        case "aliased":
+            return "({0} AS {1})".format(sparql.assembleExpression(node.expression), sparql.assembleAlias(node.alias));
+        case "var":
+            return sparql.assemble(node.value);
+        case "*":
+            return node.kind;
+        default:
+            //console.log("VARIABLE", node);
+            return "?" + node.value;
         }
     };
     sparql.assembleWhere = function (node) {
-        if(!node.pattern) {
+        if (!node.pattern) {
             return null;
-        }return [
+        }
+        return [
             "WHERE\n{\n",
             sparql.assemble(node.pattern),
             "\n}"
         ].join("");
     };
     sparql.assembleWith = function (node) {
-        if (!node.with) {
+        if (!node["with"]) {
             return null;
         }
-        return "WITH " + sparql.assemble(node.with) + " ";
+        return "WITH " + sparql.assemble(node["with"]) + " ";
     };
     return sparql;
 });

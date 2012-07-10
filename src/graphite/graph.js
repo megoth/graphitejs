@@ -1,12 +1,12 @@
+/*global define */
 define([
     "./dictionary",
     "./../rdfstore/rdf-persistence/lexicon",
     "./../rdfstore/rdf-persistence/quad_backend",
     "./../rdfstore/query-engine/query_engine",
-    "./serializer/sparql",
     "./utils",
     "./when"
-], function (Dictionary, Lexicon, QuadBackend, QueryEngine, Serializer, Utils, When) {
+], function (Dictionary, Lexicon, QuadBackend, QueryEngine, Utils, When) {
     "use strict";
     function bindVar (vars) {
         return Utils.map(vars, function (v) {
@@ -199,23 +199,22 @@ define([
     };
     Graph.prototype = {
         init: function (data) {
-            var graph = this;
             this.deferred = When.defer();
             new Lexicon.Lexicon(function(lexicon){
-                graph.lexicon = lexicon;
+                this.lexicon = lexicon;
                 new QuadBackend.QuadBackend({
                     treeOrder: 2
                 }, function(backend){
-                    graph.engine = new QueryEngine.QueryEngine({
+                    this.engine = new QueryEngine.QueryEngine({
                         backend: backend,
                         lexicon: lexicon
                     });
-                    graph.deferred.resolve(graph);
+                    this.deferred.resolve(this);
                     if (data) {
-                        graph.extend(data);
+                        this.extend(data);
                     }
-                });
-            });
+                }.bind(this));
+            }.bind(this));
         },
         clone: function () {
             return Graph(this);

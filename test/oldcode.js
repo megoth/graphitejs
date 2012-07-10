@@ -3,13 +3,13 @@ Old code that might be handy later on
 
 
 loader.open = function(method, url) {
-	buster.log(method, url);
+	console.log(method, url);
 	return;
 };
 loader.init.call(loader);
 if(options.url) {
 	loader.open.call(loader, options.method, options.uri);
-	buster.log(options.url);
+	console.log(options.url);
 	return;
 }
 loader.responseText = options.responseText;

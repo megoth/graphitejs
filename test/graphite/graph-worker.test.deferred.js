@@ -9,7 +9,7 @@ buster.testCase("Graphite graph worker", {
             assert.equals(e.data.query, query);
         });
         worker.onerror = done(function (e) {
-            buster.log("EVENT FAILED", e);
+            //console.log("EVENT FAILED", e);
             assert(false);
         });
         worker.postMessage({
@@ -23,7 +23,7 @@ buster.testCase("Graphite graph worker", {
             idle = true,
             pauseFunc = function (millis, callback) {
                 setTimeout(function () {
-                    buster.log("WAITING", idle);
+                    //console.log("WAITING", idle);
                     if (idle === true) {
                         pauseFunc(millis);
                     } else {
@@ -32,11 +32,11 @@ buster.testCase("Graphite graph worker", {
                 }, millis);
             };
         worker.onmessage = function(e) {
-            buster.log("SUCCESS!", e);
+            //console.log("SUCCESS!", e);
             idle = false;
         };
         worker.onerror = done(function (e) {
-            buster.log("EVENT FAILED", e);
+            //console.log("EVENT FAILED", e);
             idle = false;
         });
         worker.postMessage({
@@ -44,7 +44,7 @@ buster.testCase("Graphite graph worker", {
             query: query
         });
         pauseFunc(10, done(function () {
-            buster.log("IDLE?", idle);
+            //console.log("IDLE?", idle);
         }));
     }
 });

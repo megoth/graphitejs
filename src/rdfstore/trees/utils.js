@@ -1,3 +1,4 @@
+/*global define */
 define([], function () {
     var Utils = {};
     Utils.extends = function(supertype, descendant) {
@@ -8,7 +9,7 @@ define([], function () {
     Utils.stackCounter = 0;
 
     Utils.recur = function(c){
-        if(Utils.stackCounter === Utils.stackCounterLimit) {
+        if (Utils.stackCounter === Utils.stackCounterLimit) {
             Utils.stackCounter = 0;
             setTimeout(c, 0);
         } else {
@@ -31,13 +32,13 @@ define([], function () {
 
         for(var i=(a.length-1); i>=0; i--) {
             var res = false;
-            if(cmp == null) {
+            if (cmp == null) {
                 res = (a[i] === v);
             } else {
                 res = (cmp(a[i],v) === 0);
             }
 
-            if(res === true) {
+            if (res === true) {
                 return true;
             }
         }
@@ -48,7 +49,7 @@ define([], function () {
     Utils.remove = function(a,v) {
         var acum = [];
         for(var i=0; i<a.length; i++) {
-            if(a[i] !== v) {
+            if (a[i] !== v) {
                 acum.push(a[i]);
             }
         }
@@ -57,8 +58,8 @@ define([], function () {
     };
 
     Utils.repeat = function(c,max,floop,fend,env) {
-        if(arguments.length===4) { env = {}; }
-        if(c<max) {
+        if (arguments.length===4) { env = {}; }
+        if (c<max) {
             env._i = c;
             floop(function(floop,env){
                 // avoid stack overflow
@@ -72,15 +73,15 @@ define([], function () {
 
 
     Utils.meanwhile = function(c,floop,fend,env) {
-        if(arguments.length===3) { env = {}; }
+        if (arguments.length===3) { env = {}; }
 
-        if(env['_stack_counter'] == null) {
+        if (env['_stack_counter'] == null) {
             env['_stack_counter'] = 0;
         }
 
-        if(c===true) {
+        if (c===true) {
             floop(function(c,floop,env){
-                if(env['_stack_counter'] % 40 == 39) {
+                if (env['_stack_counter'] % 40 == 39) {
                     env['_stack_counter'] = env['_stack_counter'] + 1;
                     setTimeout(function(){ Utils.neanwhile(c, floop, fend, env); }, 0);
                 } else {
@@ -116,7 +117,7 @@ define([], function () {
         var groups = [];
         for(i=0; i<c.length; i++) {
             currentGroup.push(c[i]);
-            if(currentGroup.length % n == 0) {
+            if (currentGroup.length % n == 0) {
                 groups.push(currentGroup);
                 currentGroup = [];
             }
@@ -234,18 +235,18 @@ define([], function () {
         minutes = Number(d[8]);
         seconds = Number(d[10]);
 
-        if(d[12]) { millisecs = Number("0." + d[12]) * 1000; }
+        if (d[12]) { millisecs = Number("0." + d[12]) * 1000; }
 
-        if(d[13]==="Z") {
+        if (d[13]==="Z") {
             timezone = 0;
         } else if (d[14]) {
             timezone = 0;
-            if(d[17]) {
+            if (d[17]) {
                 timezone = Number(d[17]);
             }
             timezone = timezone+(Number(d[15]) * 60);
             timezone *= ((d[14] == '-') ? -1 : +1);
-        } else if(d[14]==null && d[11]) {
+        } else if (d[14]==null && d[11]) {
             timezone = Number(d[12])*60;
         }
 
@@ -263,14 +264,14 @@ define([], function () {
         var a = Utils.parseISO8601Components(stra);
         var b = Utils.parseISO8601Components(strb);
         var offset;
-        if((a.timezone == null && b.timezone == null) ||
+        if ((a.timezone == null && b.timezone == null) ||
             (a.timezone != null && b.timezone != null)) {
             var da = Utils.parseISO8601(stra);
             var db = Utils.parseISO8601(strb);
 
-            if(da.getTime() == db.getTime()) {
+            if (da.getTime() == db.getTime()) {
                 return 0;
-            } else if(da.getTime() < db.getTime()){
+            } else if (da.getTime() < db.getTime()){
                 return -1;
             } else {
                 return 1;
@@ -281,9 +282,9 @@ define([], function () {
             var ta = da.getTime();
             var tb = db.getTime();
             offset = 14*60*60;
-            if(ta < tb && ta < (tb + offset)) {
+            if (ta < tb && ta < (tb + offset)) {
                 return -1;
-            } else if(ta > tb && ta > (tb - offset)) {
+            } else if (ta > tb && ta > (tb - offset)) {
                 return 1;
             } else {
                 return null;
@@ -294,9 +295,9 @@ define([], function () {
             ta = da.getTime();
             tb = db.getTime();
             offset = 14*60*60;
-            if(ta < tb && (ta + offset)  < tb) {
+            if (ta < tb && (ta + offset)  < tb) {
                 return -1;
-            } else if(ta > tb && (ta + offset) > tb) {
+            } else if (ta > tb && (ta + offset) > tb) {
                 return 1;
             } else {
                 return null;
@@ -310,10 +311,10 @@ define([], function () {
         var type = term.type;
 
         var indexedValue = null;
-        if(value != null && type != null && typeof(type) != 'string') {
+        if (value != null && type != null && typeof(type) != 'string') {
             var typeValue = type.value;
 
-            if(typeValue == null) {
+            if (typeValue == null) {
                 var typePrefix = type.prefix;
                 var typeSuffix = type.suffix;
 
@@ -322,19 +323,19 @@ define([], function () {
                 typeValue = resolvedPrefix+typeSuffix;
             }
             // normalization
-            if(typeValue.indexOf('hexBinary') != -1) {
+            if (typeValue.indexOf('hexBinary') != -1) {
                 indexedValue = '"' + term.value.toLowerCase() + '"^^<' + typeValue + '>';
             } else {
                 indexedValue = '"' + term.value + '"^^<' + typeValue + '>';
             }
         } else {
-            if(lang == null && type == null) {
+            if (lang == null && type == null) {
                 indexedValue = '"' + value + '"';
-            } else if(type == null) {
+            } else if (type == null) {
                 indexedValue = '"' + value + '"' + "@" + lang;
             } else {
                 // normalization
-                if(type.indexOf('hexBinary') != -1) {
+                if (type.indexOf('hexBinary') != -1) {
                     indexedValue = '"' + term.value.toLowerCase() + '"^^<'+type+'>';
                 } else {
                     indexedValue = '"' + term.value + '"^^<'+type+'>';
@@ -348,14 +349,14 @@ define([], function () {
         var uri = null;
         //console.log("*** normalizing URI token:");
         //console.log(term);
-        if(term.value == null) {
+        if (term.value == null) {
             //console.log(" - URI has prefix and suffix");
             //console.log(" - prefix:"+term.prefix);
             //console.log(" - suffixx:"+term.suffix);
             var prefix = term.prefix;
             var suffix = term.suffix;
             var resolvedPrefix = env.namespaces[prefix];
-            if(resolvedPrefix != null) {
+            if (resolvedPrefix != null) {
                 uri = resolvedPrefix+suffix;
             } else {
                 uri = prefix+":"+suffix;
@@ -365,11 +366,11 @@ define([], function () {
             uri = term.value;
         }
 
-        if(uri===null) {
+        if (uri===null) {
             return null;
         } else {
             //console.log(" - resolved URI is "+uri);
-            if(uri.indexOf(":") == -1) {
+            if (uri.indexOf(":") == -1) {
                 //console.log(" - URI is partial");
                 uri = (env.base||"") + uri; // applyBaseUri
             } else {
@@ -383,11 +384,11 @@ define([], function () {
 
 
     Utils.lexicalFormTerm = function(term, ns) {
-        if(term.token === 'uri') {
+        if (term.token === 'uri') {
             return {'uri': Utils.lexicalFormBaseUri(term, ns)};
-        } else if(term.token === 'literal') {
+        } else if (term.token === 'literal') {
             return {'literal': Utils.lexicalFormLiteral(term, ns)};
-        } else if(term.token === 'blank') {
+        } else if (term.token === 'blank') {
             var label = '_:'+term.value;
             return {'blank': label};
         } else {
@@ -408,13 +409,14 @@ define([], function () {
     };
     Utils.hashTerm = function(term) {
         try {
-            if(term == null) {
+            if (term == null) {
                 return "";
-            } if(term.token==='uri') {
+            }
+            if (term.token==='uri') {
                 return "u"+term.value;
-            } else if(term.token === 'blank') {
+            } else if (term.token === 'blank') {
                 return "b"+term.value;
-            } else if(term.token === 'literal') {
+            } else if (term.token === 'literal') {
                 var l = "l"+term.value;
                 l = l + (term.type || "");
                 l = l + (term.lang || "");
@@ -422,7 +424,7 @@ define([], function () {
                 return l;
             }
         } catch(e) {
-            if(typeof(term) === 'object') {
+            if (typeof(term) === 'object') {
                 var key = "";
                 Utils.each(term, function (t, p) {
                     key = key + p + t;

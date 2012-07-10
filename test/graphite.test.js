@@ -1,16 +1,12 @@
-if (typeof module == "object" && typeof require == "function") {
-    var buster = require("buster");
-    var graphite = require(".././graphite/core.js").graphite;
-}
-
+/*global assert, buster, define */
 define([
     "src/graphite"
 ], function (Core) {
+    "use strict";
     buster.testCase("Graphite core", {
         "Basic setup": function () {
             assert.defined(Core);
             assert.isFunction(Core);
         }
     });
-
 });

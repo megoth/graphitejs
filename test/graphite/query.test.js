@@ -1,13 +1,15 @@
+/*global assert, buster, define, refute, sinon*/
 define([
     "src/graphite/query",
     "src/rdfstore/sparql-parser/sparql_parser"
 ], function (Query, SparqlParser) {
+    "use strict";
     var preName = "http://xmlns.com/foaf/0.1/name",
-        objJohnName = "John Lennon";
-    var parser = SparqlParser.parser["parse"];
+        objJohnName = "John Lennon",
+        parser = SparqlParser.parser.parse;
     buster.testCase("Graphite query", {
         setUp: function () {
-            this.query = Query();
+            this.query = new Query();
         },
         ".init": {
             "Proper setup": function () {
@@ -15,7 +17,7 @@ define([
                 assert.isFunction(Query);
             },
             "Can initiate with a URI": function () {
-                this.query = Query("http://localhost:8088/sparql/api.test.rq");
+                this.query = new Query("http://localhost:8088/sparql/api.test.rq");
                 assert.equals(
                     this.query.retrieveTree(),
                     parser("PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n" +
@@ -70,6 +72,200 @@ define([
                         'FILTER (?object = "Arne")\n' +
                         'FILTER (?subject = <http://example.org/Arne>)\n' +
                         '}')
+                );
+            }
+        },
+        ".getObject": {
+            setUp: function () {
+                this.object = this.query.getObject("?test");
+                this.filter = function (operator) {
+                    return parser("SELECT *\n" +
+                        "WHERE {\n" +
+                        "?subject ?predicate ?test .\n" +
+                        "FILTER(?test " + operator + " 22)\n" +
+                        "}");
+                }
+            },
+            "Proper initialization": function () {
+                assert.equals(
+                    this.object.retrieveTree(),
+                    parser("SELECT * WHERE { ?subject ?predicate ?test }")
+                );
+            },
+            ".asSubject": function () {
+                var subject = this.object.asSubject("?test2");
+                assert.equals(
+                    subject.retrieveTree(),
+                    parser("SELECT * WHERE { ?test2 ?predicate ?test . ?test2 ?predicate ?object }")
+                );
+            },
+            ".getSubjectAsObject": function () {
+                var object = this.object.getSubjectAsObject("?test2");
+                assert.equals(
+                    object.retrieveTree(),
+                    parser("SELECT * WHERE { ?test2 ?predicate ?test . ?subject ?predicate ?test2 }")
+                );
+            },
+            ".equals": function () {
+                this.object.equals(22);
+                assert.equals(
+                    this.object.retrieveTree(),
+                    this.filter("=")
+                );
+            },
+            ".greaterThan": function () {
+                this.object.greaterThan(22);
+                assert.equals(
+                    this.object.retrieveTree(),
+                    this.filter(">")
+                );
+            },
+            ".greaterOrEqualThan": function () {
+                this.object.greaterOrEqualThan(22);
+                assert.equals(
+                    this.object.retrieveTree(),
+                    this.filter(">=")
+                );
+            },
+            ".lesserThan": function () {
+                this.object.lesserThan(22);
+                assert.equals(
+                    this.object.retrieveTree(),
+                    this.filter("<")
+                );
+            },
+            ".lesserOrEqualThan": function () {
+                this.object.lesserOrEqualThan(22);
+                assert.equals(
+                    this.object.retrieveTree(),
+                    this.filter("<=")
+                );
+            },
+            ".regex": {
+                "Without flags": function () {
+                    this.object.regex("te");
+                    assert.equals(
+                        this.object.retrieveTree(),
+                        parser('SELECT * WHERE { ?subject ?predicate ?test . FILTER regex(?test, "te") }')
+                    )
+                },
+                "With flags": function () {
+                    this.object.regex("te", "i");
+                    assert.equals(
+                        this.object.retrieveTree(),
+                        parser('SELECT * WHERE { ?subject ?predicate ?test . FILTER regex(?test, "te", "i") }')
+                    )
+                }
+            },
+            ".withProperty": function () {
+                this.object.withProperty("foaf:name");
+                assert.equals(
+                    this.object.retrieveTree(),
+                    parser("SELECT * WHERE { ?subject foaf:name ?test }")
+                );
+            },
+            ".withSubject": function () {
+                this.object.withSubject("http://example.org/#user");
+                assert.equals(
+                    this.object.retrieveTree(),
+                    parser("SELECT * WHERE { <http://example.org/#user> ?predicate ?test }")
+                );
+            }
+        },
+        ".getSubject": {
+            setUp: function () {
+                this.subject = this.query.getSubject("?test");
+                this.filter = function (operator) {
+                    return parser("SELECT *\n" +
+                        "WHERE {\n" +
+                        "?test ?predicate ?object .\n" +
+                        "FILTER(?test " + operator + " 22)\n" +
+                        "}");
+                }
+            },
+            "Proper initialization": function () {
+                assert.equals(
+                    this.subject.retrieveTree(),
+                    parser("SELECT * WHERE { ?test ?predicate ?object }")
+                );
+            },
+            ".asObject": function () {
+                var object = this.subject.asObject("?test2");
+                assert.equals(
+                    object.retrieveTree(),
+                    parser("SELECT * WHERE { ?test ?predicate ?test2 . ?subject ?predicate ?test2 }")
+                );
+            },
+            ".getObjectAsSubject": function () {
+                var subject = this.subject.getObjectAsSubject("?test2");
+                assert.equals(
+                    subject.retrieveTree(),
+                    parser("SELECT * WHERE { ?test ?predicate ?test2 . ?test2 ?predicate ?object }")
+                );
+            },
+            ".equals": function () {
+                this.subject.equals(22);
+                assert.equals(
+                    this.subject.retrieveTree(),
+                    this.filter("=")
+                );
+            },
+            ".greaterThan": function () {
+                this.subject.greaterThan(22);
+                assert.equals(
+                    this.subject.retrieveTree(),
+                    this.filter(">")
+                );
+            },
+            ".greaterOrEqualThan": function () {
+                this.subject.greaterOrEqualThan(22);
+                assert.equals(
+                    this.subject.retrieveTree(),
+                    this.filter(">=")
+                );
+            },
+            ".lesserThan": function () {
+                this.subject.lesserThan(22);
+                assert.equals(
+                    this.subject.retrieveTree(),
+                    this.filter("<")
+                );
+            },
+            ".lesserOrEqualThan": function () {
+                this.subject.lesserOrEqualThan(22);
+                assert.equals(
+                    this.subject.retrieveTree(),
+                    this.filter("<=")
+                );
+            },
+            ".regex": {
+                "Without flags": function () {
+                    this.subject.regex("te");
+                    assert.equals(
+                        this.subject.retrieveTree(),
+                        parser('SELECT * WHERE { ?test ?predicate ?object . FILTER regex(?test, "te") }')
+                    )
+                },
+                "With flags": function () {
+                    this.subject.regex("te", "i");
+                    assert.equals(
+                        this.subject.retrieveTree(),
+                        parser('SELECT * WHERE { ?test ?predicate ?object . FILTER regex(?test, "te", "i") }')
+                    )
+                }
+            },
+            ".withProperty": function () {
+                this.subject.withProperty("foaf:name");
+                assert.equals(
+                    this.subject.retrieveTree(),
+                    parser("SELECT * WHERE { ?test foaf:name ?object }")
+                );
+            },
+            ".withObject": function () {
+                this.subject.withObject("http://example.org/#user");
+                assert.equals(
+                    this.subject.retrieveTree(),
+                    parser("SELECT * WHERE { ?test ?predicate <http://example.org/#user> }")
                 );
             }
         },

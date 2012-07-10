@@ -58,7 +58,7 @@ define([
                 g4Size.resolve(size);
             });
             When.all([ g1Size, g2Size, g3Size, g4Size ]).then(done(function (sizes) {
-                //buster.log(sizes);
+                //console.log(sizes);
                 refute.same(g1, g2);
                 refute.same(g3, g4);
                 assert.equals(sizes[0], 0);
@@ -120,7 +120,7 @@ define([
                         g4Size.resolve(size);
                     });
                 When.all([ g1Size, g2Size, g3Size, g4Size ]).then(done(function (results) {
-                    //buster.log("SIZES", results);
+                    //console.log("SIZES", results);
                     assert.equals(results[0], 4);
                     assert.equals(results[1], 4);
                     assert.equals(results[2], 1);
@@ -152,7 +152,7 @@ define([
                         g4Size.resolve(size);
                     });
                 When.all([ g1Size, g2Size, g3Size, g4Size ]).then(done(function (sizes) {
-                    //buster.log("TEST", sizes);
+                    //console.log("TEST", sizes);
                     assert.equals(sizes[0], 4);
                     assert.equals(sizes[1], 4);
                     assert.equals(sizes[2], 1);
@@ -169,26 +169,26 @@ define([
                 this.graph
                     .execute(query1, function (g1) {
                         g1.size(function (size) {
-                            //buster.log("G1 SIZE", size);
+                            //console.log("G1 SIZE", size);
                             g1Size.resolve(size);
                         });
                     })
                     .size(function (size) {
-                        //buster.log("G2 SIZE", size);
+                        //console.log("G2 SIZE", size);
                         g2Size.resolve(size);
                     })
                     .execute(query2, function (g3) {
                         g3.size(function (size) {
-                            //buster.log("G3 SIZE", size);
+                            //console.log("G3 SIZE", size);
                             g3Size.resolve(size);
                         });
                     })
                     .size(function (size) {
-                        //buster.log("G4 SIZE", size);
+                        //console.log("G4 SIZE", size);
                         g4Size.resolve(size);
                     });
                 When.all([ g1Size, g2Size, g3Size, g4Size ]).then(done(function (sizes) {
-                    //buster.log("SIZES", sizes);
+                    //console.log("SIZES", sizes);
                     assert.equals(sizes[0], 2);
                     assert.equals(sizes[1], 2);
                     assert.equals(sizes[2], 1);
@@ -220,7 +220,7 @@ define([
                     size2,
                     size3
                 ]).then(done(function (results) {
-                        //buster.log("RESULTS", results, spy1.callCount, spy2.callCount, spy3.callCount);
+                        //console.log("RESULTS", results, spy1.callCount, spy2.callCount, spy3.callCount);
                         assert.equals(results[0], 4);
                         assert.equals(results[1], 4);
                         assert.equals(results[2], 1);
@@ -302,7 +302,7 @@ define([
                 size2.resolve(size);
             });
             When.all([ size1, size2 ]).then(done(function (sizes) {
-                //buster.log("SIZES", sizes);
+                //console.log("SIZES", sizes);
                 assert.equals(sizes[0], 0);
                 assert.equals(sizes[1], 4);
             }));

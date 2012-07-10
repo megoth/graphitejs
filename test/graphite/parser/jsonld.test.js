@@ -1,36 +1,37 @@
-/*global assert, buster, refute*/
+/*global assert, buster, define, refute, sinon*/
 define([
     "src/graphite/parser/jsonld",
     "src/graphite/utils"
-], function (Parser, Utils) {
+], function (parser, Utils) {
+    "use strict";
     buster.testCase("Graphite parser (JSON-LD)", {
         setUp: function () {
             this.uriTwitterManusporny = "http://twitter.com/manusporny";
         },
         "Parser requires a valid JSON-object": function () {
             assert.exception(function () {
-                Parser();
+                parser();
             });
             assert.exception(function () {
-                Parser("test");
+                parser("test");
             });
             assert.exception(function () {
-                Parser(1);
+                parser(1);
             });
         },
         "Calling triggers a callback": function () {
             var spy = sinon.spy();
-            Parser({}, {}, spy);
+            parser({}, {}, spy);
             assert(spy.calledOnce);
         },
         "Calling with {} returns an empty graph": function () {
-            Parser({}, {}, function (graph) {
-                buster.log(graph);
+            parser({}, {}, function (graph) {
+                //console.log(graph);
                 assert.equals(graph.statements.length, 0);
             });
         },
         "Adding multiple triples, same subject": function () {
-            Parser({
+            parser({
                 "@id": "http://example.com/people/manu",
                 "http://xmlns.com/foaf/spec/name": "Manu Sporny",
                 "http://xmlns.com/foaf/spec/age": 42
@@ -39,7 +40,7 @@ define([
             });
         },
         "Adding multiple triples, same blank node as subject": function () {
-            Parser({
+            parser({
                 "http://xmlns.com/foaf/spec/name": "Manu Sporny",
                 "http://xmlns.com/foaf/spec/age": 42
             }, {}, function (graph) {
@@ -49,7 +50,7 @@ define([
         },
         "Multiple objects": {
             "Different subjects": function () {
-                Parser([
+                parser([
                     {
                         "http://xmlns.com/foaf/spec/name": "Manu Sporny"
                     }, {
@@ -62,7 +63,7 @@ define([
                 });
             },
             "Same subjects": function () {
-                Parser([
+                parser([
                     {
                         "@id": "http://example.com/people/manu",
                         "http://xmlns.com/foaf/spec/name": "Manu Sporny"
@@ -79,7 +80,7 @@ define([
         },
         "String as @context": {
             "Single request": function (done) {
-                Parser({
+                parser({
                     "@context": "http://localhost:8088/json-ld/people/manu.jsonld",
                     "name": "Manu Sporny"
                 }, {}, done(function (graph) {
@@ -87,7 +88,7 @@ define([
                 }));
             },
             "Multiple requests": function (done) {
-                Parser([{
+                parser([{
                     "@context": "http://localhost:8088/json-ld/people/manu.jsonld",
                     "name": "Manu Sporny"
                 }, {
@@ -100,7 +101,7 @@ define([
         },
         "Object as @context": {
             "Single-level @context": function () {
-                Parser({
+                parser({
                     "@context": {
                         "name": "http://xmlns.com/foaf/0.1/name"
                     },
@@ -110,7 +111,7 @@ define([
                 });
             },
             "Objects within objects": function () {
-                Parser({
+                parser({
                     "@context": {
                         "depiction": {
                             "@id": "http://xmlns.com/foaf/0.1/depiction"
@@ -124,7 +125,7 @@ define([
                 });
             },
             "Predicate defined in @context twice, last one valid": function () {
-                Parser({
+                parser({
                     "@context": {
                         "test": "http://xmlns.com/foaf/0.1/depiction"
                     },
@@ -136,7 +137,7 @@ define([
         },
         "Array as @context": {
             "No conflict": function (done) {
-                Parser({
+                parser({
                     "@context": [
                         "http://localhost:8088/json-ld/people/manu.jsonld",
                         {
@@ -149,7 +150,7 @@ define([
                 }));
             },
             "Conflict, should prefer the latest": function (done) {
-                Parser({
+                parser({
                     "@context": [
                         "http://localhost:8088/json-ld/people/manu.jsonld",
                         {
@@ -166,7 +167,7 @@ define([
         },
         "Use of CURIEs": {
             "In graph": function () {
-                Parser({
+                parser({
                     "@context": {
                         "foaf": "http://xmlns.com/foaf/0.1/",
                         "age": "foaf:age",
@@ -180,7 +181,7 @@ define([
                     "homepage": "http://example.com/",
                     "test": "test"
                 }, {}, function (graph) {
-                    buster.log(graph);
+                    //console.log(graph);
                     assert.equals(graph.statements.length, 5);
                     assert.equals(graph.statements[0].predicate.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
                     assert.equals(graph.statements[0].object.value, "http://xmlns.com/foaf/0.1/test");
@@ -189,7 +190,7 @@ define([
                 });
             },
             "CURIEs in @context are applied to graphs prefixes": function () {
-                Parser({
+                parser({
                     "@context": {
                         "testA": "http://example.com/",
                         "testB": {
@@ -200,7 +201,7 @@ define([
                     "testA:test": "TestA",
                     "testB:test": "TestB"
                 }, {}, function (graph) {
-                    buster.log(graph);
+                    //console.log(graph);
                     assert.equals(graph.statements.length, 2);
                     assert.equals(graph.statements[0].predicate.value, "http://example.com/test");
                     assert.equals(graph.statements[1].predicate.value, "http://exampleB.com/test");
@@ -208,14 +209,14 @@ define([
             }
         },
         "Triple within a triple within a triple": function () {
-            Parser({
+            parser({
                 "http://xmlns.com/foaf/spec/knows": {
                     "http://xmlns.com/foaf/spec/knows": {
                         "http://xmlns.com/foaf/spec/name": "Manu Sporny"
                     }
                 }
             }, {}, function (graph) {
-                buster.log(graph);
+                //console.log(graph);
                 assert.equals(graph.statements.length, 3);
                 assert.equals(graph.statements[1].object, graph.statements[0].subject);
                 assert.equals(graph.statements[2].object, graph.statements[1].subject);
@@ -223,7 +224,7 @@ define([
         },
         "Array as objects": {
             "Literal values": function () {
-                Parser({
+                parser({
                     "http://xmlns.com/foaf/spec/nick": [ "test", "0:47" ]
                 }, {}, function (graph) {
                     assert.equals(graph.statements.length, 2);
@@ -232,7 +233,7 @@ define([
                 });
             },
             "Complex values": function () {
-                Parser({
+                parser({
                     "http://xmlns.com/foaf/spec/nick": [{
                         "@value": "Das Kapital",
                         "@language": "de"
@@ -249,7 +250,7 @@ define([
         },
         "Language": {
             "String internationalization": function () {
-                Parser({
+                parser({
                     "http://xmlns.com/foaf/spec/nick": {
                         "@value": "花澄",
                         "@language": "ja"
@@ -260,7 +261,7 @@ define([
                 });
             },
             "Default language": function () {
-                Parser({
+                parser({
                     "@context": {
                         "@language": "ja"
                     },
@@ -283,14 +284,14 @@ define([
             }
         },
         "Lists": function () {
-            Parser({
+            parser({
                 "http://xmlns.com/foaf/spec/nick": {
                     "@list": [ "joe", "bob", "jaybee" ]
                 }
             }, {}, function (graph) {
-                buster.log(graph);
+                //console.log(graph);
                 Utils.each(graph.statements, function (s, i) {
-                    buster.log(i, s);
+                    //console.log(i, s);
                 });
                 assert.equals(graph.statements.length, 10);
                 assert.equals(graph.statements[0].predicate.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#first");

@@ -21,7 +21,7 @@ define([
                 parser(data, {});
                 result.message = "This test shouldn't pass...";
             } catch (e) {
-                buster.log(e);
+                //console.log(e);
                 result.message = e;
             }
             deferred.resolve(result);
@@ -115,7 +115,3 @@ define([
         }
     });
 });
-
-(function () {
-    "use strict";
-}());

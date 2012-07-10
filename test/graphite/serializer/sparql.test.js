@@ -1,26 +1,17 @@
+/*global assert, buster, define */
 define([
     "src/graphite/serializer/sparql",
     "src/rdfstore/sparql-parser/sparql_parser",
     "../../utils",
     "src/graphite/utils",
     "src/graphite/when"
-], function (SparqlSerializer, SparqlParser, TestUtils, Utils, When) {
-    function checkGroup (directory, files, fileExtension) {
-        var promises = [];
-        Utils.each(files, function (filePath) {
-            promises.push(checkSparql("http://localhost:8088/sparql/{0}/{1}.{2}".format(
-                directory,
-                filePath,
-                fileExtension || "rq"
-            )));
-        });
-        return When.all(promises);
-    }
+], function (sparqlSerializer, SparqlParser, TestUtils, Utils, When) {
+    "use strict";
     function checkSparql(filePath) {
         var promise = When.defer();
         TestUtils.openFile(filePath, function (err, data) {
-            var query = SparqlSerializer(data);
-            buster.log("QUERIES", data, "\n", query);
+            var query = sparqlSerializer(data);
+            //console.log("QUERIES", data, "\n", query);
             promise.resolve({
                 after: SparqlParser.parser.parse(query),
                 afterQuery: query,
@@ -31,16 +22,27 @@ define([
         });
         return promise;
     }
+    function checkGroup(directory, files, fileExtension) {
+        var promises = [];
+        Utils.each(files, function (filePath) {
+            promises.push(checkSparql("http://localhost:8088/sparql/{0}/{1}.{2}".format(
+                directory,
+                filePath,
+                fileExtension || "rq"
+            )));
+        });
+        return When.all(promises);
+    }
     function sparqlEquals(objects) {
         Utils.each(objects, function (obj) {
-            buster.log("DID NOT EQUAL", obj.description, obj.beforeQuery, obj.afterQuery);
+            //console.log("DID NOT EQUAL", obj.description, obj.beforeQuery, obj.afterQuery);
             assert.equals(obj.before, obj.after, obj.description);
         });
     }
     buster.testCase("Graphite serializer (sparql)", {
         "Proper setup": function () {
-            assert.defined(SparqlSerializer);
-            assert.isFunction(SparqlSerializer);
+            assert.defined(sparqlSerializer);
+            assert.isFunction(sparqlSerializer);
         },
         "Loading SPARQL test suite (173 of 409 passes)": {
             setUp: function () {
@@ -238,10 +240,10 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     assert.equals(previousTree, currentTree);
                 }));
@@ -266,14 +268,14 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     delete previousTree.kind;
                     delete previousTree.prologue;
                     delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     //assert.equals(previousTree, currentTree);
                 }));
@@ -297,14 +299,14 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     delete previousTree.kind;
                     delete previousTree.prologue;
                     delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     //assert.equals(previousTree, currentTree);
                 }));
@@ -352,14 +354,14 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     //delete previousTree.kind;
                     //delete previousTree.prologue;
                     //delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     assert.equals(previousTree, currentTree);
                 }));
@@ -436,15 +438,15 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    //buster.log("QUERY TO RUN", data);
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    //console.log("QUERY TO RUN", data);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     //delete previousTree.kind;
                     //delete previousTree.prologue;
                     //delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     assert.equals(previousTree, currentTree);
                 }));
@@ -470,15 +472,15 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    //buster.log("QUERY TO RUN", data);
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    //console.log("QUERY TO RUN", data);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     //delete previousTree.kind;
                     //delete previousTree.prologue;
                     //delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     assert.equals(previousTree, currentTree);
                 }));
@@ -501,15 +503,15 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    //buster.log("QUERY TO RUN", data);
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    //console.log("QUERY TO RUN", data);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     //delete previousTree.kind;
                     //delete previousTree.prologue;
                     //delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     assert.equals(previousTree, currentTree);
                 }));
@@ -532,15 +534,15 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    //buster.log("QUERY TO RUN", data);
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    //console.log("QUERY TO RUN", data);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     //delete previousTree.kind;
                     //delete previousTree.prologue;
                     //delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     assert.equals(previousTree, currentTree);
                 }));
@@ -568,15 +570,15 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    //buster.log("QUERY TO RUN", data);
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    //console.log("QUERY TO RUN", data);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     //delete previousTree.kind;
                     //delete previousTree.prologue;
                     //delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     assert.equals(previousTree, currentTree);
                 }));
@@ -602,15 +604,15 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    //buster.log("QUERY TO RUN", data);
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    //console.log("QUERY TO RUN", data);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     //delete previousTree.kind;
                     //delete previousTree.prologue;
                     //delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     assert.equals(previousTree, currentTree);
                 }));
@@ -658,15 +660,15 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    //buster.log("QUERY TO RUN", data);
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    //console.log("QUERY TO RUN", data);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     //delete previousTree.kind;
                     //delete previousTree.prologue;
                     //delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     assert.equals(previousTree, currentTree);
                 }));
@@ -692,15 +694,15 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    //buster.log("QUERY TO RUN", data);
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    //console.log("QUERY TO RUN", data);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     //delete previousTree.kind;
                     //delete previousTree.prologue;
                     //delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     assert.equals(previousTree, currentTree);
                 }));
@@ -733,15 +735,15 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    //buster.log("QUERY TO RUN", data);
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    //console.log("QUERY TO RUN", data);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     //delete previousTree.kind;
                     //delete previousTree.prologue;
                     //delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     assert.equals(previousTree, currentTree);
                 }));
@@ -763,15 +765,15 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    //buster.log("QUERY TO RUN", data);
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    //console.log("QUERY TO RUN", data);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     //delete previousTree.kind;
                     //delete previousTree.prologue;
                     //delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     assert.equals(previousTree, currentTree);
                 }));
@@ -843,15 +845,15 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    //buster.log("QUERY TO RUN", data);
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    //console.log("QUERY TO RUN", data);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     //delete previousTree.kind;
                     //delete previousTree.prologue;
                     //delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     assert.equals(previousTree, currentTree);
                 }));
@@ -922,15 +924,15 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    //buster.log("QUERY TO RUN", data);
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    //console.log("QUERY TO RUN", data);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     //delete previousTree.kind;
                     //delete previousTree.prologue;
                     //delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     assert.equals(previousTree, currentTree);
                 }));
@@ -950,15 +952,15 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    //buster.log("QUERY TO RUN", data);
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    //console.log("QUERY TO RUN", data);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     //delete previousTree.kind;
                     //delete previousTree.prologue;
                     //delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     assert.equals(previousTree, currentTree);
                 }));
@@ -990,15 +992,15 @@ define([
                     currentTree;
                 TestUtils.openFile(current, done(function (err, data) {
                     previousQuery = data;
-                    //buster.log("QUERY TO RUN", data);
-                    currentQuery = SparqlSerializer(data);
-                    buster.log("QUERIES", previousQuery, "\n", currentQuery);
+                    //console.log("QUERY TO RUN", data);
+                    currentQuery = sparqlSerializer(data);
+                    //console.log("QUERIES", previousQuery, "\n", currentQuery);
                     previousTree = SparqlParser.parser.parse(previousQuery);
                     //delete previousTree.kind;
                     //delete previousTree.prologue;
                     //delete previousTree.token;
                     //delete previousTree.units;
-                    buster.log("ORIG TREE", previousTree);
+                    //console.log("ORIG TREE", previousTree);
                     currentTree = SparqlParser.parser.parse(currentQuery);
                     assert.equals(previousTree, currentTree);
                 }));

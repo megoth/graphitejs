@@ -1,6 +1,8 @@
+/*global define */
 define([
     "../utils"
 ], function (Utils) {
+    "use strict";
     var aliasRegex = /^\(/,
         ascRegex = /^(ASC|asc)/,
         asRegex = /^(AS|as)/,
@@ -29,6 +31,7 @@ define([
         maxRegex = /^(MAX|max)/,
         minRegex = /^(MIN|min)/,
         notEqualsRegex = /^!=/,
+        numericRegex = /^[0-9]+/,
         optionalRegex = /^(OPTIONAL|optional)/,
         parenthesisLeft = /^\(/,
         parenthesisRight = /^\)/,
@@ -41,15 +44,15 @@ define([
         uriRegex = /^http:\/\/[a-zA-Z0-9#_\-.\/]+/,
         variableRegex = /^\?/,
         whereRegex = /^(WHERE|where)/,
-        wsRegex = /^(\u0009|\u000A|\u000D|\u0020|#([^\u000A\u000D])*)+/,
+        wsRegex = /^(\u0009|\u000A|\u000D|\u0020|#([\u000A\u000D])*)+/,
         token = {
-            "base": function (value) {
+            base: function (value) {
                 return {
                     "token": "base",
                     "value": value
                 };
             },
-            "expression": function (expressionType, primaryExpression, value) {
+            expression: function (expressionType, primaryExpression, value) {
                 return {
                     "expressionType": expressionType,
                     "primaryexpression": primaryExpression,
@@ -57,7 +60,7 @@ define([
                     "value": value
                 };
             },
-            "literal": function (value, lang, type) {
+            literal: function (value, lang, type) {
                 return {
                     "lang": lang,
                     "token": "literal",
@@ -65,20 +68,20 @@ define([
                     "value": value
                 };
             },
-            "optional": function (value) {
+            optional: function (value) {
                 return {
                     "token": "optionalgraphpattern",
                     "value": value
                 };
             },
-            "prefix": function (prefix, local) {
+            prefix: function (prefix, local) {
                 return {
                     "local": local,
                     "prefix": prefix,
                     "token": "prefix"
                 };
             },
-            "uri": function (options) {
+            uri: function (options) {
                 return {
                     "prefix": options.prefix || null,
                     "suffix": options.suffix || null,
@@ -109,13 +112,20 @@ define([
                 return tmp;
             }
         };
+    function expect(data, regex) {
+        if (!regex.test(data)) {
+            throw new Error("Didn't meet expected token: " + data);
+        }
+        return data.substr(regex.exec(data)[0].length);
+    }
     /**
      *
+     * @param tokenizer
      * @param data
      * @param [options]
      * @return {Object}
      */
-    function bpgPart(data, options) {
+    function bpgPart(tokenizer, data, options) {
         //console.log("BPGPART", data);
         var lToken, part;
         if (typeRegex.test(data)) {
@@ -124,19 +134,19 @@ define([
                 value: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
             });
         } else if (variableRegex.test(data)) {
-            part = this.var(data.substr(1));
-            lToken = part.var;
+            part = tokenizer["var"](data.substr(1));
+            lToken = part["var"];
             data = part.remainder;
         } else if (literalRegex.test(data)) {
-            part = this.literal(data, options);
+            part = tokenizer.literal(data, options);
             lToken = part.literal;
             data = part.remainder;
         } else if (curieRegex.test(data) || lesserRegex.test(data)) {
-            part = this.uri(data, options);
+            part = tokenizer.uri(data, options);
             lToken = part.uri;
             data = part.remainder;
         } else {
-            part = this.literal(data, options);
+            part = tokenizer.literal(data, options);
             lToken = part.literal;
             data = part.remainder;
         }
@@ -145,15 +155,9 @@ define([
             "token": lToken
         };
     }
-    function expect(data, regex) {
-        if (!regex.test(data)) {
-            throw new Error ("Didn't meet expected token: " + data);
-        }
-        return data.substr(regex.exec(data)[0].length);
-    }
-    function expressionAggregate(type, data) {
+    function expressionAggregate(tokenizer, type, data) {
         var remainder = expect(data.substr(type.length), parenthesisLeft),
-            expression = this.expression(remainder);
+            expression = tokenizer.expression(remainder);
         remainder = expect(expression.remainder, parenthesisRight);
         return {
             "expression": {
@@ -164,7 +168,7 @@ define([
                 "token": "expression"
             },
             "remainder": remainder
-        }
+        };
     }
     /**
      *
@@ -172,8 +176,8 @@ define([
      * @param [options]
      * @return {Object}
      */
-    function expressionLiteral(data, options) {
-        var literal = this.literal(data, options);
+    function expressionLiteral(tokenizer, data, options) {
+        var literal = tokenizer.literal(data, options);
         return {
             "expression": {
                 "expressionType": "atomic",
@@ -184,22 +188,42 @@ define([
             "remainder": literal.remainder
         };
     }
-    function expressionRegex(data) {
+    function expressionNumericLiteral(tokenizer, data, options) {
+        var literal = tokenizer.literal(data, options);
+        return {
+            "expression": {
+                "expressionType": "atomic",
+                "primaryexpression": "numericliteral",
+                "token": "expression",
+                "value": literal.literal
+            },
+            "remainder": literal.remainder
+        };
+    }
+    function ws(data, opts) {
+        opts = opts || {};
+        if ((opts.required || false) && !wsRegex.test(data)) {
+            throw ("Invalid sparql: Required whitespace is missing!");
+        }
+        //console.log("IN SPARQL, WS", data);
+        return data.replace(wsRegex, '');
+    }
+    function expressionRegex(tokenizer, data) {
         var flags, pattern, text;
         data = expect(data, regexRegex);
         data = expect(data, parenthesisLeft);
-        text = this.expression(data);
+        text = tokenizer.expression(data);
         data = text.remainder;
         text = text.expression;
         data = expect(data, commaRegex);
         data = ws(data);
-        pattern = this.expression(data);
+        pattern = tokenizer.expression(data);
         data = pattern.remainder;
         pattern = pattern.expression;
         if (commaRegex.test(data)) {
             data = expect(data, commaRegex);
             data = ws(data);
-            flags = this.expression(data);
+            flags = tokenizer.expression(data);
             data = flags.remainder;
             flags = flags.expression;
         }
@@ -213,21 +237,21 @@ define([
                 "token": "expression"
             },
             "remainder": data
-        }
+        };
     }
-    function expressionRelationalOp2(data, regex) {
+    function expressionRelationalOp2(tokenizer, data, regex) {
         var op2;
         data = expect(data, regex);
         data = ws(data, { required: true });
-        op2 = this.expression(data);
+        op2 = tokenizer.expression(data);
         data = ws(op2.remainder);
         op2 = op2.expression;
         return {
             "op2": op2,
             "remainder": data
-        }
+        };
     }
-    function expressionRelational(data, op1) {
+    function expressionRelational(tokenizer, data, op1) {
         var op2,
             expression = {
                 "expressionType": "relationalexpression",
@@ -236,45 +260,45 @@ define([
         if (!op1) {
             if (variableRegex.test(data)) {
                 data = expect(data, variableRegex);
-                op1 = this.expression(data);
+                op1 = tokenizer.expression(data);
                 data = ws(op1.remainder, { required: true });
-                op1 = op1.var;
+                op1 = op1["var"];
             } else {
-                throw new Error ("Expressional relation sign not recognized: " + data);
+                throw new Error("Expressional relation sign not recognized: " + data);
             }
         }
         if (equalsRegex.test(data)) {
-            op2 = expressionRelationalOp2.call(this, data, equalsRegex);
+            op2 = expressionRelationalOp2(tokenizer, data, equalsRegex);
             data = op2.remainder;
             op2 = op2.op2;
             expression.operator = "=";
         } else if (greaterOrEqualsRegex.test(data)) {
-            op2 = expressionRelationalOp2.call(this, data, greaterOrEqualsRegex);
+            op2 = expressionRelationalOp2(tokenizer, data, greaterOrEqualsRegex);
             data = op2.remainder;
             op2 = op2.op2;
             expression.operator = ">=";
         } else if (greaterRegex.test(data)) {
-            op2 = expressionRelationalOp2.call(this, data, greaterRegex);
+            op2 = expressionRelationalOp2(tokenizer, data, greaterRegex);
             data = op2.remainder;
             op2 = op2.op2;
             expression.operator = ">";
         } else if (lesserOrEqualsRegex.test(data)) {
-            op2 = expressionRelationalOp2.call(this, data, lesserOrEqualsRegex);
+            op2 = expressionRelationalOp2(tokenizer, data, lesserOrEqualsRegex);
             data = op2.remainder;
             op2 = op2.op2;
             expression.operator = "<=";
         } else if (lesserRegex.test(data)) {
-            op2 = expressionRelationalOp2.call(this, data, lesserRegex);
+            op2 = expressionRelationalOp2(tokenizer, data, lesserRegex);
             data = op2.remainder;
             op2 = op2.op2;
             expression.operator = "<";
         } else if (notEqualsRegex.test(data)) {
-            op2 = expressionRelationalOp2.call(this, data, notEqualsRegex);
+            op2 = expressionRelationalOp2(tokenizer, data, notEqualsRegex);
             data = op2.remainder;
             op2 = op2.op2;
             expression.operator = "!=";
         } else {
-            throw new Error ("Expressional relation sign not recognized: " + data);
+            throw new Error("Expressional relation sign not recognized: " + data);
         }
         expression.op1 = op1;
         expression.op2 = op2;
@@ -285,41 +309,41 @@ define([
     }
     function whereBGP(triplesContext, pattern, options) {
         switch (pattern.kind) {
-            case "BGP":
-                //console.log("IN SPARQL, WHERE BGP BGP");
-                return {
-                    "kind": "BGP",
-                    "value": pattern.value.concat(triplesContext)
-                };
-            case "EMPTY_PATTERN":
-                //console.log("IN SPARQL, WHERE BGP EMPTY_PATTERN");
-                return {
-                    "kind": "BGP",
-                    "value": triplesContext
-                };
-            case "FILTER":
-                //console.log("IN SPARQL, WHERE BGP FILTER");
-                pattern.value = whereBGP(triplesContext, pattern.value, options);
-                return pattern;
-            case "JOIN":
-                //console.log("IN SPARQL, WHERE BGP JOIN");
-                pattern.rvalue.value = pattern.rvalue.value.concat(triplesContext);
-                return pattern;
-            case "LEFT_JOIN":
-                //console.log("IN SPARQL, WHERE BGP LEFT_JOIN");
-                return {
-                    "kind": "JOIN",
-                    "lvalue": pattern,
-                    "rvalue": {
-                        "kind": "BGP",
-                        "value": triplesContext
-                    }
-                };
-            default:
-                return {
+        case "BGP":
+            //console.log("IN SPARQL, WHERE BGP BGP");
+            return {
+                "kind": "BGP",
+                "value": pattern.value.concat(triplesContext)
+            };
+        case "EMPTY_PATTERN":
+            //console.log("IN SPARQL, WHERE BGP EMPTY_PATTERN");
+            return {
+                "kind": "BGP",
+                "value": triplesContext
+            };
+        case "FILTER":
+            //console.log("IN SPARQL, WHERE BGP FILTER");
+            pattern.value = whereBGP(triplesContext, pattern.value, options);
+            return pattern;
+        case "JOIN":
+            //console.log("IN SPARQL, WHERE BGP JOIN");
+            pattern.rvalue.value = pattern.rvalue.value.concat(triplesContext);
+            return pattern;
+        case "LEFT_JOIN":
+            //console.log("IN SPARQL, WHERE BGP LEFT_JOIN");
+            return {
+                "kind": "JOIN",
+                "lvalue": pattern,
+                "rvalue": {
                     "kind": "BGP",
                     "value": triplesContext
                 }
+            };
+        default:
+            return {
+                "kind": "BGP",
+                "value": triplesContext
+            };
         }
     }
     function whereFilter(token, pattern) {
@@ -334,14 +358,6 @@ define([
         };
         return token;
     }
-    function ws(data, opts) {
-        opts = opts || {};
-        if ((opts.required || false) && !wsRegex.test(data)) {
-            throw("Invalid sparql: Required whitespace is missing!");
-        }
-        //console.log("IN SPARQL, WS", data);
-        return data.replace(wsRegex, '');
-    }
     return {
         "alias": function (data) {
             var alias;
@@ -350,9 +366,9 @@ define([
             }
             data = ws(data.substr(2), { required: true });
             if (variableRegex.test(data)) {
-                alias = this.var(data.substr(1));
+                alias = this["var"](data.substr(1));
                 return {
-                    "alias": alias.var,
+                    "alias": alias["var"],
                     "remainder": alias.remainder
                 };
             } else {
@@ -379,15 +395,15 @@ define([
             //console.log("STARTING BGP", data, subject);
             //console.log("IN SPARQL, BGP", data);
             //console.log(options);
-            var subject = !options.subject ? bpgPart.call(this, data, options) : {
+            var subject = !options.subject ? bpgPart(this, data, options) : {
                     "remainder": data,
                     "token": options.subject
                 },
-                predicate = !options.predicate ? bpgPart.call(this, ws(subject.remainder, { required: true }), options) : {
+                predicate = !options.predicate ? bpgPart(this, ws(subject.remainder, { required: true }), options) : {
                     "remainder": data,
                     "token": options.predicate
                 },
-                object = bpgPart.call(this, ws(predicate.remainder, { required: true }), options),
+                object = bpgPart(this, ws(predicate.remainder, { required: true }), options),
                 remainder = ws(object.remainder),
                 value = {
                     "object": object.token,
@@ -424,7 +440,7 @@ define([
                     "triplesContext": triplesContext
                 },
                 "remainder": remainder
-            }
+            };
         },
         /**
          *
@@ -439,21 +455,21 @@ define([
                 remainder,
                 irireforfunction;
             if (variableRegex.test(data)) {
-                value = this.var(data.substr(1));
+                value = this["var"](data.substr(1));
                 expression =  {
                     "expressionType": "atomic",
                     "primaryexpression": "var",
                     "token": "expression",
-                    "value": value.var
+                    "value": value["var"]
                 };
                 data = ws(value.remainder);
                 if (equalsRegex.test(data) ||
-                    greaterOrEqualsRegex.test(data) ||
-                    greaterRegex.test(data) ||
-                    lesserOrEqualsRegex.test(data) ||
-                    lesserRegex.test(data) ||
-                    notEqualsRegex.test(data)) {
-                    return expressionRelational.call(this, data, expression);
+                        greaterOrEqualsRegex.test(data) ||
+                        greaterRegex.test(data) ||
+                        lesserOrEqualsRegex.test(data) ||
+                        lesserRegex.test(data) ||
+                        notEqualsRegex.test(data)) {
+                    return expressionRelational(this, data, expression);
                 }
                 return {
                     "expression": expression,
@@ -471,7 +487,7 @@ define([
                     "remainder": irireforfunction.remainder
                 };
             } else if (literalRegex.test(data)) {
-                return expressionLiteral.call(this, data, options);
+                return expressionLiteral(this, data, options);
             } else if (bnodeRegex.test(data)) {
                 remainder = expect(data.substr(5), parenthesisLeft);
                 arg = this.expression(remainder);
@@ -486,19 +502,21 @@ define([
                     "remainder": remainder
                 };
             } else if (avgRegex.test(data)) {
-                return expressionAggregate.call(this, "avg", data);
+                return expressionAggregate(this, "avg", data);
             } else if (countRegex.test(data)) {
-                return expressionAggregate.call(this, "count", data);
+                return expressionAggregate(this, "count", data);
             } else if (maxRegex.test(data)) {
-                return expressionAggregate.call(this, "max", data);
+                return expressionAggregate(this, "max", data);
             } else if (minRegex.test(data)) {
-                return expressionAggregate.call(this, "min", data);
+                return expressionAggregate(this, "min", data);
             } else if (sumRegex.test(data)) {
-                return expressionAggregate.call(this, "sum", data);
+                return expressionAggregate(this, "sum", data);
             } else if (regexRegex.test(data)) {
-                return expressionRegex.call(this, data);
+                return expressionRegex(this, data);
+            } else if (numericRegex.test(data)) {
+                return expressionNumericLiteral(this, data, options);
             } else if (stringRegex.test(data)) {
-                return expressionLiteral.call(this, data, options);
+                return expressionLiteral(this, data, options);
             } else {
                 throw new Error("Can't parse expression: " + data);
             }
@@ -541,8 +559,8 @@ define([
             var variable;
             if (variableRegex.test(data)) {
                 data = expect(data, variableRegex);
-                variable = this.var(data);
-                group.push(variable.var);
+                variable = this["var"](data);
+                group.push(variable["var"]);
                 data = ws(variable.remainder);
                 return this.group(data, group);
             }
@@ -659,7 +677,7 @@ define([
             return {
                 "optional": token.optional(groupgraphpattern.groupgraphpattern),
                 "remainder": data
-            }
+            };
         },
         "order": function (data, order) {
             if (!order) {
@@ -703,7 +721,7 @@ define([
             return {
                 "order": order,
                 "remainder": data
-            }
+            };
         },
         "prefix": function (data) {
             var prefix = stringRegex.exec(data)[0],
@@ -737,7 +755,7 @@ define([
                 return {
                     "remainder": data,
                     "projection": projections
-                }
+                };
             }
             remainder = ws(parsed.remainder);
             return this.projection(remainder, projections);
@@ -811,23 +829,26 @@ define([
             var tmp = stringRegex.exec(data)[0];
             return {
                 "remainder": data.substr(tmp.length),
-                "var": token.var(tmp)
-            }
+                "var": token["var"](tmp)
+            };
         },
         "variable": function (data) {
             var pVar,
-                pVariable;
+                pVariable,
+                expression,
+                remainder,
+                alias;
             if (variableRegex.test(data)) {
-                pVar = this.var(data.substr(1));
-                pVariable = token.variable("var", pVar.var);
+                pVar = this["var"](data.substr(1));
+                pVariable = token.variable("var", pVar["var"]);
                 return {
                     "remainder": pVar.remainder,
                     "variable": pVariable
                 };
             } else if (aliasRegex.test(data)) {
-                var expression = this.expression(data.substr(1)),
-                    remainder = ws(expression.remainder),
-                    alias = this.alias(remainder);
+                expression = this.expression(data.substr(1));
+                remainder = ws(expression.remainder);
+                alias = this.alias(remainder);
                 data = expect(alias.remainder, parenthesisRight);
                 return {
                     "remainder": data,

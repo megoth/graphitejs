@@ -1,11 +1,13 @@
+/*global define */
 define([
     "../dictionary",
     "../utils"
 ], function (Dictionary, Utils) {
-    return function(json, options, callback) {
+    "use strict";
+    return function (json, options, callback) {
         var graph = Dictionary.Formula(options.graph);
         if (!json) {
-            throw Error("No valid JSON-object given");
+            throw new Error("No valid JSON-object given");
         } else if (Utils.isString(json)) {
             try {
                 json = JSON.parse(json);
@@ -13,13 +15,13 @@ define([
                 throw new Error("Couldn't parse given rdfjson: " + e);
             }
         }
-        Utils.each(json, function(predicates, subject) {
+        Utils.each(json, function (predicates, subject) {
             subject = subject[0] === "_" ?
-                Dictionary.BlankNode(subject) :
-                Dictionary.Symbol(subject);
-            Utils.each(predicates, function(objects, predicate) {
+                    Dictionary.BlankNode(subject) :
+                    Dictionary.Symbol(subject);
+            Utils.each(predicates, function (objects, predicate) {
                 predicate = Dictionary.Symbol(predicate);
-                Utils.each(objects, function(object) {
+                Utils.each(objects, function (object) {
                     if (Utils.isObject(object)) {
                         if (object.type === "literal") {
                             object = Dictionary.Literal(object.value, object.lang, object.datatype);

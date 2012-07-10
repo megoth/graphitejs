@@ -1,12 +1,12 @@
+/*global define */
 define([
     "./utils",
-    "./dictionary",
-    "./graph",
     "./parser/jsonld",
     "./parser/rdfjson",
     "../rdfquery/parser/rdfxml",
     "../rdfquery/parser/turtle"
-], function (Utils, Dictionary, Graph, JSONLD, RDFJSON, RDFXML, TTL) {
+], function (Utils, JSONLD, RDFJSON, RDFXML, TTL) {
+    "use strict";
     var parsers = {
         "json": JSONLD,
         "jsonld": JSONLD,
@@ -29,8 +29,6 @@ define([
      * the graph assembled, given in form of Dictionary.Formula
      */
     return function (data, format, options, callback) {
-        var graph,
-            parts;
         //console.log("IN PARSER", format, parsers[format]);
         if (!callback && Utils.isFunction(options)) {
             callback = options;

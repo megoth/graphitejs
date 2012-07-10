@@ -1,46 +1,11 @@
+/*global assert, buster, define */
 define([
-    "src/graphite/tokenizer/sparql",
-    "src/graphite/utils"
-], function (Tokenizer, Utils) {
+    "src/graphite/tokenizer/sparql"
+], function (Tokenizer) {
+    "use strict";
     var tokenBase = {
             "token": "base",
             "value": "http://example.org/"
-        },
-        tokenCurieName = {
-            "prefix": "foaf",
-            "suffix": "name",
-            "token": "uri",
-            "value": null
-        },
-        tokenCurieType = {
-            "prefix": "rdf",
-            "suffix": "type",
-            "token": "uri",
-            "value": null
-        },
-        tokenUriInteger = {
-            "prefix": null,
-            "suffix": null,
-            "token": "uri",
-            "value": "http://www.w3.org/2001/XMLSchema#integer"
-        },
-        tokenUriType = {
-            "prefix": null,
-            "suffix": null,
-            "token": "uri",
-            "value": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
-        },
-        tokenLiteral22 = {
-            "lang": null,
-            "token": "literal",
-            "type": "http://www.w3.org/2001/XMLSchema#integer",
-            "value": "22"
-        },
-        tokenLiteral22Specified = {
-            "lang": null,
-            "token": "literal",
-            "type": tokenUriInteger,
-            "value": "22"
         },
         tokenLiteralArne = {
             "lang": null,
@@ -48,11 +13,11 @@ define([
             "type": null,
             "value": "Arne"
         },
-        tokenLiteralEnglish = {
-            "lang": "en",
+        tokenLiteral22 = {
+            "lang": null,
             "token": "literal",
-            "type": null,
-            "value": "Andy"
+            "type": "http://www.w3.org/2001/XMLSchema#integer",
+            "value": "22"
         },
         tokenVarA = {
             "token": "var",
@@ -73,6 +38,12 @@ define([
             "token": "expression",
             "value": tokenVarA
         },
+        tokenExpressionAtomic22 = {
+            "expressionType": "atomic",
+            "primaryexpression": "numericliteral",
+            "token": "expression",
+            "value": tokenLiteral22
+        },
         tokenExpressionAtomicArne = {
             "expressionType": "atomic",
             "primaryexpression": "rdfliteral",
@@ -89,6 +60,13 @@ define([
             "args": [ tokenExpressionAtomicA ],
             "builtincall": "bnode",
             "expressionType": "builtincall",
+            "token": "expression"
+        },
+        tokenExpressionAEquals22 = {
+            "expressionType": "relationalexpression",
+            "op1": tokenExpressionAtomicA,
+            "op2": tokenExpressionAtomic22,
+            "operator": "=",
             "token": "expression"
         },
         tokenExpressionAEqualsArne = {
@@ -181,6 +159,10 @@ define([
             "expression": tokenExpressionAtomicA,
             "expressionType": "aggregate",
             "token": "expression"
+        },
+        tokenFilterAEquals22 = {
+            "token": "filter",
+            "value": tokenExpressionAEquals22
         },
         tokenFilterAEqualsArne = {
             "token": "filter",
@@ -287,115 +269,13 @@ define([
             "predicate": tokenVarB,
             "subject": tokenVarA
         },
-        tokenTripleACurieName22 = {
-            "object": tokenLiteral22,
-            "predicate": tokenCurieName,
-            "subject": tokenVarA
-        },
-        tokenTripleACurieName22Specified = {
-            "object": tokenLiteral22Specified,
-            "predicate": tokenCurieName,
-            "subject": tokenVarA
-        },
-        tokenTripleACurieNameArne = {
-            "object": tokenLiteralArne,
-            "predicate": tokenCurieName,
-            "subject": tokenVarA
-        },
-        tokenTripleACurieNameEnglish = {
-            "object": tokenLiteralEnglish,
-            "predicate": tokenCurieName,
-            "subject": tokenVarA
-        },
-        tokenTripleACurieTypeC = {
-            "object": tokenVarC,
-            "predicate": tokenCurieType,
-            "subject": tokenVarA
-        },
-        tokenTripleAUriTypeC = {
-            "object": tokenVarC,
-            "predicate": tokenUriType,
-            "subject": tokenVarA
-        },
         tokenBGPABC = {
             "token": "basicgraphpattern",
             "triplesContext": [ tokenTripleABC ]
         },
-        tokenBGPABCx2 = {
-            "token": "basicgraphpattern",
-            "triplesContext": [ tokenTripleABC, tokenTripleABC ]
-        },
-        tokenBGPABCx3 = {
-            "token": "basicgraphpattern",
-            "triplesContext": [ tokenTripleABC, tokenTripleABC, tokenTripleABC ]
-        },
-        tokenBGPACurieName22 = {
-            "token": "basicgraphpattern",
-            "triplesContext": [ tokenTripleACurieName22 ]
-        },
-        tokenBGPACurieName22Specified = {
-            "token": "basicgraphpattern",
-            "triplesContext": [ tokenTripleACurieName22Specified ]
-        },
-        tokenBGPACurieNameArne = {
-            "token": "basicgraphpattern",
-            "triplesContext": [ tokenTripleACurieNameArne ]
-        },
-        tokenBGPACurieNameEnglish = {
-            "token": "basicgraphpattern",
-            "triplesContext": [ tokenTripleACurieNameEnglish ]
-        },
-        tokenBGPACurieTypeC = {
-            "token": "basicgraphpattern",
-            "triplesContext": [ tokenTripleACurieTypeC ]
-        },
-        tokenBGPAUriTypeC = {
-            "token": "basicgraphpattern",
-            "triplesContext": [ tokenTripleAUriTypeC ]
-        },
         tokenPatternABC = {
             "filters": [],
             "patterns": [ tokenBGPABC ],
-            "token": "groupgraphpattern"
-        },
-        tokenPatternABCx2 = {
-            "filters": [],
-            "patterns": [ tokenBGPABCx2 ],
-            "token": "groupgraphpattern"
-        },
-        tokenPatternABCx3 = {
-            "filters": [],
-            "patterns": [ tokenBGPABCx3 ],
-            "token": "groupgraphpattern"
-        },
-        tokenPatternACurieName22 = {
-            "filters": [],
-            "patterns": [ tokenBGPACurieName22 ],
-            "token": "groupgraphpattern"
-        },
-        tokenPatternACurieName22Specified = {
-            "filters": [],
-            "patterns": [ tokenBGPACurieName22Specified ],
-            "token": "groupgraphpattern"
-        },
-        tokenPatternACurieNameArne = {
-            "filters": [],
-            "patterns": [ tokenBGPACurieNameArne ],
-            "token": "groupgraphpattern"
-        },
-        tokenPatternACurieNameEnglish = {
-            "filters": [],
-            "patterns": [ tokenBGPACurieNameEnglish ],
-            "token": "groupgraphpattern"
-        },
-        tokenPatternACurieTypeC = {
-            "filters": [],
-            "patterns": [ tokenBGPACurieTypeC ],
-            "token": "groupgraphpattern"
-        },
-        tokenPatternAUriTypeC = {
-            "filters": [],
-            "patterns": [ tokenBGPAUriTypeC ],
             "token": "groupgraphpattern"
         },
         tokenOptionalABC = {
@@ -481,7 +361,7 @@ define([
             assert.equals(Tokenizer.base("http://example.org/"), {
                 "base": tokenBase,
                 "remainder": ""
-            })
+            });
         },
         ".expression": {
             "avg": function () {
@@ -550,7 +430,7 @@ define([
                 assert.equals(Tokenizer.expression("SUM(?a)"), {
                     "expression": tokenExpressionSumA,
                     "remainder": ""
-                })
+                });
             }
         },
         ".filter": function () {
@@ -578,6 +458,10 @@ define([
                 "filter": tokenFilterANotEqualsArne,
                 "remainder": ""
             });
+            assert.equals(Tokenizer.filter('FILTER(?a = 22)'), {
+                "filter": tokenFilterAEquals22,
+                "remainder": ""
+            })
         },
         ".filter, with regex": function () {
             assert.equals(Tokenizer.filter('FILTER regex(?a, "Arne")'), {
@@ -673,7 +557,7 @@ define([
             });
         },
         ".var": function () {
-            assert.equals(Tokenizer.var("a"), {
+            assert.equals(Tokenizer["var"]("a"), {
                 "remainder": "",
                 "var": tokenVarA
             });
@@ -702,51 +586,61 @@ define([
                     assert.equals(
                         Tokenizer.where("WHERE { ?a ?b ?c }", {
                             pattern: tokenEmptyPattern
-                        }), {
+                        }),
+                        {
                             bgpindex: 0,
                             remainder: "",
                             where: tokenPatternABC
-                        });
+                        }
+                    );
                 },
                 "Pattern: Empty pattern": function () {
                     assert.equals(
                         Tokenizer.where("WHERE { ?a ?b ?c }", {
                             pattern: tokenWhereEmptyPattern,
                             variables: [ "a" ]
-                        }), {
+                        }),
+                        {
                             remainder: "",
                             where: tokenWhereABCWithVariableA
-                        });
+                        }
+                    );
                 },
                 "Pattern: BGP": function () {
                     assert.equals(
                         Tokenizer.where("WHERE { ?a ?b ?c }", {
                             pattern: tokenWhereABCWithVariableA,
                             variables: [ "a" ]
-                        }), {
+                        }),
+                        {
                             remainder: "",
                             where: tokenWhereABCWithVariableAx2
-                        });
+                        }
+                    );
                 },
                 "Pattern: Optional": function () {
                     assert.equals(
                         Tokenizer.where("WHERE { ?a ?b ?c }", {
                             pattern: tokenWhereABCAndOptionalABCWithVariableA,
                             variables: [ "a" ]
-                        }), {
+                        }),
+                        {
                             remainder: "",
                             where: tokenWhereABCAndOptionalABCAndBGPABCWithVariableA
-                        });
+                        }
+                    );
                 },
                 "Pattern: Filter": function () {
                     assert.equals(
                         Tokenizer.where("WHERE { ?a ?b ?c }", {
                             pattern: tokenWhereFilterAEqualsArneAndBGPABCWithVariableA,
                             variables: [ "a" ]
-                        }), {
+                        }),
+                        {
                             remainder: "",
                             where: tokenWhereFilterAEqualsArneAndBGPABCx2WithVariableA
-                        });
+                        }
+                    );
                 }
             },
             "Inserting optional": {
@@ -755,30 +649,36 @@ define([
                         Tokenizer.where("WHERE { OPTIONAL { ?a ?b ?c } }", {
                             pattern: tokenWhereABCWithVariableA,
                             variables: [ "a" ]
-                        }), {
+                        }),
+                        {
                             remainder: "",
                             where: tokenWhereABCAndOptionalABCWithVariableA
-                        });
+                        }
+                    );
                 },
                 "Pattern: Optional": function () {
                     assert.equals(
                         Tokenizer.where("WHERE { OPTIONAL { ?a ?b ?c } }", {
                             pattern: tokenWhereOptionalABCWithVariableA,
                             variables: [ "a" ]
-                        }), {
+                        }),
+                        {
                             remainder: "",
                             where: tokenWhereOptionalABCAndOptionalABCWithVariableA
-                        });
+                        }
+                    );
                 },
                 "Pattern: Filter": function () {
                     assert.equals(
                         Tokenizer.where("WHERE { OPTIONAL { ?a ?b ?c } }", {
                             pattern: tokenWhereFilterAEqualsArneAndBGPABCWithVariableA,
                             variables: [ "a" ]
-                        }), {
+                        }),
+                        {
                             remainder: "",
                             where: tokenWhereFilterAEqualsArneAndBGPABCAndOptionalABCWithVariableA
-                        });
+                        }
+                    );
                 }
             },
             "Inserting filter": {
@@ -787,30 +687,36 @@ define([
                         Tokenizer.where('WHERE { FILTER(?a = "Arne") }', {
                             pattern: tokenWhereABCWithVariableA,
                             variables: [ "a" ]
-                        }), {
+                        }),
+                        {
                             remainder: "",
                             where: tokenWhereFilterAEqualsArneAndBGPABCWithVariableA
-                        })
+                        }
+                    );
                 },
                 "Pattern: Optional": function () {
                     assert.equals(
                         Tokenizer.where('WHERE { FILTER(?a = "Arne") }', {
                             pattern: tokenWhereABCAndOptionalABCWithVariableA,
                             variables: [ "a" ]
-                        }), {
+                        }),
+                        {
                             remainder: "",
                             where: tokenWhereFilterAEqualsArneAndBGPABCAndOptionalABCWithVariableA
-                        });
+                        }
+                    );
                 },
                 "Pattern: Filter": function () {
                     assert.equals(
                         Tokenizer.where('WHERE { FILTER(?a < "Arne") }', {
                             pattern: tokenWhereFilterAEqualsArneAndBGPABCWithVariableA,
                             variables: [ "a" ]
-                        }), {
+                        }),
+                        {
                             remainder: "",
                             where: tokenWhereFilterAEqualsArneAndFilterALesserArneAndBGPABCWithVariableA
-                        });
+                        }
+                    );
                 }
             }
         }

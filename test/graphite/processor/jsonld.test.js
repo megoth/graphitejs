@@ -1,1 +1,0 @@
-/* jsonld.js has its own tests, see https://github.com/digitalbazaar/jsonld.js */

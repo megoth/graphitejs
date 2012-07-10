@@ -145,6 +145,18 @@ define([
                 }));
             }
         },
+        "//.getSubject": {
+            setUp: function (done) {
+                addStatements.call(this.api, done);
+                this.subject = this.api.getSubject("test");
+            },
+            "Proper setup": function (done) {
+                this.subject
+                    .execute(done(function (test) {
+                        assert.defined(test);
+                    }));
+            }
+        },
         "//.group": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
@@ -216,7 +228,7 @@ define([
                 }));
             }
         },
-        ".load": {
+        "//.load": {
             setUp: function () {
                 buster.testRunner.timeout = 2000;
             },
@@ -296,7 +308,7 @@ define([
                 }));
             }
         },
-        ".query": {
+        "//.query": {
             "Loading query": function (done) {
                 var spy = sinon.spy();
                 this.api
@@ -317,7 +329,7 @@ define([
                     }))
                 }
             },
-            "SELECT": {
+            "//SELECT": {
                 setUp: function (done) {
                     addStatements.call(this.api, done);
                 },
@@ -330,7 +342,7 @@ define([
                         assert.equals(spy.callCount, 6);
                     }));
                 },
-                "with group by": function (done) {
+                "//with group by": function (done) {
                     var spy = sinon.spy();
                     this.api
                         .query("SELECT (COUNT(?s) as ?count) WHERE { ?s ?p ?o } GROUP BY ?s")
@@ -342,7 +354,7 @@ define([
                         assert.equals(spy.callCount, 2);
                     }));
                 },
-                "with distinct": function (done) {
+                "//with distinct": function (done) {
                     var spy = sinon.spy();
                     this.api
                         .query("SELECT DISTINCT ?s WHERE { ?s ?p ?o }")
@@ -354,7 +366,7 @@ define([
                         assert.equals(spy.callCount, 2);
                     }));
                 },
-                "with sum": function (done) {
+                "//with sum": function (done) {
                     var spy = sinon.spy();
                     this.api
                         .query("SELECT (SUM(?age) as ?totalAge) WHERE { ?s <http://xmlns.com/foaf/0.1/age> ?age }")
@@ -366,7 +378,7 @@ define([
                         assert.equals(spy.callCount, 1);
                     }));
                 },
-                "with avg": function (done) {
+                "//with avg": function (done) {
                     var spy = sinon.spy();
                     this.api
                         .query("SELECT (AVG(?age) as ?avgAge) WHERE { ?s <http://xmlns.com/foaf/0.1/age> ?age }")
@@ -378,7 +390,7 @@ define([
                         assert.equals(spy.callCount, 1);
                     }));
                 },
-                "with min": function (done) {
+                "//with min": function (done) {
                     var spy = sinon.spy();
                     this.api
                         .query("SELECT (MIN(?age) as ?minAge) WHERE { ?s <http://xmlns.com/foaf/0.1/age> ?age }")
@@ -390,7 +402,7 @@ define([
                         assert.equals(spy.callCount, 1);
                     }));
                 },
-                "with max": function (done) {
+                "//with max": function (done) {
                     var spy = sinon.spy();
                     this.api
                         .query("SELECT (MAX(?age) as ?maxAge) WHERE { ?s <http://xmlns.com/foaf/0.1/age> ?age }")
@@ -402,7 +414,7 @@ define([
                         assert.equals(spy.callCount, 1);
                     }));
                 },
-                "with variable inserted": function (done) {
+                "//with variable inserted": function (done) {
                     var spy = sinon.spy();
                     this.api
                         .query("SELECT ?subject WHERE { ?subject <{0}> ?o }", "http://xmlns.com/foaf/0.1/age")
@@ -458,7 +470,7 @@ define([
                 }));
             }
         },
-        ".select": {
+        "//.select": {
             setUp: function (done) {
                 addStatements.call(this.api, done);
             },
@@ -467,7 +479,7 @@ define([
                     .select("*")
                     .where("?subject ?predicate ?object")
                     .execute(function(subject, predicate, object) {
-                        console.log(arguments);
+                        //console.log(arguments);
                         assert.defined(subject);
                         assert.defined(predicate);
                         assert.defined(object);

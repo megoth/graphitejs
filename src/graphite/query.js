@@ -1,3 +1,4 @@
+/*global define */
 define([
     "./loader",
     "../rdfstore/sparql-parser/sparql_parser",
@@ -5,7 +6,35 @@ define([
     "./utils",
     "./when"
 ], function (Loader, SparqlParser, Tokenizer, Utils, When) {
-    var sparqlRegex = /^(#|ADD|ASK|BASE|CONSTRUCT|COPY|CLEAR|CREATE|DESCRIBE|DELETE|DROP|INSERT|LOAD|MOVE|PREFIX|SELECT|WITH)/;
+    var Query = function (queryString) {
+            return new Query.prototype.init(queryString);
+        },
+        QueryObject = function (query, objectName) {
+            return new QueryObject.prototype.init(query, objectName);
+        },
+        QuerySubject = function (query, subjectName) {
+            return new QuerySubject.prototype.init(query, subjectName);
+        },
+        QueryTerm,
+        sparqlRegex = /^(#|ADD|ASK|BASE|CONSTRUCT|COPY|CLEAR|CREATE|DESCRIBE|DELETE|DROP|INSERT|LOAD|MOVE|PREFIX|SELECT|WITH)/;
+    function assembleNode (node, subject, predicate, object) {
+        node.query
+            .where("{0} {1} {2}".format(
+            subject,
+            predicate,
+            object
+        ));
+        if (node.filters.length > 0) {
+            Utils.each(node.filters, function (filter) {
+                node.query.filter(filter);
+            }.bind(node));
+        }
+        if (node.regexes.length > 0) {
+            Utils.each(node.regexes, function (r) {
+                node.query.regex(node.termName, r.pattern, r.flags);
+            }.bind(node));
+        }
+    }
     function cleanArg(str) {
         if (Utils.isString(str)) {
             return str.replace(/"/g, '\\"');
@@ -32,6 +61,12 @@ define([
         }
         //console.debug("IN QUERY, FORMAT QUERY STRING", queryString);
         return queryString;
+    }
+    function formatTerm(term) {
+        if (term.length > 7 && term.substr(0, 7) === "http://") {
+            return "<" + term + ">";
+        }
+        return term;
     }
     function initiateQuery(queryString, deferred) {
         //console.log("IN QUERY, initiateQuery", queryString);
@@ -61,9 +96,6 @@ define([
         this.bgpindex = Utils.isNumber(where.bgpindex) ? where.bgpindex : this.bgpindex;
         this.pattern = where.where;
     }
-    var Query = function (queryString) {
-        return new Query.prototype.init(queryString);
-    };
     Query.prototype = {
         init: function (queryStringOrUri) {
             var self = this,
@@ -110,6 +142,12 @@ define([
             //console.log("IN QUERY, filter", filter);
             tokenWhere.call(this, "FILTER(" + filter + ")");
             return this;
+        },
+        getObject: function (variableName) {
+            return new QueryObject(this, variableName);
+        },
+        getSubject: function (variableName) {
+            return new QuerySubject(this, variableName);
         },
         group: function (group) {
             group = format(group, arguments, 1);
@@ -170,8 +208,8 @@ define([
             this.projection = Tokenizer.projection(projection).projection;
             return this;
         },
-        then: function (callback) {
-            this.deferred.then(callback);
+        Than: function (callback) {
+            this.deferred.Than(callback);
             return this;
         },
         where: function (pattern) {
@@ -182,5 +220,90 @@ define([
         }
     };
     Query.prototype.init.prototype = Query.prototype;
+    QueryObject.prototype = {
+        init: function (query, objectName) {
+            this.query = query;
+            this.termName = objectName;
+            this.predicateName = "?predicate";
+            this.subjectName = "?subject";
+            this.filters = [];
+            this.regexes = [];
+        },
+        asSubject: function (subjectName) {
+            assembleNode(this, subjectName, this.predicateName, this.termName);
+            return new QuerySubject(this.query, subjectName);
+        },
+        getSubjectAsObject: function (objectName) {
+            assembleNode(this, objectName, this.predicateName, this.termName);
+            return new QueryObject(this.query, objectName);
+        },
+        retrieveTree: function () {
+            assembleNode(this, this.subjectName, this.predicateName, this.termName);
+            return this.query.retrieveTree();
+        },
+        withSubject: function (subjectName) {
+            this.subjectName = formatTerm(subjectName);
+        }
+    };
+    QuerySubject.prototype = {
+        init: function (query, subjectName) {
+            this.query = query;
+            this.objectName = "?object";
+            this.predicateName = "?predicate";
+            this.termName = subjectName;
+            this.filters = [];
+            this.regexes = [];
+        },
+        asObject: function (objectName) {
+            assembleNode(this, this.termName, this.predicateName, objectName);
+            return new QueryObject(this.query, objectName);
+        },
+        getObjectAsSubject: function (subjectName) {
+            assembleNode(this, this.termName, this.predicateName, subjectName);
+            return new QuerySubject(this.query, subjectName);
+        },
+        retrieveTree: function () {
+            assembleNode(this, this.termName, this.predicateName, this.objectName);
+            return this.query.retrieveTree();
+        },
+        withObject: function (objectName) {
+            this.objectName = formatTerm(objectName);
+        }
+    };
+    QueryTerm = {
+        equals: function (value) {
+            value = format(value, arguments, 1);
+            this.filters.push("{0} = {1}".format(this.termName, value));
+        },
+        greaterThan: function (value) {
+            value = format(value, arguments, 1);
+            this.filters.push("{0} > {1}".format(this.termName, value));
+        },
+        greaterOrEqualThan: function (value) {
+            value = format(value, arguments, 1);
+            this.filters.push("{0} >= {1}".format(this.termName, value));
+        },
+        lesserThan: function (value) {
+            value = format(value, arguments, 1);
+            this.filters.push("{0} < {1}".format(this.termName, value));
+        },
+        lesserOrEqualThan: function (value) {
+            value = format(value, arguments, 1);
+            this.filters.push("{0} <= {1}".format(this.termName, value));
+        },
+        regex: function (pattern, flags) {
+            pattern = format(pattern, arguments, 2);
+            flags = flags ? format(flags, arguments, 2) : null;
+            this.regexes.push({
+                flags: flags,
+                pattern: pattern
+            });
+        },
+        withProperty: function (predicateName) {
+            this.predicateName = formatTerm(predicateName);
+        }
+    };
+    Utils.extend(QueryObject.prototype.init.prototype, QueryTerm, QueryObject.prototype);
+    Utils.extend(QuerySubject.prototype.init.prototype, QueryTerm, QuerySubject.prototype);
     return Query;
 });

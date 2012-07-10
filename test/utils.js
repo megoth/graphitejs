@@ -1,10 +1,11 @@
+/*global define */
 define([
     "src/graphite/loader"
-], function (Loader) {
+], function (loader) {
     "use strict";
     var Utils = {};
     Utils.openFile = function (pathToFile, callback) {
-        Loader({
+        loader({
             uri: pathToFile,
             success: callback
         });

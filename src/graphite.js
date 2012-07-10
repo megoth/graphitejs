@@ -11,9 +11,9 @@ define([
      *
      * The graphite object.
      *
-     * @returns {Object} The graphite object, run through `init`
+     * @returns {Object} The API module
      */
-    return function(options) {
-        return API(options);
+    return function Constructor(input) {
+        return new API(input);
     };
 });

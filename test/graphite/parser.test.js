@@ -35,7 +35,7 @@ define([
         },
         "Loads the RDF+JSON parser": function (done) {
             TestUtils.openFile("http://localhost:8088/rdfjson/arne.rdfjson", function (err, data) {
-                //buster.log("DATA", data);
+                //console.log("DATA", data);
                 When.all([
                     loadParser(data, "rdfjson"),
                     loadParser(data, "rdf+json"),

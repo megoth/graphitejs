@@ -19,7 +19,8 @@ define([
             // list of namespaces that will be automatically added to every query
             this.defaultPrefixes = {};
             this.abstractQueryTree = new AbstractQueryTree.AbstractQueryTree();
-            this.rdfLoader = new RDFLoader.RDFLoader(params['communication']);
+            this.rdfLoader = new RDFLoader.RDFLoader();
+            //this.rdfLoader = new RDFLoader.RDFLoader(params['communication']);
             this.callbacksBackend = new Callbacks.CallbacksBackend(this);
         }
     };
