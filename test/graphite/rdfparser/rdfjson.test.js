@@ -1,6 +1,6 @@
 /*global assert, buster, define, sinon */
 define([
-    "src/graphite/parser/rdfjson",
+    "src/graphite/rdfparser/rdfjson",
     "src/graphite/dictionary",
     "src/graphite/graph",
     "src/graphite/utils",

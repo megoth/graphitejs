@@ -1,10 +1,6 @@
 /*global assert, console, module, refute, require*/
-if (typeof module === "object" && typeof require === "function") {
-    var buster = require("buster");
-}
-
 define([
-    "src/graphite/parser",
+    "src/graphite/rdfparser",
     "src/graphite/utils",
     "src/graphite/when",
     "../utils"

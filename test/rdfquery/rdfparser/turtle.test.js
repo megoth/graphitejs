@@ -5,7 +5,7 @@ if (typeof module === "object" && typeof require === "function") {
 }
 
 define([
-    "src/rdfquery/parser/turtle",
+    "src/rdfquery/rdfparser/turtle",
     "src/graphite/utils",
     "src/graphite/when",
     "../../utils"

@@ -1,10 +1,10 @@
 /*global define */
 define([
     "./utils",
-    "./parser/jsonld",
-    "./parser/rdfjson",
-    "../rdfquery/parser/rdfxml",
-    "../rdfquery/parser/turtle"
+    "./rdfparser/jsonld",
+    "./rdfparser/rdfjson",
+    "../rdfquery/rdfparser/rdfxml",
+    "../rdfquery/rdfparser/turtle"
 ], function (Utils, JSONLD, RDFJSON, RDFXML, TTL) {
     "use strict";
     var parsers = {

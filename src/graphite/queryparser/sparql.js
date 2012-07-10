@@ -1,7 +1,8 @@
 /*global define */
 define([
+    "../../rdfstore/sparql-parser/sparql_parser",
     "../utils"
-], function (Utils) {
+], function (SparqlParser, Utils) {
     "use strict";
     var aliasRegex = /^\(/,
         ascRegex = /^(ASC|asc)/,
@@ -721,6 +722,12 @@ define([
             return {
                 "order": order,
                 "remainder": data
+            };
+        },
+        "parse": function (data) {
+            return {
+                "syntaxTree": SparqlParser.parser.parse(data),
+                "remainder": ""
             };
         },
         "prefix": function (data) {

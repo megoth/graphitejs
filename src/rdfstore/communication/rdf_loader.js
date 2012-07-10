@@ -1,9 +1,9 @@
 define([
-    "../trees/utils",
     "../../graphite/loader",
-    "../../graphite/parser",
+    "../../graphite/rdfparser",
+    "../trees/utils",
     "../../graphite/utils"
-], function (TreeUtils, Loader, Parser, Utils) {
+], function (Loader, Parser, TreeUtils, Utils) {
     function getMime(responseHeader) {
         return responseHeader.split("application/")[1];
     }

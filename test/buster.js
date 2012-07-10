@@ -14,6 +14,11 @@ config["Graphite tests - browser"] = {
         "test/*/*.test.js",
         "test/*/*/*.test.js"
     ],
+    tests: [
+        "test/utils.js",
+        "test/graphite/*.test.js",
+        "test/graphite/*/*.test.js"
+    ],
     libs: [
         "lib/*.js"
     ],

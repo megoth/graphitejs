@@ -1,5 +1,5 @@
 define([
-    "src/rdfquery/parser/rdfxml",
+    "src/rdfquery/rdfparser/rdfxml",
     "src/graphite/utils",
     "src/graphite/when",
     "../../utils"

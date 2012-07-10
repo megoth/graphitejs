@@ -1,7 +1,7 @@
 /*global assert, buster, define */
 define([
-    "src/graphite/tokenizer/sparql"
-], function (Tokenizer) {
+    "src/graphite/queryparser/sparql"
+], function (Parser) {
     "use strict";
     var tokenBase = {
             "token": "base",
@@ -348,190 +348,190 @@ define([
         };
     buster.testCase("Graphite tokenizer (SPARQL)", {
         "Proper setup": function () {
-            assert.defined(Tokenizer);
-            assert.isObject(Tokenizer);
+            assert.defined(Parser);
+            assert.isObject(Parser);
         },
         ".alias": function () {
-            assert.equals(Tokenizer.alias("AS ?b"), {
+            assert.equals(Parser.alias("AS ?b"), {
                 "alias": tokenVarB,
                 "remainder": ""
             });
         },
         ".base": function () {
-            assert.equals(Tokenizer.base("http://example.org/"), {
+            assert.equals(Parser.base("http://example.org/"), {
                 "base": tokenBase,
                 "remainder": ""
             });
         },
         ".expression": {
             "avg": function () {
-                assert.equals(Tokenizer.expression("AVG(?a)"), {
+                assert.equals(Parser.expression("AVG(?a)"), {
                     "expression": tokenExpressionAvgA,
                     "remainder": ""
                 });
             },
             "count": function () {
-                assert.equals(Tokenizer.expression("COUNT(?a)"), {
+                assert.equals(Parser.expression("COUNT(?a)"), {
                     "expression": tokenExpressionCountA,
                     "remainder": ""
                 });
             },
             "max": function () {
-                assert.equals(Tokenizer.expression("MAX(?a)"), {
+                assert.equals(Parser.expression("MAX(?a)"), {
                     "expression": tokenExpressionMaxA,
                     "remainder": ""
                 });
             },
             "min": function () {
-                assert.equals(Tokenizer.expression("MIN(?a)"), {
+                assert.equals(Parser.expression("MIN(?a)"), {
                     "expression": tokenExpressionMinA,
                     "remainder": ""
                 });
             },
             "relationalexpression": {
                 "equals": function () {
-                    assert.equals(Tokenizer.expression('?a = "Arne"'), {
+                    assert.equals(Parser.expression('?a = "Arne"'), {
                         "expression": tokenExpressionAEqualsArne,
                         "remainder": ""
                     });
                 },
                 "greater": function () {
-                    assert.equals(Tokenizer.expression('?a > "Arne"'), {
+                    assert.equals(Parser.expression('?a > "Arne"'), {
                         "expression": tokenExpressionAGreaterArne,
                         "remainder": ""
                     });
                 },
                 "greater-or-equals": function () {
-                    assert.equals(Tokenizer.expression('?a >= "Arne"'), {
+                    assert.equals(Parser.expression('?a >= "Arne"'), {
                         "expression": tokenExpressionAGreaterOrEqualsArne,
                         "remainder": ""
                     });
                 },
                 "lesser": function () {
-                    assert.equals(Tokenizer.expression('?a < "Arne"'), {
+                    assert.equals(Parser.expression('?a < "Arne"'), {
                         "expression": tokenExpressionALesserArne,
                         "remainder": ""
                     });
                 },
                 "lesser-or-equals": function () {
-                    assert.equals(Tokenizer.expression('?a <= "Arne"'), {
+                    assert.equals(Parser.expression('?a <= "Arne"'), {
                         "expression": tokenExpressionALesserOrEqualsArne,
                         "remainder": ""
                     });
                 },
                 "not-equals": function () {
-                    assert.equals(Tokenizer.expression('?a != "Arne"'), {
+                    assert.equals(Parser.expression('?a != "Arne"'), {
                         "expression": tokenExpressionANotEqualsArne,
                         "remainder": ""
                     });
                 }
             },
             "sum": function () {
-                assert.equals(Tokenizer.expression("SUM(?a)"), {
+                assert.equals(Parser.expression("SUM(?a)"), {
                     "expression": tokenExpressionSumA,
                     "remainder": ""
                 });
             }
         },
         ".filter": function () {
-            assert.equals(Tokenizer.filter('FILTER(?a = "Arne")'), {
+            assert.equals(Parser.filter('FILTER(?a = "Arne")'), {
                 "filter": tokenFilterAEqualsArne,
                 "remainder": ""
             });
-            assert.equals(Tokenizer.filter('FILTER(?a > "Arne")'), {
+            assert.equals(Parser.filter('FILTER(?a > "Arne")'), {
                 "filter": tokenFilterAGreaterArne,
                 "remainder": ""
             });
-            assert.equals(Tokenizer.filter('FILTER(?a >= "Arne")'), {
+            assert.equals(Parser.filter('FILTER(?a >= "Arne")'), {
                 "filter": tokenFilterAGreaterOrEqualsArne,
                 "remainder": ""
             });
-            assert.equals(Tokenizer.filter('FILTER(?a < "Arne")'), {
+            assert.equals(Parser.filter('FILTER(?a < "Arne")'), {
                 "filter": tokenFilterALesserArne,
                 "remainder": ""
             });
-            assert.equals(Tokenizer.filter('FILTER(?a <= "Arne")'), {
+            assert.equals(Parser.filter('FILTER(?a <= "Arne")'), {
                 "filter": tokenFilterALesserOrEqualsArne,
                 "remainder": ""
             });
-            assert.equals(Tokenizer.filter('FILTER(?a != "Arne")'), {
+            assert.equals(Parser.filter('FILTER(?a != "Arne")'), {
                 "filter": tokenFilterANotEqualsArne,
                 "remainder": ""
             });
-            assert.equals(Tokenizer.filter('FILTER(?a = 22)'), {
+            assert.equals(Parser.filter('FILTER(?a = 22)'), {
                 "filter": tokenFilterAEquals22,
                 "remainder": ""
             })
         },
         ".filter, with regex": function () {
-            assert.equals(Tokenizer.filter('FILTER regex(?a, "Arne")'), {
+            assert.equals(Parser.filter('FILTER regex(?a, "Arne")'), {
                 "filter": tokenFilterRegexArne,
                 "remainder": ""
             });
-            assert.equals(Tokenizer.filter('FILTER regex(?a, "Arne", "Arne")'), {
+            assert.equals(Parser.filter('FILTER regex(?a, "Arne", "Arne")'), {
                 "filter": tokenFilterRegexArneWithFlagArne,
                 "remainder": ""
             });
         },
         ".group": {
             "Single variable": function () {
-                assert.equals(Tokenizer.group("?a"), {
+                assert.equals(Parser.group("?a"), {
                     "group": tokenGroupA,
                     "remainder": ""
                 });
             },
             "Multiple variables": function () {
-                assert.equals(Tokenizer.group("?a ?b"), {
+                assert.equals(Parser.group("?a ?b"), {
                     "group": tokenGroupAB,
                     "remainder": ""
                 });
             }
         },
         ".optional": function () {
-            assert.equals(Tokenizer.optional("OPTIONAL { ?a ?b ?c }"), {
+            assert.equals(Parser.optional("OPTIONAL { ?a ?b ?c }"), {
                 "optional": tokenOptionalABC,
                 "remainder": ""
             });
         },
         ".order": function () {
-            assert.equals(Tokenizer.order("?a"), {
+            assert.equals(Parser.order("?a"), {
                 "order": tokenOrderAAsc,
                 "remainder": ""
             });
-            assert.equals(Tokenizer.order("ASC(?a)"), {
+            assert.equals(Parser.order("ASC(?a)"), {
                 "order": tokenOrderAAsc,
                 "remainder": ""
             });
-            assert.equals(Tokenizer.order("DESC(?a)"), {
+            assert.equals(Parser.order("DESC(?a)"), {
                 "order": tokenOrderADesc,
                 "remainder": ""
             });
-            assert.equals(Tokenizer.order("DESC(?a) ?b"), {
+            assert.equals(Parser.order("DESC(?a) ?b"), {
                 "order": tokenOrderADescBAsc,
                 "remainder": ""
             });
         },
         ".prefix": function () {
-            assert.equals(Tokenizer.prefix("rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"), {
+            assert.equals(Parser.prefix("rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"), {
                 "prefix": tokenPrefixRDF,
                 "remainder": ""
             });
         },
         ".prologue": function () {
-            assert.equals(Tokenizer.prologue("BASE <http://example.org/>"), {
+            assert.equals(Parser.prologue("BASE <http://example.org/>"), {
                 "prologue": tokenPrologueBase,
                 "remainder": ""
             });
-            assert.equals(Tokenizer.prologue("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"), {
+            assert.equals(Parser.prologue("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"), {
                 "prologue": tokenProloguePrefixRDF,
                 "remainder": ""
             });
-            assert.equals(Tokenizer.prologue("BASE <http://example.org/>\n" +
+            assert.equals(Parser.prologue("BASE <http://example.org/>\n" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"), {
                 "prologue": tokenPrologueBaseAndPrefixRDF,
                 "remainder": ""
             });
-            assert.equals(Tokenizer.prologue("BASE <http://example.org/>\n" +
+            assert.equals(Parser.prologue("BASE <http://example.org/>\n" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX foaf: <http://xmlns.com/foaf/0.1/>"), {
                 "prologue": tokenPrologueBaseAndPrefixRDFAndPrefixFOAF,
@@ -539,43 +539,43 @@ define([
             });
         },
         ".projection": function () {
-            assert.equals(Tokenizer.projection("?a"), {
+            assert.equals(Parser.projection("?a"), {
                 "projection": tokenProjectionA,
                 "remainder": ""
             });
-            assert.equals(Tokenizer.projection("*"), {
+            assert.equals(Parser.projection("*"), {
                 "projection": tokenProjectionStar,
                 "remainder": ""
             });
-            assert.equals(Tokenizer.projection("(?a AS ?b)"), {
+            assert.equals(Parser.projection("(?a AS ?b)"), {
                 "projection": tokenProjectionAAsB,
                 "remainder": ""
             });
-            assert.equals(Tokenizer.projection("?a (?a AS ?b)"), {
+            assert.equals(Parser.projection("?a (?a AS ?b)"), {
                 "projection": tokenProjectionsAAndAAsB,
                 "remainder": ""
             });
         },
         ".var": function () {
-            assert.equals(Tokenizer["var"]("a"), {
+            assert.equals(Parser["var"]("a"), {
                 "remainder": "",
                 "var": tokenVarA
             });
         },
         ".variable": function () {
-            assert.equals(Tokenizer.variable("?a"), {
+            assert.equals(Parser.variable("?a"), {
                 "remainder": "",
                 "variable": tokenVariableA
             });
-            assert.equals(Tokenizer.variable("*"), {
+            assert.equals(Parser.variable("*"), {
                 "remainder": "",
                 "variable": tokenVariableStar
             });
-            assert.equals(Tokenizer.variable("(?a AS ?b)"), {
+            assert.equals(Parser.variable("(?a AS ?b)"), {
                 "remainder": "",
                 "variable": tokenVariableAliasedAAsB
             });
-            assert.equals(Tokenizer.variable("(BNODE(?a) AS ?b)"), {
+            assert.equals(Parser.variable("(BNODE(?a) AS ?b)"), {
                 "remainder": "",
                 "variable": tokenVariableAliasedBnodeAsB
             });
@@ -584,7 +584,7 @@ define([
             "Inserting BGP": {
                 "Simple case": function () {
                     assert.equals(
-                        Tokenizer.where("WHERE { ?a ?b ?c }", {
+                        Parser.where("WHERE { ?a ?b ?c }", {
                             pattern: tokenEmptyPattern
                         }),
                         {
@@ -596,7 +596,7 @@ define([
                 },
                 "Pattern: Empty pattern": function () {
                     assert.equals(
-                        Tokenizer.where("WHERE { ?a ?b ?c }", {
+                        Parser.where("WHERE { ?a ?b ?c }", {
                             pattern: tokenWhereEmptyPattern,
                             variables: [ "a" ]
                         }),
@@ -608,7 +608,7 @@ define([
                 },
                 "Pattern: BGP": function () {
                     assert.equals(
-                        Tokenizer.where("WHERE { ?a ?b ?c }", {
+                        Parser.where("WHERE { ?a ?b ?c }", {
                             pattern: tokenWhereABCWithVariableA,
                             variables: [ "a" ]
                         }),
@@ -620,7 +620,7 @@ define([
                 },
                 "Pattern: Optional": function () {
                     assert.equals(
-                        Tokenizer.where("WHERE { ?a ?b ?c }", {
+                        Parser.where("WHERE { ?a ?b ?c }", {
                             pattern: tokenWhereABCAndOptionalABCWithVariableA,
                             variables: [ "a" ]
                         }),
@@ -632,7 +632,7 @@ define([
                 },
                 "Pattern: Filter": function () {
                     assert.equals(
-                        Tokenizer.where("WHERE { ?a ?b ?c }", {
+                        Parser.where("WHERE { ?a ?b ?c }", {
                             pattern: tokenWhereFilterAEqualsArneAndBGPABCWithVariableA,
                             variables: [ "a" ]
                         }),
@@ -646,7 +646,7 @@ define([
             "Inserting optional": {
                 "Pattern: BGP": function () {
                     assert.equals(
-                        Tokenizer.where("WHERE { OPTIONAL { ?a ?b ?c } }", {
+                        Parser.where("WHERE { OPTIONAL { ?a ?b ?c } }", {
                             pattern: tokenWhereABCWithVariableA,
                             variables: [ "a" ]
                         }),
@@ -658,7 +658,7 @@ define([
                 },
                 "Pattern: Optional": function () {
                     assert.equals(
-                        Tokenizer.where("WHERE { OPTIONAL { ?a ?b ?c } }", {
+                        Parser.where("WHERE { OPTIONAL { ?a ?b ?c } }", {
                             pattern: tokenWhereOptionalABCWithVariableA,
                             variables: [ "a" ]
                         }),
@@ -670,7 +670,7 @@ define([
                 },
                 "Pattern: Filter": function () {
                     assert.equals(
-                        Tokenizer.where("WHERE { OPTIONAL { ?a ?b ?c } }", {
+                        Parser.where("WHERE { OPTIONAL { ?a ?b ?c } }", {
                             pattern: tokenWhereFilterAEqualsArneAndBGPABCWithVariableA,
                             variables: [ "a" ]
                         }),
@@ -684,7 +684,7 @@ define([
             "Inserting filter": {
                 "Pattern: BGP": function () {
                     assert.equals(
-                        Tokenizer.where('WHERE { FILTER(?a = "Arne") }', {
+                        Parser.where('WHERE { FILTER(?a = "Arne") }', {
                             pattern: tokenWhereABCWithVariableA,
                             variables: [ "a" ]
                         }),
@@ -696,7 +696,7 @@ define([
                 },
                 "Pattern: Optional": function () {
                     assert.equals(
-                        Tokenizer.where('WHERE { FILTER(?a = "Arne") }', {
+                        Parser.where('WHERE { FILTER(?a = "Arne") }', {
                             pattern: tokenWhereABCAndOptionalABCWithVariableA,
                             variables: [ "a" ]
                         }),
@@ -708,7 +708,7 @@ define([
                 },
                 "Pattern: Filter": function () {
                     assert.equals(
-                        Tokenizer.where('WHERE { FILTER(?a < "Arne") }', {
+                        Parser.where('WHERE { FILTER(?a < "Arne") }', {
                             pattern: tokenWhereFilterAEqualsArneAndBGPABCWithVariableA,
                             variables: [ "a" ]
                         }),

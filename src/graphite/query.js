@@ -1,11 +1,10 @@
 /*global define */
 define([
     "./loader",
-    "../rdfstore/sparql-parser/sparql_parser",
-    "./tokenizer/sparql",
+    "./queryparser",
     "./utils",
     "./when"
-], function (Loader, SparqlParser, Tokenizer, Utils, When) {
+], function (Loader, QueryParser, Utils, When) {
     var Query = function (queryString) {
             return new Query.prototype.init(queryString);
         },
@@ -70,7 +69,7 @@ define([
     }
     function initiateQuery(queryString, deferred) {
         //console.log("IN QUERY, initiateQuery", queryString);
-        this.syntaxTree = SparqlParser.parser.parse(queryString);
+        this.syntaxTree = this.parser.parse(queryString).syntaxTree;
         if (this.syntaxTree.kind === "query") {
             this.unitindex = findUnit(this.syntaxTree);
             this.pattern = this.syntaxTree.units[this.unitindex].pattern;
@@ -89,7 +88,7 @@ define([
     }
     function tokenWhere(pattern) {
         //console.log("IN QUERY, tokenWhere", this);
-        var where = Tokenizer.where("WHERE {" + pattern + "}", {
+        var where = this.parser.where("WHERE {" + pattern + "}", {
             bgpindex: this.bgpindex,
             pattern: this.pattern
         });
@@ -108,6 +107,7 @@ define([
             this.variables = [];
             this.unitGroup = null;
             this.unitindex = 0;
+            this.parser = QueryParser("sparql");
             if(queryStringOrUri && Utils.isString(queryStringOrUri) && sparqlRegex.test(queryStringOrUri)) {
                 queryStringOrUri = format(queryStringOrUri, arguments, 1);
                 //console.log("IN QUERY, INIT, WITH", queryStringOrUri);
@@ -126,7 +126,7 @@ define([
                 throw new Error("Query given invalid");
             } else {
                 //console.log("IN QUERY, INIT, WITHOUT");
-                this.syntaxTree = SparqlParser.parser.parse("SELECT * WHERE { ?subject ?predicate ?object }");
+                this.syntaxTree = this.parser.parse("SELECT * WHERE { ?subject ?predicate ?object }").syntaxTree;
                 deferred.resolve(true);
             }
             this.deferred = deferred;
@@ -134,7 +134,7 @@ define([
         },
         base: function (value) {
             value = format(value, arguments, 1);
-            this.prologueBase = Tokenizer.base(value).base;
+            this.prologueBase = this.parser.base(value).base;
             return this;
         },
         filter: function (filter) {
@@ -151,7 +151,7 @@ define([
         },
         group: function (group) {
             group = format(group, arguments, 1);
-            this.unitGroup = Tokenizer.group(group).group;
+            this.unitGroup = this.parser.group(group).group;
             return this;
         },
         optional: function (optional) {
@@ -163,7 +163,7 @@ define([
             prefix = format(prefix, arguments, 2);
             local = format(local, arguments, 2);
             if (!this.prefixes[prefix]) {
-                var token = Tokenizer.prefix("{0}: <{1}>".format(prefix, local));
+                var token = this.parser.prefix("{0}: <{1}>".format(prefix, local));
                 this.prefixes[prefix] = token.prefix;
             }
             return this;
@@ -205,7 +205,7 @@ define([
         },
         select: function (projection) {
             projection = format(projection, arguments, 1);
-            this.projection = Tokenizer.projection(projection).projection;
+            this.projection = this.parser.projection(projection).projection;
             return this;
         },
         Than: function (callback) {

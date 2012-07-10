@@ -1,6 +1,6 @@
 /*global assert, buster, define, refute, sinon*/
 define([
-    "src/graphite/parser/jsonld",
+    "src/graphite/rdfparser/jsonld",
     "src/graphite/utils"
 ], function (parser, Utils) {
     "use strict";
