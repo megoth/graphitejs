@@ -16,7 +16,7 @@ define([
         this.eventsOnBatchLoad = (params.eventsOnBatchLoad || false);
         // list of namespaces that will be automatically added to every query
         this.defaultPrefixes = {};
-        this.abstractQueryTree = new AbstractQueryTree.AbstractQueryTree();
+        this.abstractQueryTree = new AbstractQueryTree();
         this.rdfLoader = new RDFLoader.RDFLoader();
         //this.rdfLoader = new RDFLoader.RDFLoader(params['communication']);
         this.callbacksBackend = new Callbacks.CallbacksBackend(this);
@@ -580,7 +580,6 @@ define([
             this.registerNsInEnvironment(prologue, queryEnv);
             // retrieval queries can only have 1 executable unit
             aqt = that.abstractQueryTree.parseExecutableUnit(units[0]);
-            // can be anything else but a select???
             if(aqt.kind === 'select') {
                 this.executeSelect(aqt, queryEnv, defaultDataset, namedDataset, function(success, result){
                     if(success) {

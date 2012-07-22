@@ -14,7 +14,7 @@ define([
     Callbacks.eventsFlushed = 'eventsFlushed';
 
     Callbacks.CallbacksBackend = function() {
-        this.aqt = new AbstractQueryTree.AbstractQueryTree();
+        this.aqt = new AbstractQueryTree();
         this.engine = arguments[0];
         this.indexMap = {};
         this.observersMap = {};

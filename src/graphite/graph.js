@@ -79,12 +79,6 @@ define([
     }
     function executeSelect(promise, options) {
         return function (success, results) {
-            //console.log("IN GRAPH, SELECT QUERY", results.length, results);
-            if (results.length === 0) {
-                //console.debug("The query didn't return any results");
-            } else {
-                //console.debug("IN QUERY, executeSelect", results);
-            }
             var vars, lvars;
             if (options.callback && options.callback.length > 0) {
                 vars = Utils.extractArgumentMap(options.callback);

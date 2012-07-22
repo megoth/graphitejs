@@ -6,7 +6,7 @@ if (typeof module === "object" && typeof require === "function") {
 define(["src/rdfstore/query-engine/abstract_query_tree"], function (AbstractQueryTree) {
     buster.testCase("RDFStore AbstractQueryTree", {
         setUp: function () {
-            this.aqt = new AbstractQueryTree.AbstractQueryTree();
+            this.aqt = new AbstractQueryTree();
         },
         "Example 1": function () {
             var query = "SELECT * { ?s ?p ?o }",
