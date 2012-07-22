@@ -1,7 +1,7 @@
 
 define([
     "./abstract_query_tree",
-    "../rdf-persistence/quad_index_common",
+    "./quad_index_common",
     "./rdf_js_interface",
     "../trees/utils"
 ], function (AbstractQueryTree, QuadIndexCommon, RDFJSInterface, TreeUtils) {

@@ -1,5 +1,5 @@
 
-define(["../trees/utils", "./quad_index"], function (Utils, QuadIndex) {
+define(["../trees/utils", "./quad_index"], function (TreeUtils, QuadIndex) {
     var QuadBackend = {};
     /*
      * "perfect" indices for RDF indexing
@@ -54,7 +54,7 @@ define(["../trees/utils", "./quad_index"], function (Utils, QuadIndex) {
             var index = matchingIndices[i];
             var indexComponents = this.componentOrders[index];
             for (var j = 0; j < indexComponents.length; j++) {
-                if (Utils.include(indexKey, indexComponents[j]) === false) {
+                if (TreeUtils.include(indexKey, indexComponents[j]) === false) {
                     break;
                 }
                 if (j == indexKey.length - 1) {

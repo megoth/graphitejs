@@ -1,9 +1,6 @@
 /*global assert, console, module, refute, require*/
 define([
-    "src/graphite/queryparser",
-    "src/graphite/utils",
-    "src/graphite/when",
-    "../utils"
+    "src/graphite/queryparser"
 ], function (Parser) {
     buster.testCase("Graphite parser", {
         "Has proper Setup": function () {

@@ -3,7 +3,9 @@ if (typeof module === "object" && typeof require === "function") {
     var buster = require("buster");
 }
 
-define(["src/rdfstore/rdf-persistence/quad_index_common"], function (QuadIndexCommon) {
+define([
+    "src/rdfstore/query-engine/quad_index_common"
+], function (QuadIndexCommon) {
     buster.testCase("RDFStore QuadIndexCommon", {
         "nodeKeyComparator": function () {
             var order = ['subject', 'predicate', 'object'],

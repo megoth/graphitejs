@@ -4,11 +4,11 @@ define([
     "src/rdfstore/sparql-parser/sparql_parser",
     "../../utils",
     "src/graphite/utils",
-    "src/graphite/when"
-], function (sparqlSerializer, SparqlParser, TestUtils, Utils, When) {
+    "src/graphite/promise"
+], function (sparqlSerializer, SparqlParser, TestUtils, Utils, Promise) {
     "use strict";
     function checkSparql(filePath) {
-        var promise = When.defer();
+        var promise = Promise.defer();
         TestUtils.openFile(filePath, function (err, data) {
             var query = sparqlSerializer(data);
             //console.log("QUERIES", data, "\n", query);
@@ -31,7 +31,7 @@ define([
                 fileExtension || "rq"
             )));
         });
-        return When.all(promises);
+        return Promise.all(promises);
     }
     function sparqlEquals(objects) {
         Utils.each(objects, function (obj) {

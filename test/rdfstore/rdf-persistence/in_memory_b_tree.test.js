@@ -3,7 +3,7 @@ if (typeof module === "object" && typeof require ===  "function") {
     var buster = require("buster");
 }
 define([
-    "src/rdfstore/trees/in_memory_b_tree",
+    "src/rdfstore/rdf-persistence/in_memory_b_tree",
     "src/rdfstore/trees/utils"
 ], function (btree, Utils) {
     buster.testCase("RDFStore btree (VERY BIG; TAKES LONG TIME TO RUN)", {

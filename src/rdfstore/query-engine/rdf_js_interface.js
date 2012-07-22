@@ -1,7 +1,7 @@
 define([
-    "../trees/utils",
-    "./query_filters"
-], function (Utils, QueryFilters) {
+    "./query_filters",
+    "../trees/utils"
+], function (QueryFilters, TreeUtils) {
     var RDFJSInterface = {};
 
     /**
@@ -38,7 +38,7 @@ define([
     RDFJSInterface.UrisMap.prototype.values = function() {
         var collected = {};
         for(var p in this) {
-            if(!Utils.include(this.interfaceProperties,p) &&
+            if(!TreeUtils.include(this.interfaceProperties,p) &&
                 typeof(this[p])!=='function' &&
                 p!=='defaultNs' &&
                 p!=='interfaceProperties') {
@@ -81,7 +81,7 @@ define([
 
     RDFJSInterface.UrisMap.prototype.addAll = function(prefixMap, override) {
         for(var prefix in prefixMap) {
-            if(!Utils.include(this.interfaceProperties, prefix)) {
+            if(!TreeUtils.include(this.interfaceProperties, prefix)) {
                 if(this[prefix] != null) {
                     if(override === true) {
                         this[prefix] = prefixMap[prefix];
@@ -222,7 +222,7 @@ define([
             this.prefixes.set(p, RDFJSInterface.defaultContext[p]);
         }
     };
-    Utils.extends(RDFJSInterface.Profile, RDFJSInterface.RDFEnvironment);
+    TreeUtils.extends(RDFJSInterface.Profile, RDFJSInterface.RDFEnvironment);
 
     RDFJSInterface.RDFEnvironment.prototype.createBlankNode = function() {
         var bnode =  new RDFJSInterface.BlankNode(this.blankNodeCounter);
@@ -345,7 +345,7 @@ define([
         this.bnodeId = bnodeId;
     };
 
-    Utils.extends(RDFJSInterface.RDFNode,RDFJSInterface.BlankNode);
+    TreeUtils.extends(RDFJSInterface.RDFNode,RDFJSInterface.BlankNode);
 
     RDFJSInterface.BlankNode.prototype.toString = function(){
         return this.nominalValue;
@@ -371,7 +371,7 @@ define([
         }
     };
 
-    Utils.extends(RDFJSInterface.RDFNode,RDFJSInterface.Literal);
+    TreeUtils.extends(RDFJSInterface.RDFNode,RDFJSInterface.Literal);
 
     RDFJSInterface.Literal.prototype.toString = function(){
         var tmp = "\""+this.nominalValue+"\"";
@@ -405,7 +405,7 @@ define([
         }
     };
 
-    Utils.extends(RDFJSInterface.RDFNode,RDFJSInterface.NamedNode);
+    TreeUtils.extends(RDFJSInterface.RDFNode,RDFJSInterface.NamedNode);
 
     RDFJSInterface.NamedNode.prototype.toString = function(){
         return this.nominalValue;

@@ -3,8 +3,8 @@ define([
     "./loader",
     "./queryparser",
     "./utils",
-    "./when"
-], function (Loader, QueryParser, Utils, When) {
+    "./promise"
+], function (Loader, QueryParser, Utils, Promise) {
     var Query = function (queryString) {
             return new Query.prototype.init(queryString);
         },
@@ -98,7 +98,7 @@ define([
     Query.prototype = {
         init: function (queryStringOrUri) {
             var self = this,
-                deferred = When.defer();
+                deferred = Promise.defer();
             this.prologueBase = null;
             this.bgpindex = null;
             this.pattern = null;

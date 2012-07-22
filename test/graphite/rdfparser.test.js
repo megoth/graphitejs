@@ -2,11 +2,11 @@
 define([
     "src/graphite/rdfparser",
     "src/graphite/utils",
-    "src/graphite/when",
+    "src/graphite/promise",
     "../utils"
-], function (Parser, Utils, When, TestUtils) {
+], function (Parser, Utils, Promise, TestUtils) {
     function loadParser(data, format) {
-        var deferred = When.defer();
+        var deferred = Promise.defer();
         Parser(data, format, {}, function (graph) {
             deferred.resolve(graph.statements);
         });
@@ -19,7 +19,7 @@ define([
         },
         "Loads the JSON-LD parser": function (done) {
             TestUtils.openFile("http://localhost:8088/json-ld/simple.jsonld", function (err, data) {
-                When.all([
+                Promise.all([
                     loadParser(data, "jsonld"),
                     loadParser(data, "json-ld")
                 ]).then(done(function (results) {
@@ -32,7 +32,7 @@ define([
         "Loads the RDF+JSON parser": function (done) {
             TestUtils.openFile("http://localhost:8088/rdfjson/arne.rdfjson", function (err, data) {
                 //console.log("DATA", data);
-                When.all([
+                Promise.all([
                     loadParser(data, "rdfjson"),
                     loadParser(data, "rdf+json"),
                     loadParser(data, "rdf/json")
@@ -45,7 +45,7 @@ define([
         },
         "Loads the RDF/XML parser": function (done) {
             TestUtils.openFile("http://localhost:8088/rdfxml/amp-in-url/test001.rdf", function (err, data) {
-                When.all([
+                Promise.all([
                     loadParser(data, "rdfxml"),
                     loadParser(data, "rdf/xml"),
                     loadParser(data, "rdf+xml")
@@ -58,7 +58,7 @@ define([
         },
         "Loads the Turtle parser": function (done) {
             TestUtils.openFile("http://localhost:8088/turtle/test-00.ttl", function (err, data) {
-                When.all([
+                Promise.all([
                     loadParser(data, "turtle"),
                     loadParser(data, "ttl")
                 ]).then(done(function (results) {

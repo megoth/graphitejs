@@ -1,9 +1,9 @@
 define([
     "src/rdfquery/rdfparser/rdfxml",
     "src/graphite/utils",
-    "src/graphite/when",
+    "src/graphite/promise",
     "../../utils"
-], function (Parser, Utils, When, TestUtils) {
+], function (Parser, Utils, Promise, TestUtils) {
     function badAssertion (results) {
         //console.log("RESULTS", results);
         Utils.each(results, function (r) {
@@ -15,10 +15,10 @@ define([
         Utils.each(tests, function (filePath) {
             promises.push(badTest(group + '/' + filePath));
         });
-        When.all(promises).then(callback);
+        Promise.all(promises).then(callback);
     }
     function badTest(filePath) {
-        var deferred = When.defer();
+        var deferred = Promise.defer();
         TestUtils.openFile("http://localhost:8088/rdfxml/" + filePath + ".rdf", function (err, data) {
             try {
                 Parser(data, {}, function () {});
@@ -39,12 +39,12 @@ define([
         Utils.each(tests, function (numTriples, filePath) {
             promises.push(goodTest(group + '/' + filePath, numTriples));
         });
-        When.all(promises).then(function (results) {
+        Promise.all(promises).then(function (results) {
             callback(results);
         });
     }
     function goodTest(filePath, numTriples) {
-        var deferred = When.defer();
+        var deferred = Promise.defer();
         TestUtils.openFile("http://localhost:8088/rdfxml/" + filePath + ".rdf", function (err, data) {
             Parser(data, {}, function (graph) {
                 deferred.resolve({

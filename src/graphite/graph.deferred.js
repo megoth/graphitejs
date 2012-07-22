@@ -5,8 +5,8 @@ define([
     "./../rdfstore/query-engine/query_engine",
     "./serializer/sparql",
     "./utils",
-    "./when"
-], function (Dictionary, Lexicon, QuadBackend, QueryEngine, Serializer, Utils, When) {
+    "./promise"
+], function (Dictionary, Lexicon, QuadBackend, QueryEngine, Serializer, Utils, Promise) {
     "use strict";
     function bindVar (vars) {
         return Utils.map(vars, function (v) {
@@ -148,12 +148,12 @@ define([
     }
     function loadUris(graph, uris, deferred) {
         var promises = Utils.map(uris, function () {
-            return When.defer();
+            return Promise.defer();
         });
         Utils.each(uris, function (uri, i) {
             loadUri(graph, uri, promises[i]);
         });
-        When.all(promises).then(function () {
+        Promise.all(promises).then(function () {
             deferred.resolve(graph);
         });
     }
@@ -166,7 +166,7 @@ define([
     Graph.prototype = {
         init: function (input) {
             var self = this;
-            this.deferred = When.defer();
+            this.deferred = Promise.defer();
             new Lexicon.Lexicon(function(lexicon){
                 self.lexicon = lexicon;
                 new QuadBackend.QuadBackend({
@@ -223,7 +223,7 @@ define([
          * @return {*}
          */
         execute: function (query, callback, onsuccess) {
-            var deferred = When.defer();
+            var deferred = Promise.defer();
             query = query.retrieveTree ? query.retrieveTree() : query;
             this.deferred.then(function (graph) {
                 graph.engine.execute(query, getExecuteFunction(deferred, graph, query, callback, onsuccess));
@@ -236,7 +236,7 @@ define([
          * @param {String} input
          */
         load: function (input) {
-            var deferred = When.defer();
+            var deferred = Promise.defer();
             this.deferred.then(function (graph) {
                 if (input instanceof Graph) {
                     getTriples.call(input, function (formula) {

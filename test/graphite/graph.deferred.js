@@ -9,8 +9,8 @@ define([
     "src/graphite/dictionary",
     "src/graphite/query",
     "src/graphite/utils",
-    "src/graphite/when"
-], function (Graph, Dictionary, Query, Utils, When) {
+    "src/graphite/promise"
+], function (Graph, Dictionary, Query, Utils, Promise) {
     var subJohn = Dictionary.Symbol("http://dbpedia.org/resource/John_Lennon"),
         preName = Dictionary.Symbol("http://xmlns.com/foaf/0.1/name"),
         objJohnName = Dictionary.Literal("John Lennon"),
@@ -41,10 +41,10 @@ define([
                 g2,
                 g3,
                 g4,
-                g1Size = When.defer(),
-                g2Size = When.defer(),
-                g3Size = When.defer(),
-                g4Size = When.defer();
+                g1Size = Promise.defer(),
+                g2Size = Promise.defer(),
+                g3Size = Promise.defer(),
+                g4Size = Promise.defer();
             g1.size(function (size) {
                 g1Size.resolve(size);
             });
@@ -57,7 +57,7 @@ define([
             g4 = g3.clone().size(function (size) {
                 g4Size.resolve(size);
             });
-            When.all([ g1Size, g2Size, g3Size, g4Size ]).then(done(function (sizes) {
+            Promise.all([ g1Size, g2Size, g3Size, g4Size ]).then(done(function (sizes) {
                 //console.log(sizes);
                 refute.same(g1, g2);
                 refute.same(g3, g4);
@@ -69,10 +69,10 @@ define([
         },
         "Function .execute": {
             "ASK query": function (done) {
-                var ask1 = When.defer(),
-                    ask2 = When.defer(),
-                    g1Size = When.defer(),
-                    g2Size = When.defer(),
+                var ask1 = Promise.defer(),
+                    ask2 = Promise.defer(),
+                    g1Size = Promise.defer(),
+                    g2Size = Promise.defer(),
                     query1 = Query("ASK { " + formula1.statements[0].toNT() + " }"),
                     query2 = Query("ASK " + formula2.toNT());
                 Graph(formula1)
@@ -88,7 +88,7 @@ define([
                     .size(function (size) {
                         g2Size.resolve(size);
                     });
-                When.all([ ask1, ask2, g1Size, g2Size ]).then(done(function (results) {
+                Promise.all([ ask1, ask2, g1Size, g2Size ]).then(done(function (results) {
                     assert.equals(results[0], true);
                     assert.equals(results[1], false);
                     assert.equals(results[2], 4);
@@ -96,10 +96,10 @@ define([
                 }));
             },
             "CONSTRUCT query": function (done) {
-                var g1Size = When.defer(),
-                    g2Size = When.defer(),
-                    g3Size = When.defer(),
-                    g4Size = When.defer(),
+                var g1Size = Promise.defer(),
+                    g2Size = Promise.defer(),
+                    g3Size = Promise.defer(),
+                    g4Size = Promise.defer(),
                     query1 = Query("CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }"),
                     query2 = Query("CONSTRUCT { ?s ?p 43 } WHERE { ?s ?p 42 }");
                 Graph(formula1)
@@ -119,7 +119,7 @@ define([
                     .size(function (size) {
                         g4Size.resolve(size);
                     });
-                When.all([ g1Size, g2Size, g3Size, g4Size ]).then(done(function (results) {
+                Promise.all([ g1Size, g2Size, g3Size, g4Size ]).then(done(function (results) {
                     //console.log("SIZES", results);
                     assert.equals(results[0], 4);
                     assert.equals(results[1], 4);
@@ -128,10 +128,10 @@ define([
                 }));
             },
             "INSERT query": function (done) {
-                var g1Size = When.defer(),
-                    g2Size = When.defer(),
-                    g3Size = When.defer(),
-                    g4Size = When.defer(),
+                var g1Size = Promise.defer(),
+                    g2Size = Promise.defer(),
+                    g3Size = Promise.defer(),
+                    g4Size = Promise.defer(),
                     query1 = Query('INSERT DATA ' + formula1.toNT()),
                     query2 = Query('INSERT DATA ' + formula2.toNT());
                 this.graph
@@ -151,7 +151,7 @@ define([
                     .size(function (size) {
                         g4Size.resolve(size);
                     });
-                When.all([ g1Size, g2Size, g3Size, g4Size ]).then(done(function (sizes) {
+                Promise.all([ g1Size, g2Size, g3Size, g4Size ]).then(done(function (sizes) {
                     //console.log("TEST", sizes);
                     assert.equals(sizes[0], 4);
                     assert.equals(sizes[1], 4);
@@ -160,10 +160,10 @@ define([
                 }));
             },
             "LOAD query": function (done) {
-                var g1Size = When.defer(),
-                    g2Size = When.defer(),
-                    g3Size = When.defer(),
-                    g4Size = When.defer(),
+                var g1Size = Promise.defer(),
+                    g2Size = Promise.defer(),
+                    g3Size = Promise.defer(),
+                    g4Size = Promise.defer(),
                     query1 = Query('LOAD <http://localhost:8088/rdfjson/manu.rdfjson>'),
                     query2 = Query('LOAD <http://localhost:8088/rdfjson/arne.rdfjson>');
                 this.graph
@@ -187,7 +187,7 @@ define([
                         //console.log("G4 SIZE", size);
                         g4Size.resolve(size);
                     });
-                When.all([ g1Size, g2Size, g3Size, g4Size ]).then(done(function (sizes) {
+                Promise.all([ g1Size, g2Size, g3Size, g4Size ]).then(done(function (sizes) {
                     //console.log("SIZES", sizes);
                     assert.equals(sizes[0], 2);
                     assert.equals(sizes[1], 2);
@@ -196,9 +196,9 @@ define([
                 }));
             },
             "SELECT query": function (done) {
-                var size1 = When.defer(),
-                    size2 = When.defer(),
-                    size3 = When.defer(),
+                var size1 = Promise.defer(),
+                    size2 = Promise.defer(),
+                    size3 = Promise.defer(),
                     query1 = Query("SELECT * WHERE { ?s ?p ?o }"),
                     query2 = Query("SELECT ?s WHERE { ?s ?p ?o }"),
                     query3 = Query('SELECT ?s WHERE { ?s ?p 42 }'),
@@ -215,7 +215,7 @@ define([
                     .execute(query3, spy3, function () {
                         size3.resolve(spy3.callCount);
                     });
-                When.all([
+                Promise.all([
                     size1,
                     size2,
                     size3
@@ -228,8 +228,8 @@ define([
             },
             "SELECT query with binded variables": function (done) {
                 var query = Query("SELECT * WHERE { ?s ?p ?o }"),
-                    query1 = When.defer(),
-                    query2 = When.defer();
+                    query1 = Promise.defer(),
+                    query2 = Promise.defer();
                 Graph(formula2)
                     .execute(query, function (o, p, s) {
                         query1.resolve([ o, p, s ]);
@@ -237,7 +237,7 @@ define([
                     .execute(query, function (p, o) {
                         query2.resolve([ p, o ]);
                     });
-                When.all([ query1, query2 ]).then(done(function (results) {
+                Promise.all([ query1, query2 ]).then(done(function (results) {
                     assert.equals(results[0], [ subTim.value, preKnows.value, subJohn.value ]);
                     assert.equals(results[1], [ preKnows.value, subTim.value ]);
                 }));
@@ -293,15 +293,15 @@ define([
             }
         },
         "Function .size": function (done) {
-            var size1 = When.defer(),
-                size2 = When.defer();
+            var size1 = Promise.defer(),
+                size2 = Promise.defer();
             this.graph.size(function (size) {
                 size1.resolve(size);
             });
             Graph(formula1).size(function (size) {
                 size2.resolve(size);
             });
-            When.all([ size1, size2 ]).then(done(function (sizes) {
+            Promise.all([ size1, size2 ]).then(done(function (sizes) {
                 //console.log("SIZES", sizes);
                 assert.equals(sizes[0], 0);
                 assert.equals(sizes[1], 4);

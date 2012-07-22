@@ -1,5 +1,5 @@
 
-define(["../trees/in_memory_b_tree", "../trees/utils"], function (BaseTree, Utils) {
+define(["./in_memory_b_tree", "../trees/utils"], function (BaseTree, Utils) {
     var QuadIndex = {};
 
     QuadIndex.Tree = function(params,callback) {

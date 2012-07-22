@@ -4,9 +4,9 @@ define([
     "src/graphite/dictionary",
     "src/graphite/graph",
     "src/graphite/utils",
-    "src/graphite/when",
+    "src/graphite/promise",
     "../../utils"
-], function (parser, Dictionary, graph, Utils, When, TestUtils) {
+], function (parser, Dictionary, graph, Utils, Promise, TestUtils) {
     "use strict";
     buster.testCase("Graphite parser (RDF JSON)", {
         "Parser has proper setup": function () {

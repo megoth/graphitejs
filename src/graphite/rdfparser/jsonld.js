@@ -3,8 +3,8 @@ define([
     "../loader",
     "../dictionary",
     "../utils",
-    "../when"
-], function (Loader, Dictionary, Utils, When) {
+    "../promise"
+], function (Loader, Dictionary, Utils, Promise) {
     "use strict";
     function assignType(predicates, objects, obj) {
         if (Utils.isArray(obj)) {
@@ -87,7 +87,7 @@ define([
         load: function (callback) {
             var cl = this;
 
-            When.all(this.promises).then(function (contexts) {
+            Promise.all(this.promises).then(function (contexts) {
                 if (contexts) {
                     Utils.each(contexts, function (context) {
                         cl.contexts.push(context);
@@ -356,7 +356,7 @@ define([
          * @returns {Object} A promise that can be resolved with the Promise Pattern
          */
         getPromise: function (obj) {
-            var deferred = When.defer();
+            var deferred = Promise.defer();
             if (Utils.isString(obj)) {
                 this.getLoader({
                     uri: obj,
@@ -370,7 +370,7 @@ define([
                 Utils.each(obj, function (nObj) {
                     promises.push(node.getPromise(nObj));
                 });
-                When.all(promises).then(function () {
+                Promise.all(promises).then(function () {
                     if (arguments[0]) {
                         var result = {};
                         Utils.each(arguments[0], function (context) {

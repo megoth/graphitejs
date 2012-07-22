@@ -1,17 +1,12 @@
 /*global assert, buster, graphite, module, require*/
-if (typeof module === "object" && typeof require === "function") {
-    var buster = require("buster");
-    var sinon = require("sinon");
-}
-
 define([
     "src/rdfquery/rdfparser/turtle",
     "src/graphite/utils",
-    "src/graphite/when",
+    "src/graphite/promise",
     "../../utils"
-], function (Parser, Utils, When, TestUtils) {
+], function (Parser, Utils, Promise, TestUtils) {
     function badTest(testSuitePath, parser, num, expectedMessage) {
-        var deferred = When.defer(),
+        var deferred = Promise.defer(),
             result = {
                 description: "test " + num,
                 expected: expectedMessage
@@ -29,7 +24,7 @@ define([
         return deferred;
     }
     function goodTest(testSuitePath, parser, num, numOfStatement) {
-        var deferred = When.defer();
+        var deferred = Promise.defer();
         TestUtils.parseFile(testSuitePath + "test-" + num + ".ttl", parser, {}, function (graph) {
             deferred.resolve({
                 counted: graph.statements.length,
@@ -77,7 +72,7 @@ define([
                     promises = Utils.map(tests, function (expectedMessage, test) {
                         return badTest(testSuitePath, parser, test, expectedMessage);
                     });
-                When.all(promises).then(done(function (results) {
+                Promise.all(promises).then(done(function (results) {
                     Utils.each(results, function (r) {
                         assert.equals(r.message, r.expected, r.description);
                     });
@@ -106,7 +101,7 @@ define([
                 Utils.each(tests, function (numStatements, test) {
                     promises.push(goodTest(testSuitePath, parser, test, numStatements));
                 });
-                When.all(promises).then(done(function (results) {
+                Promise.all(promises).then(done(function (results) {
                     Utils.each(results, function (r) {
                         assert.equals(r.counted, r.expected, r.description);
                     });

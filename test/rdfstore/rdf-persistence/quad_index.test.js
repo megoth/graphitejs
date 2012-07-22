@@ -5,7 +5,7 @@ if (typeof module === "object" && typeof require === "function") {
 
 define([
     "src/rdfstore/rdf-persistence/quad_index",
-    "src/rdfstore/rdf-persistence/quad_index_common"
+    "src/rdfstore/query-engine/quad_index_common"
 ], function (QuadIndex, QuadIndexCommon) {
     buster.testCase("RDFStore QuadIndex", {
         setUp: function () {

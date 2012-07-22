@@ -5,8 +5,8 @@ define([
     "./../rdfstore/rdf-persistence/quad_backend",
     "./../rdfstore/query-engine/query_engine",
     "./utils",
-    "./when"
-], function (Dictionary, Lexicon, QuadBackend, QueryEngine, Utils, When) {
+    "./promise"
+], function (Dictionary, Lexicon, QuadBackend, QueryEngine, Utils, Promise) {
     "use strict";
     function bindVar (vars) {
         return Utils.map(vars, function (v) {
@@ -121,7 +121,7 @@ define([
         }
     }
     function getTriples (graph) {
-        var deferred = When.defer(),
+        var deferred = Promise.defer(),
             formula = Dictionary.Formula(),
             subject,
             predicate,
@@ -182,7 +182,7 @@ define([
     function loadUris(graph, uris, deferred) {
         if (uris.length > 0) {
             var uri = uris.pop(),
-                promise = When.defer();
+                promise = Promise.defer();
             loadUri(graph, uri, promise);
             promise.then(function (graph) {
                 loadUris(graph, uris, deferred);
@@ -199,7 +199,7 @@ define([
     };
     Graph.prototype = {
         init: function (data) {
-            this.deferred = When.defer();
+            this.deferred = Promise.defer();
             new Lexicon.Lexicon(function(lexicon){
                 this.lexicon = lexicon;
                 new QuadBackend.QuadBackend({
@@ -248,7 +248,7 @@ define([
          */
         execute: function (query, callback, onsuccess) {
             query = query.retrieveTree ? query.retrieveTree() : query;
-            var deferred = When.defer(),
+            var deferred = Promise.defer(),
                 executeFunc = getExecuteFunction(query);
             //console.log("IN GRAPH, EXECUTING FUNCTION", query);
             if(executeFunc) {
@@ -269,7 +269,7 @@ define([
             return this;
         },
         extend: function (resource) {
-            var deferred = When.defer();
+            var deferred = Promise.defer();
             this.deferred.then(function (graph) {
                 if (resource instanceof Graph) {
                     loadGraph(graph, resource, deferred);
@@ -289,7 +289,7 @@ define([
             return this;
         },
         size: function (callback) {
-            var deferred = When.defer();
+            var deferred = Promise.defer();
             this.deferred.then(function (graph) {
                 graph.engine.execute("SELECT * WHERE { ?s ?p ?o }", function (success, results) {
                     callback(results.length);

@@ -1,7 +1,7 @@
 define([
     "./abstract_query_tree",
     "./../trees/utils",
-    "./../rdf-persistence/quad_index_common",
+    "./quad_index_common",
     "./query_plan_sync_dpsize",
     "./query_filters",
     "./rdf_js_interface",
