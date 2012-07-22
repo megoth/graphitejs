@@ -86,7 +86,7 @@ define([
         "filterTest1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({
+                    var engine = new QueryEngine({
                         backend: backend,
                         lexicon: lexicon
                     });
@@ -102,7 +102,7 @@ define([
         "filterTest2": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({
+                    var engine = new QueryEngine({
                         backend: backend,
                         lexicon: lexicon
                     });
@@ -118,7 +118,7 @@ define([
         "filterTest3": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({
+                    var engine = new QueryEngine({
                         backend: backend,
                         lexicon: lexicon
                     });
@@ -134,7 +134,7 @@ define([
         "filterTest4": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({
+                    var engine = new QueryEngine({
                         backend: backend,
                         lexicon: lexicon
                     });
@@ -150,7 +150,7 @@ define([
         "filterTest5": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({
+                    var engine = new QueryEngine({
                         backend: backend,
                         lexicon: lexicon
                     });
@@ -166,7 +166,7 @@ define([
         "filterTest6": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({
+                    var engine = new QueryEngine({
                         backend: backend,
                         lexicon: lexicon
                     });
@@ -191,7 +191,7 @@ define([
         "filterTest7": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({
+                    var engine = new QueryEngine({
                         backend: backend,
                         lexicon: lexicon
                     });
@@ -209,7 +209,7 @@ define([
         "filterTest8": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({
+                    var engine = new QueryEngine({
                         backend: backend,
                         lexicon: lexicon
                     });
@@ -234,7 +234,7 @@ define([
         "filterTest9": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({
+                    var engine = new QueryEngine({
                         backend: backend,
                         lexicon: lexicon
                     });
@@ -252,7 +252,7 @@ define([
         "filterTest10": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({
+                    var engine = new QueryEngine({
                         backend: backend,
                         lexicon: lexicon
                     });
@@ -270,7 +270,7 @@ define([
         "filterTest11": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({
+                    var engine = new QueryEngine({
                         backend: backend,
                         lexicon: lexicon
                     });
@@ -288,7 +288,7 @@ define([
         "filterTest12": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({
+                    var engine = new QueryEngine({
                         backend: backend,
                         lexicon: lexicon
                     });
@@ -307,7 +307,7 @@ define([
         "filterTest13": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({
+                    var engine = new QueryEngine({
                         backend: backend,
                         lexicon: lexicon
                     });
@@ -325,7 +325,7 @@ define([
         "filterTest14": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({
+                    var engine = new QueryEngine({
                         backend: backend,
                         lexicon: lexicon
                     });

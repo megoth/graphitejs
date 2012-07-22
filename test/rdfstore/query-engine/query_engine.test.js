@@ -12,7 +12,7 @@ define([
         "testInsertDataSimpleQuery": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('INSERT DATA {  <http://example/book3> <http://example.com/vocab#title> <http://test.com/example> }', function(result){
                         assert.equals(result, true);
 
@@ -47,7 +47,7 @@ define([
         "testInsertDataSimpleQueryLiteral": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend,
+                    var engine = new QueryEngine({backend: backend,
                         lexicon: lexicon});
                     engine.execute('INSERT DATA {  <http://example/book3> <http://example.com/vocab#title> 2 }', function(result){
                         assert(result);
@@ -92,7 +92,7 @@ define([
         "testInsertDataTrivialRecovery": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('INSERT DATA {  <http://example/book3> <http://example.com/vocab#title> <http://test.com/example> }', function(result){
                         assert(result);
                         engine.execute('SELECT * { ?s ?p ?o }', function(success, result){
@@ -110,7 +110,7 @@ define([
         "testInsertDataTrivialRecovery 2": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('INSERT DATA {  <http://example/book3> <http://example.com/vocab#title> <http://test.com/example>; <http://example.com/vocab#pages> 95 }', function(success){
                         assert(success);
                         engine.execute('SELECT * { ?s ?p ?o }', function(success, result){
@@ -144,7 +144,7 @@ define([
         "testInsertDataTrivialRecovery 3": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('INSERT DATA { <http://example/book3> <http://example.com/vocab#title> <http://test.com/example>; <http://example.com/vocab#pages> 95 }',function(){
                         engine.execute('INSERT DATA { <http://example/book4> <http://example.com/vocab#title> <http://test.com/example>; <http://example.com/vocab#pages> 96 }', function(success){
                             assert.equals( success, true );
@@ -178,7 +178,7 @@ define([
         "testSimpleJoin 1": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('INSERT DATA {  <http://example/book3> <http://example.com/vocab#title> <http://test.com/example>; <http://example.com/vocab#pages> 95 . <http://example/book4> <http://example.com/vocab#title> <http://test.com/example>; <http://example.com/vocab#pages> 96 . }', function(success){
                         assert(success);
                         engine.execute('SELECT * { ?s <http://example.com/vocab#title> ?o . ?s <http://example.com/vocab#pages> 95 }', function(success, result){
@@ -193,7 +193,7 @@ define([
         "testPrefixInsertion": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('PREFIX ns: <http://example.org/ns#>  PREFIX x:  <http://example.org/x/> PREFIX z:  <http://example.org/x/#> INSERT DATA { x:x ns:p  "d:x ns:p" . x:x x:p "x:x x:p" . z:x z:p "z:x z:p" . }', function(){
 
                         engine.execute('SELECT * { ?s ?p ?o }', function(success, results){
@@ -224,7 +224,7 @@ define([
         "testUnionBasic 1": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute(" PREFIX dc10:  <http://purl.org/dc/elements/1.0/> PREFIX dc11:  <http://purl.org/dc/elements/1.1/> INSERT DATA { _:a  dc10:title 'SPARQL Query Language Tutorial' .\
                         _:a  dc10:creator 'Alice' .\
                         _:b  dc11:title 'SPARQL Protocol Tutorial' .\
@@ -255,7 +255,7 @@ define([
         "testUnionBasic 2": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute(" PREFIX dc10:  <http://purl.org/dc/elements/1.0/> PREFIX dc11:  <http://purl.org/dc/elements/1.1/> INSERT DATA { _:a  dc10:title 'SPARQL Query Language Tutorial' .\
                         _:a  dc10:creator 'Alice' .\
                         _:b  dc11:title 'SPARQL Protocol Tutorial' .\
@@ -292,7 +292,7 @@ define([
         "testUnionBasic 3": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute(" PREFIX dc10:  <http://purl.org/dc/elements/1.0/> PREFIX dc11:  <http://purl.org/dc/elements/1.1/> INSERT DATA { _:a  dc10:title 'SPARQL Query Language Tutorial' .\
                         _:a  dc10:creator 'Alice' .\
                         _:b  dc11:title 'SPARQL Protocol Tutorial' .\
@@ -327,7 +327,7 @@ define([
             var book;
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute(" PREFIX dc10:  <http://purl.org/dc/elements/1.0/> PREFIX dc11:  <http://purl.org/dc/elements/1.1/> INSERT DATA { _:a  dc10:title 'SPARQL Query Language Tutorial' .\
                         _:a  dc10:creator 'Alice' .\
                         _:b  dc11:title 'SPARQL Protocol Tutorial' .\
@@ -351,7 +351,7 @@ define([
         "testOptionalBasic 1": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute("PREFIX  foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA {\
                         _:a  foaf:name 'Alice' .\
@@ -391,7 +391,7 @@ define([
         "testOptionalDistinct 1": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute("PREFIX  foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA {\
                         _:x  foaf:name 'Alice' .\
@@ -414,7 +414,7 @@ define([
         "testLimit 1": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute("PREFIX  foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA {\
                         _:x  foaf:name 'Alice' .\
@@ -438,7 +438,7 @@ define([
         "testOrderBy 1": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute("PREFIX  foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA {\
                         _:x  foaf:name 'Bob' .\
@@ -463,7 +463,7 @@ define([
         "testOrderBy 2": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute("PREFIX  foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA {\
                         _:x  foaf:name 'Bob' .\
@@ -488,7 +488,7 @@ define([
         "testOrderBy 3": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute("PREFIX  foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA {\
                         _:x  foaf:name 'Bob' .\
@@ -513,7 +513,7 @@ define([
         "testOrderBy 4": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute("PREFIX  foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA {\
                         _:x  foaf:name 'Bob' .\
@@ -538,7 +538,7 @@ define([
         "testInsertionDeletionTrivial 1": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('INSERT DATA {  <http://example/book3> <http://example.com/vocab#title> <http://test.com/example> }', function(result){
                         assert(result);
                         engine.execute('SELECT * { ?s ?p ?o }', function(success, result){
@@ -577,7 +577,7 @@ define([
         "testInsertionDeletion 2": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('INSERT DATA {  GRAPH <a> { <http://example/book3> <http://example.com/vocab#title> <http://test.com/example> } }', function(result){
                         assert(result);
                         engine.execute('INSERT DATA {  GRAPH <c> { <http://example/book3> <http://example.com/vocab#title> <http://test.com/example> } }', function(result){
@@ -632,7 +632,7 @@ define([
         "testModify 1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('PREFIX foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA {  GRAPH <http://example/addresses> \
                         { \
@@ -676,7 +676,7 @@ define([
         "testModifyDefaultGraph": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('PREFIX foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA {  \
                         <http://example/president25> foaf:givenName "Bill" .\
@@ -716,7 +716,7 @@ define([
         "testModifyOnlyInsert": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('PREFIX foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA {  GRAPH <http://example/addresses> \
                         { \
@@ -755,7 +755,7 @@ define([
         "testModifyOnlyDelete": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('PREFIX foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA {  GRAPH <http://example/addresses> \
                         { \
@@ -788,7 +788,7 @@ define([
         "testAliasedVar": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :s1 :p 1 .\
@@ -808,7 +808,7 @@ define([
         "testClearGraph 1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('PREFIX foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA {  GRAPH <http://example/president25> \
                         { \
@@ -840,7 +840,7 @@ define([
         "testClearGraph 2": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('PREFIX foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA { \
                         <http://example/president22> foaf:givenName "Grover" .\
@@ -882,7 +882,7 @@ define([
         "testClearGraph 3": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('PREFIX foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA { \
                         <http://example/president22> foaf:givenName "Grover" .\
@@ -925,7 +925,7 @@ define([
         "testClearGraph 4": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('PREFIX foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA { \
                         <http://example/president22> foaf:givenName "Grover" .\
@@ -971,7 +971,7 @@ define([
         "testCreate": function () {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('CREATE GRAPH <a>', function(result){
                         assert(result);
                     });
@@ -981,7 +981,7 @@ define([
         "testDrop 1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('PREFIX foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA {  GRAPH <http://example/president25> \
                         { \
@@ -1013,7 +1013,7 @@ define([
         "testDrop 2": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('PREFIX foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA { \
                         <http://example/president22> foaf:givenName "Grover" .\
@@ -1055,7 +1055,7 @@ define([
         "testDrop 3": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('PREFIX foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA { \
                         <http://example/president22> foaf:givenName "Grover" .\
@@ -1098,7 +1098,7 @@ define([
         "testDrop 4": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('PREFIX foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA { \
                         <http://example/president22> foaf:givenName "Grover" .\
@@ -1144,7 +1144,7 @@ define([
         "testDeleteWhere 1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     engine.execute('PREFIX foaf:  <http://xmlns.com/foaf/0.1/>\
                         INSERT DATA \
                         { \
@@ -1172,7 +1172,7 @@ define([
         "testGroupMax 1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :s1 :p 1 .\
@@ -1193,7 +1193,7 @@ define([
         "testGroupMin 1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :s1 :p 1 .\
@@ -1214,7 +1214,7 @@ define([
         "testGroupCount 1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :s1 :p 1 .\
@@ -1236,7 +1236,7 @@ define([
         "testGroupCountDistinct 1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :s1 :p 1 .\
@@ -1258,7 +1258,7 @@ define([
         "testGroupAvg 1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :s1 :p 1 .\
@@ -1280,7 +1280,7 @@ define([
         "testGroupAvg 2": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :s1 :p 2 .\
@@ -1301,7 +1301,7 @@ define([
         "testGroupSum 1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :s1 :p 1 .\
@@ -1323,7 +1323,7 @@ define([
         "testGroupSum 2": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :s1 :p 2 .\
@@ -1344,7 +1344,7 @@ define([
         "testPath 1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :s1 :first 1 .\
@@ -1366,7 +1366,7 @@ define([
         "testPath 2": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :s1 :first 1 .\
@@ -1398,7 +1398,7 @@ define([
         "testPath 3": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :s1 :first 1 .\
@@ -1421,7 +1421,7 @@ define([
         "testPath 4": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :list :elems :s1 .\
@@ -1444,7 +1444,7 @@ define([
         "testPath 5": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :list :elems :s1 .\
@@ -1467,7 +1467,7 @@ define([
         "testPathFinal": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :s1 :data (\"1\" \"2\" \"3\" \"4\")	 }";
@@ -1491,7 +1491,7 @@ define([
         "testPathOwl": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://triplr.org/> \
                         PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\
                         PREFIX owl: <http://www.w3.org/2002/07/owl#> \
@@ -1534,7 +1534,7 @@ define([
         "testPathOneMore 1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :s1 :first 1 .\
@@ -1556,7 +1556,7 @@ define([
         "testPathOneMore 2": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = "PREFIX : <http://example/>\
                         INSERT DATA {\
                         :s1 :first 1 .\
@@ -1578,7 +1578,7 @@ define([
         "testDisjointUnion": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 15}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var query = 'PREFIX ex:  <http://www.w3.org/2009/sparql/docs/tests/data-sparql11/negation#> \
                         PREFIX dc:  <http://purl.org/dc/elements/1.1/>\
                         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \

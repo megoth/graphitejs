@@ -22,7 +22,7 @@ define([
                 people;
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     query = 'PREFIX foaf: <http://xmlns.com/foaf/0.1/>' +
                             'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>' +
                             'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>' +

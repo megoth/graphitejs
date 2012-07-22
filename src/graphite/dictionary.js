@@ -129,51 +129,8 @@ define([
         NextId = 0, // Global genid
         NTAnonymousNodePrefix = "_:",
         idCounter = 0,
-        TS = {
-            blanknode: function () {
-                return NTAnonymousNodePrefix + this.id
-            },
-            collection: function () {
-                return NTAnonymousNodePrefix + this.id
-            },
-            empty: function () {
-                return "()";
-            },
-            formula: function () {
-                var statements = Utils.map(this.statements, function (s) {
-                    return s.toNT();
-                });
-                return "{\n" + statements.join('\n') + "\n}";
-            },
-            literal: function () {
-                var str = this.value;
-                if (typeof str != 'string') {
-                    if (typeof str == 'number') return ''+str;
-                    throw Error("Value of RDF literal is not string: "+str);
-                }
-                str = str.replace(/\\/g, '\\\\');  // escape backslashes
-                str = str.replace(/"/g, '\\"');    // escape quotes
-                str = str.replace(/\n/g, '\\n');    // escape newlines
-                str = '"' + str + '"';  //';
-                if (this.datatype){
-                    //console.log("DATATYPE", this.datatype, this.datatype.toNT);
-                    str = str + '^^{0}'.format(this.datatype.toNT());
-                } else if (this.lang) {
-                    str = str + "@{0}".format(this.lang);
-                }
-                return str;
-            },
-            statement: function () {
-                //console.log("SUBJECT", this.subject, this.subject.toNT);
-                //console.log("PREDICATE", this.predicate, this.predicate.toNT);
-                //console.log("OBJECT", this.object, this.object.toNT);
-                return (this.subject.toNT() + " "
-                    + this.predicate.toNT() + " "
-                    +  this.object.toNT() +" .");
-            },
-            symbol: function () {
-                return ("<" + this.uri + ">");
-            }
+        toString = function () {
+            return this.toNT();
         },
         // These are the classes corresponding to the RDF and N3 data models
         //
@@ -187,8 +144,10 @@ define([
         //	Symbol
         BlankNode = function (id) {
             return Object.create({
-                toNT: TS.blanknode,
-                toString: TS.blanknode,
+                toNT: function () {
+                    return NTAnonymousNodePrefix + this.id
+                },
+                toString: toString,
                 toQuads: function () {
                     return {'blank': NTAnonymousNodePrefix + this.id };
                 }
@@ -199,8 +158,10 @@ define([
         },
         Collection = function (graph) {
             return Object.create({
-                toNT: TS.collection,
-                toString: TS.collection,
+                toNT: function () {
+                    return NTAnonymousNodePrefix + this.id
+                },
+                toString: toString,
                 toQuads: function () {
                     var acum = [];
                     var subjectId = "_:list"+idCounter;
@@ -263,8 +224,10 @@ define([
         },
         Empty = function () {
             return Object.create({
-                toNT: TS.empty,
-                toString: TS.empty,
+                toNT: function () {
+                    return "()";
+                },
+                toString: toString,
                 toQuads: function () {
                     return {
                         'uri': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil'
@@ -277,8 +240,13 @@ define([
         //	Set of statements.
         Formula = function (graph) {
             return Object.create({
-                toNT: TS.formula,
-                toString: TS.formula,
+                toNT: function () {
+                    var statements = Utils.map(this.statements, function (s) {
+                        return s.toNT();
+                    });
+                    return "{\n" + statements.join('\n') + "\n}";
+                },
+                toString: toString,
                 toQuads: function () {
                     var accumulated = [];
                     for(var i=0; i<this.statements.length; i++) {
@@ -338,8 +306,25 @@ define([
         },
         Literal = function (value, lang, datatype) {
             return Object.create({
-                toNT: TS.literal,
-                toString: TS.literal,
+                toNT: function () {
+                    var str = this.value;
+                    if (typeof str != 'string') {
+                        if (typeof str == 'number') return ''+str;
+                        throw Error("Value of RDF literal is not string: "+str);
+                    }
+                    str = str.replace(/\\/g, '\\\\');  // escape backslashes
+                    str = str.replace(/"/g, '\\"');    // escape quotes
+                    str = str.replace(/\n/g, '\\n');    // escape newlines
+                    str = '"' + str + '"';  //';
+                    if (this.datatype){
+                        //console.log("DATATYPE", this.datatype, this.datatype.toNT);
+                        str = str + '^^{0}'.format(this.datatype.toNT());
+                    } else if (this.lang) {
+                        str = str + "@{0}".format(this.lang);
+                    }
+                    return str;
+                },
+                toString: toString,
                 toQuads: function () {
                     var str = this.value;
                     if (typeof str != 'string') {
@@ -375,8 +360,15 @@ define([
         //
         Statement = function (subject, predicate, object, why, graph) {
             return Object.create({
-                toNT: TS.statement,
-                toString: TS.statement,
+                toNT: function () {
+                    //console.log("SUBJECT", this.subject, this.subject.toNT);
+                    //console.log("PREDICATE", this.predicate, this.predicate.toNT);
+                    //console.log("OBJECT", this.object, this.object.toNT);
+                    return (this.subject.toNT() + " "
+                        + this.predicate.toNT() + " "
+                        +  this.object.toNT() +" .");
+                },
+                toString: toString,
                 toQuads: function () {
                     var object = this.object.toQuads();
                     if(object.constructor === Array) {
@@ -408,8 +400,10 @@ define([
         // Symbol
         Symbol = function (uri) {
             return Object.create({
-                toNT: TS.symbol,
-                toString: TS.symbol,
+                toNT: function () {
+                    return ("<" + this.uri + ">");
+                },
+                toString: toString,
                 toQuads: function () {
                     return {
                         token: 'uri',

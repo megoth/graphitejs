@@ -9,7 +9,7 @@ define([
         "callbacksBatchLoad 1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var callbackCounter = 0;
                     engine.callbacksBackend.observeQuery("select ?subject where { ?subject <http://test.com/named> ?o; <http://test.com/named2> ?o2 }",function(){
                         callbackCounter++;

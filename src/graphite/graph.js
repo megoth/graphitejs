@@ -205,7 +205,7 @@ define([
                 new QuadBackend.QuadBackend({
                     treeOrder: 2
                 }, function(backend){
-                    this.engine = new QueryEngine.QueryEngine({
+                    this.engine = new QueryEngine({
                         backend: backend,
                         lexicon: lexicon
                     });

@@ -9,7 +9,7 @@ define([
         "simpleCallback 1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var callbacksBackend = new Callbacks.CallbacksBackend(engine);
                     var callbackasCounter = 0;
                     callbacksBackend.subscribe(null,null,null,"http://test.com/g", function(event, triples) {
@@ -54,7 +54,7 @@ define([
         "simpleCallback 2": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var callbacksBackend = new Callbacks.CallbacksBackend(engine);
                     var callbackasCounter = 0;
                     callbacksBackend.subscribe("http://test.com/a","http://test.com/b","http://test.com/c","http://test.com/g",
@@ -101,7 +101,7 @@ define([
         "simpleObserve 1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var count = 0;
                     var numTriples = 0;
                     var observerCallback = function(graph) {
@@ -131,7 +131,7 @@ define([
         "simpleObserve 2": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var count = 0;
                     var numTriples = 0;
                     var triples = [];
@@ -160,7 +160,7 @@ define([
         "simpleCallbackQuery 1": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var callbacksBackend = engine.callbacksBackend;
                     var callbacksCounter = 0;
                     callbacksBackend.observeQuery("select * where { ?s ?p ?o }",
@@ -186,7 +186,7 @@ define([
         "simpleCallbackQuery 2": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var callbacksBackend = engine.callbacksBackend;
                     var callbacksCounter = 0;
                     callbacksBackend.observeQuery("select * where { <http://test.com/vocab#a> ?p ?o }",
@@ -224,7 +224,7 @@ define([
         "simpleCallbackQuery 3": function (done) {
             new Lexicon.Lexicon(function(lexicon){
                 new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                    var engine = new QueryEngine.QueryEngine({backend: backend, lexicon: lexicon});
+                    var engine = new QueryEngine({backend: backend, lexicon: lexicon});
                     var callbacksBackend = engine.callbacksBackend;
                     var callbacksCounter = 0;
                     callbacksBackend.observeQuery("select ?subject where { ?subject <http://test.com/named> ?o }",
