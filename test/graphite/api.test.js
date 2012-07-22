@@ -319,7 +319,7 @@ define([
                     assert.equals(spy.callCount, 1);
                 }));
             },
-            "LOAD": {
+            "//LOAD": {
                 "JSON-LD": function (done) {
                     this.api
                         .query("LOAD <http://localhost:8088/json-ld/people/arne.jsonld>")

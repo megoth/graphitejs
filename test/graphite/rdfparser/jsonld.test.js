@@ -59,7 +59,7 @@ define([
                     }
                 ], {}, function (graph) {
                     assert.equals(graph.statements.length, 2);
-                    refute.equals(graph.statements[0].subject, graph.statements[1].subject);
+                    refute.same(graph.statements[0].subject, graph.statements[1].subject);
                 });
             },
             "Same subjects": function () {

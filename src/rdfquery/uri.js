@@ -25,10 +25,10 @@ define([
 
     var mem = {},
         uriRegex = /^(([a-z][\-a-z0-9+\.]*):)?(\/\/([^\/?#]+))?([^?#]*)?(\?([^#]*))?(#(.*))?$/i,
-        parseURI = function (u) {
-            var m = u.match(uriRegex);
+        parseURI = function (uri) {
+            var m = uri.match(uriRegex);
             if (m === null) {
-                throw "Malformed URI: " + u;
+                throw "Malformed URI: " + uri;
             }
             //console.log("PARSED URI, the match", m);
             return {
