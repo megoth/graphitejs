@@ -4,16 +4,15 @@ define([
     "./query",
     "./utils"
 ], function (Dictionary, Graph, Query, Utils) {
-    var ApiSubject = {
-            execute: function (callback) {
-                this.api.execute(this.query, callback);
-            },
-            then: function (callback) {
-                this.api.then(callback);
-            }
-        },
-        ApiSubjectConstructor = function (api, subjectName) {
-            return Object.create(ApiSubject, {
+    var ApiSubject = function (api, subjectName) {
+            return Object.create({
+                execute: function (callback) {
+                    this.api.execute(this.query, callback);
+                },
+                then: function (callback) {
+                    this.api.then(callback);
+                }
+            }, {
                 api: { value: api },
                 query: { value: api.q.getSubject(subjectName) }
             });
@@ -52,7 +51,7 @@ define([
                 return this;
             },
             getSubject: function (subjectName) {
-                return new ApiSubjectConstructor(this, subjectName);
+                return new ApiSubject(this, subjectName);
             },
             group: function (group) {
                 this.q.group.apply(this.q, arguments);

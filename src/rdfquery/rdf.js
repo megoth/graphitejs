@@ -544,15 +544,6 @@ define([
             return a;
         };
 
-
-    TypedValue.types['http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral'] = {
-        regex: /^.*$/m,
-        strip: false,
-        value: function (v) {
-            return v;
-        }
-    };
-
     /**
      * <p>Creates a new jQuery.rdf object. This should be invoked as a method rather than constructed using new; indeed you will usually want to generate these objects using a method such as {@link jQuery#rdf} or {@link jQuery.rdf#where}.</p>
      * @class <p>A jQuery.rdf object represents the results of a query over its {@link jQuery.rdf#databank}. The results of a query are a sequence of objects which represent the bindings of values to the variables used in filter expressions specified using {@link jQuery.rdf#where} or {@link jQuery.rdf#optional}. Each of the objects in this sequence has associated with it a set of triples that are the sources for the variable bindings, which you can get at using {@link jQuery.rdf#sources}.</p>
@@ -567,7 +558,7 @@ define([
      * @example rdf = jQuery.rdf();
      * @see jQuery#rdf
      */
-    rdf = function (options) {
+    var rdf = function (options) {
         return new rdf.fn.init(options);
     };
 

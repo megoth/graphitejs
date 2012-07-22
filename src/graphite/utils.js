@@ -13,22 +13,40 @@ define([
         nativeReduce     = ArrayProto.reduce,
         nativeSome       = ArrayProto.some,
         slice            = ArrayProto.slice,
-        unshift          = ArrayProto.unshift,
         toString         = ObjProto.toString,
         hasOwnProperty   = ObjProto.hasOwnProperty,
         nativeTrim       = String.prototype.trim,
         Utils = {},
         lexicon = new Lexicon.Lexicon();
-
     if (!Object.create) {
         var F;
-        Object.create = function (obj) {
+        Object.prototype.create = function (obj) {
             F = function () {};
             F.prototype = obj;
             return new F;
         }
     }
-
+    if (!String.format) {
+        /**
+         *
+         * @param {String} str The string to be formatted
+         * @return {String} The formatted string
+         */
+        String.prototype.format = function() {
+            var args = Utils.toArray(arguments),
+                last = Utils.last(args),
+                fn = function (str) { return str; }
+            if (Utils.isFunction(last)) {
+                fn = last;
+                args.pop();
+            }
+            return this.replace(/{(\d+)}/g, function(match, number) {
+                return typeof args[number] != 'undefined'
+                    ? fn(args[number])
+                    : fn(match);
+            });
+        };
+    }
     var defaultToWhiteSpace = function (characters){
         if (characters != null) {
             return '[' + _s.escapeRegExp(''+characters) + ']';
@@ -307,25 +325,6 @@ define([
             memo[memo.length] = value;
             return memo;
         }, []);
-    };
-    /**
-     *
-     * @param {String} str The string to be formatted
-     * @return {String} The formatted string
-     */
-    String.prototype.format = function() {
-        var args = Utils.toArray(arguments),
-            last = Utils.last(args),
-            fn = function (str) { return str; }
-        if (Utils.isFunction(last)) {
-            fn = last;
-            args.pop();
-        }
-        return this.replace(/{(\d+)}/g, function(match, number) {
-            return typeof args[number] != 'undefined'
-                ? fn(args[number])
-                : fn(match);
-        });
     };
     /**
      *
