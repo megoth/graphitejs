@@ -287,6 +287,25 @@ define([
             'http://www.w3.org/2001/XMLSchema#yearMonthDuration': datatypeYearMonthDuration
         },
         /**
+         * Checks whether a value is valid according to a given datatype. The datatype must be held in the {@link jQuery.types} object.
+         * @param {String} value The value to validate.
+         * @param {String} datatype The URI for the datatype against which the value will be validated.
+         * @returns {boolean} True if the value is valid or the datatype is not recognised.
+         * @example validDate = $.typedValue.valid(date, 'http://www.w3.org/2001/XMLSchema#date');
+         */
+        valid = function (value, datatype) {
+            var d = types[datatype];
+            if (d === undefined) {
+                return true;
+            }
+            value = d.strip ? strip(value) : value;
+            if (d.regex.test(value)) {
+                return d.validate === undefined ? true : d.validate(value);
+            } else {
+                return false;
+            }
+        },
+        /**
          * Creates a new jQuery.typedValue object. This should be invoked as a method
          * rather than constructed using new.
          * @class Represents a value with an XML Schema datatype
@@ -297,7 +316,7 @@ define([
          */
         typedValue = function (value, datatype) {
             var d = types[datatype];
-            if (typedValue.valid(value, datatype)) {
+            if (valid(value, datatype)) {
                 return {
                     /**
                      * The XML Schema datatype URI for the value's datatype
@@ -386,24 +405,6 @@ define([
                 message: value + ' is not a valid ' + datatype + ' value'
             };
         };
-    /**
-     * Checks whether a value is valid according to a given datatype. The datatype must be held in the {@link jQuery.types} object.
-     * @param {String} value The value to validate.
-     * @param {String} datatype The URI for the datatype against which the value will be validated.
-     * @returns {boolean} True if the value is valid or the datatype is not recognised.
-     * @example validDate = $.typedValue.valid(date, 'http://www.w3.org/2001/XMLSchema#date');
-     */
-    typedValue.valid = function (value, datatype) {
-        var d = types[datatype];
-        if (d === undefined) {
-            return true;
-        }
-        value = d.strip ? strip(value) : value;
-        if (d.regex.test(value)) {
-            return d.validate === undefined ? true : d.validate(value);
-        } else {
-            return false;
-        }
-    };
+    typedValue.valid = valid;
     return typedValue;
 });
