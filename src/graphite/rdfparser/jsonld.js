@@ -1,10 +1,10 @@
 /*global define*/
 define([
     "../loader",
-    "../dictionary",
+    "../rdf",
     "../utils",
     "../promise"
-], function (Loader, Dictionary, Utils, Promise) {
+], function (Loader, RDF, Utils, Promise) {
     "use strict";
     function assignType(predicates, objects, obj) {
         if (Utils.isArray(obj)) {
@@ -217,20 +217,20 @@ define([
                 if (subject.type === "bnode") {
                     subject = node.getBlankNode(subject.value);
                 } else if (subject.type === "uri") {
-                    subject = Dictionary.Symbol(subject.value);
+                    subject = RDF.Symbol(subject.value);
                 } else {
                     throw new Error("Unrecognized type of subject" + subject.type);
                 }
                 predicate = node.getPredicate(triple[1]);
-                predicate = Dictionary.Symbol(predicate);
+                predicate = RDF.Symbol(predicate);
                 object = node.getObject(triple[2], predicate);
                 if (object.type === "bnode") {
                     object = node.getBlankNode(object.value);
                 } else if (object.type === "uri") {
-                    object = Dictionary.Symbol(object.value);
+                    object = RDF.Symbol(object.value);
                 } else {
                     //console.log("IN JSONLD, OBJECT", object);
-                    object = Dictionary.Literal(object.value, object.lang, object.datatype);
+                    object = RDF.Literal(object.value, object.lang, object.datatype);
                 }
                 //console.log("TRIPLE", subject, predicate, object);
                 graph.add(subject, predicate, object);
@@ -253,7 +253,7 @@ define([
             if (this.bnodes[value]) {
                 subject = this.bnodes[value];
             } else {
-                subject = Dictionary.BlankNode(value);
+                subject = RDF.BlankNode(value);
                 this.bnodes[value] = subject;
             }
             //console.log("BNODE", value, subject);
@@ -441,7 +441,7 @@ define([
          * @returns {Object} The graph
          */
         assembleTriples: function () {
-            var graph = Dictionary.Formula(this.options.graph),
+            var graph = RDF.Formula(this.options.graph),
                 cl = this.contextLoader;
             Utils.each(this.nodes, function (node) {
                 //console.log("NODE ASSEMBLING", node);

@@ -1,11 +1,11 @@
 /*global define */
 define([
-    "../dictionary",
+    "../rdf",
     "../utils"
-], function (Dictionary, Utils) {
+], function (RDF, Utils) {
     "use strict";
     return function (json, options, callback) {
-        var graph = Dictionary.Formula(options.graph);
+        var graph = RDF.Formula(options.graph);
         if (!json) {
             throw new Error("No valid JSON-object given");
         } else if (Utils.isString(json)) {
@@ -17,19 +17,19 @@ define([
         }
         Utils.each(json, function (predicates, subject) {
             subject = subject[0] === "_" ?
-                    Dictionary.BlankNode(subject) :
-                    Dictionary.Symbol(subject);
+                    RDF.BlankNode(subject) :
+                    RDF.Symbol(subject);
             Utils.each(predicates, function (objects, predicate) {
-                predicate = Dictionary.Symbol(predicate);
+                predicate = RDF.Symbol(predicate);
                 Utils.each(objects, function (object) {
                     if (Utils.isObject(object)) {
                         if (object.type === "literal") {
-                            object = Dictionary.Literal(object.value, object.lang, object.datatype);
+                            object = RDF.Literal(object.value, object.lang, object.datatype);
                         } else {
-                            object = Dictionary.Symbol(object.value);
+                            object = RDF.Symbol(object.value);
                         }
                     } else {
-                        object = Dictionary.Literal(object);
+                        object = RDF.Literal(object);
                     }
                     graph.add(subject, predicate, object);
                 });

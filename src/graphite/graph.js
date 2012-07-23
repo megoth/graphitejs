@@ -1,12 +1,12 @@
 /*global define */
 define([
-    "./dictionary",
+    "./rdf",
     "./../rdfstore/rdf-persistence/lexicon",
     "./../rdfstore/rdf-persistence/quad_backend",
     "./../rdfstore/query-engine/query_engine",
     "./utils",
     "./promise"
-], function (Dictionary, Lexicon, QuadBackend, QueryEngine, Utils, Promise) {
+], function (RDF, Lexicon, QuadBackend, QueryEngine, Utils, Promise) {
     "use strict";
     function bindVar (vars) {
         return Utils.map(vars, function (v) {
@@ -112,15 +112,15 @@ define([
     }
     function getTriples (graph) {
         var deferred = Promise.defer(),
-            formula = Dictionary.Formula(),
+            formula = RDF.Formula(),
             subject,
             predicate,
             object;
         graph.engine.execute("SELECT * WHERE { ?s ?p ?o }", function (success, results) {
             Utils.each(results, function (t) {
-                subject = Dictionary.createSubject(t.s.value);
-                predicate = Dictionary.createPredicate(t.p.value);
-                object = Dictionary.createObject(t.o.value);
+                subject = RDF.createSubject(t.s.value);
+                predicate = RDF.createPredicate(t.p.value);
+                object = RDF.createObject(t.o.value);
                 formula.add(subject, predicate, object);
             });
             deferred.resolve(formula);

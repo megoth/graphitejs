@@ -1,9 +1,8 @@
 define([
-    "../../graphite/dictionary",
-    "../rdf",
+    "../../graphite/rdf",
     "../uri",
     "../../graphite/utils"
-], function (Dictionary, RDF, URI, Utils) {
+], function (RDF, URI, Utils) {
     /*
      * jQuery RDF @VERSION
      *
@@ -15,9 +14,9 @@ define([
      *  jquery.xmlns.js
      *  jquery.datatype.js
      *  jquery.curie.js
-     *  jquery.rdf.js
-     *  jquery.rdf.json.js
-     *  jquery.rdf.xml.js
+     *  jquery.Dictionary.js
+     *  jquery.Dictionary.json.js
+     *  jquery.Dictionary.xml.js
      *
      * @fileOverview jQuery RDF/XML parser
      * @author <a href="mailto:jeni@jenitennison.com">Jeni Tennison</a>
@@ -74,15 +73,15 @@ define([
             var s, subject;
             if (hasAttributeNS(elem, rdfNs, 'about')) {
                 s = getAttributeNS(elem, rdfNs, 'about');
-                subject = Dictionary.Symbol(RDF.resource('<' + s + '>', { base: base }).value);
+                subject = RDF.Symbol(RDF.resource('<' + s + '>', { base: base }).value);
             } else if (hasAttributeNS(elem, rdfNs, 'ID')) {
                 s = getAttributeNS(elem, rdfNs, 'ID');
-                subject = Dictionary.Symbol(RDF.resource('<#' + s + '>', { base: base }).value);
+                subject = RDF.Symbol(RDF.resource('<#' + s + '>', { base: base }).value);
             } else if (hasAttributeNS(elem, rdfNs, 'nodeID')) {
                 s = getAttributeNS(elem, rdfNs, 'nodeID');
-                subject = Dictionary.BlankNode(s);
+                subject = RDF.BlankNode(s);
             } else {
-                subject = Dictionary.BlankNode();
+                subject = RDF.BlankNode();
             }
             return subject;
         },
@@ -114,8 +113,8 @@ define([
             }
             subject = parseRdfXmlSubject(elem, base);
             if (isDescription && (elem.namespaceURI !== rdfNs || getLocalName(elem) !== 'Description')) {
-                property = Dictionary.Symbol(RDF.type.value);
-                object = Dictionary.Symbol(elem.namespaceURI + getLocalName(elem));
+                property = RDF.Symbol(RDF.type.value);
+                object = RDF.Symbol(elem.namespaceURI + getLocalName(elem));
                 graph.add(subject, property, object);
             }
             for (i = 0; i < elem.attributes.length; i += 1) {
@@ -126,12 +125,12 @@ define([
                     p.prefix !== 'xmlns' &&
                     p.prefix !== 'xml') {
                     if (p.namespaceURI !== rdfNs) {
-                        property = Dictionary.Symbol(p.namespaceURI + getLocalName(p));
-                        object = Dictionary.Literal(literalOpts.lang ? p.nodeValue : '"' + p.nodeValue.replace(/"/g, '\\"'), literalOpts.lang);
+                        property = RDF.Symbol(p.namespaceURI + getLocalName(p));
+                        object = RDF.Literal(literalOpts.lang ? p.nodeValue : '"' + p.nodeValue.replace(/"/g, '\\"'), literalOpts.lang);
                         graph.add(subject, property, object);
                     } else if (getLocalName(p) === 'type') {
-                        property = Dictionary.Symbol(RDF.type.value);
-                        object = Dictionary.Symbol(RDF.resource('<' + p.nodeValue + '>', { base: base }).value);
+                        property = RDF.Symbol(RDF.type.value);
+                        object = RDF.Symbol(RDF.resource('<' + p.nodeValue + '>', { base: base }).value);
                         graph.add(subject, property, object);
                     }
                 }
@@ -141,10 +140,10 @@ define([
                 p = elem.childNodes[i];
                 if (p.nodeType === 1) {
                     if (p.namespaceURI === rdfNs && getLocalName(p) === 'li') {
-                        property = Dictionary.Symbol(rdfNs + '_' + li);
+                        property = RDF.Symbol(rdfNs + '_' + li);
                         li += 1;
                     } else {
-                        property = Dictionary.Symbol(p.namespaceURI + getLocalName(p));
+                        property = RDF.Symbol(p.namespaceURI + getLocalName(p));
                     }
                     lang = getAttributeNS(p, 'http://www.w3.org/XML/1998/namespace', 'lang') || parentLang;
                     if (lang !== null && lang !== undefined && lang !== '') {
@@ -154,10 +153,10 @@ define([
                     }
                     if (hasAttributeNS(p, rdfNs, 'resource')) {
                         o = getAttributeNS(p, rdfNs, 'resource');
-                        object = Dictionary.Symbol(RDF.resource('<' + o + '>', { base: base }).value);
+                        object = RDF.Symbol(RDF.resource('<' + o + '>', { base: base }).value);
                     } else if (hasAttributeNS(p, rdfNs, 'nodeID')) {
                         o = getAttributeNS(p, rdfNs, 'nodeID');
-                        object = Dictionary.BlankNode(o);
+                        object = RDF.BlankNode(o);
                     } else if (hasAttributeNS(p, rdfNs, 'parseType')) {
                         parseType = getAttributeNS(p, rdfNs, 'parseType');
                         if (parseType === 'Literal') {
@@ -170,7 +169,7 @@ define([
                                     o += p.childNodes[j].xml;
                                 }
                             }
-                            object = Dictionary.Literal(o, null, Dictionary.Symbol(rdfNs + 'XMLLiteral'));
+                            object = RDF.Literal(o, null, RDF.Symbol(rdfNs + 'XMLLiteral'));
                         } else if (parseType === 'Resource') {
                             tmpObject1 = Utils.last(graph.statements);
                             parseRdfXmlDescription(p, false, graph, base, lang);
@@ -179,7 +178,7 @@ define([
                             if (tmpObject1 && tmpObject1 !== tmpObject2) {
                                 object = tmpObject2;
                             } else {
-                                object = Dictionary.BlankNode();
+                                object = RDF.BlankNode();
                             }
                         } else if (parseType === 'Collection') {
                             if (p.getElementsByTagName('*').length > 0) {
@@ -189,7 +188,7 @@ define([
                                         collectionItems.push(o);
                                     }
                                 }
-                                collection1 = Dictionary.BlankNode();
+                                collection1 = RDF.BlankNode();
                                 object = collection1;
                                 for (j = 0; j < collectionItems.length; j += 1) {
                                     o = collectionItems[j];
@@ -202,12 +201,12 @@ define([
                                     } else {
                                         collectionItem = parseRdfXmlSubject(o);
                                     }
-                                    graph.add(collection1, Dictionary.Symbol(RDF.first.value), collectionItem);
+                                    graph.add(collection1, RDF.Symbol(RDF.first.value), collectionItem);
                                     if (j === collectionItems.length - 1) {
-                                        graph.add(collection1, Dictionary.Symbol(RDF.rest.value), Dictionary.Symbol(RDF.nil.value));
+                                        graph.add(collection1, RDF.Symbol(RDF.rest.value), RDF.Symbol(RDF.nil.value));
                                     } else {
-                                        collection2 = Dictionary.BlankNode();
-                                        graph.add(collection1, Dictionary.Symbol(RDF.rest.value), collection2);
+                                        collection2 = RDF.BlankNode();
+                                        graph.add(collection1, RDF.Symbol(RDF.rest.value), collection2);
                                         collection1 = collection2;
                                     }
                                 }
@@ -217,7 +216,7 @@ define([
                         }
                     } else if (hasAttributeNS(p, rdfNs, 'datatype')) {
                         o = p.childNodes[0] ? p.childNodes[0].nodeValue : "";
-                        object = Dictionary.Literal(o, null, Dictionary.Symbol(getAttributeNS(p, rdfNs, 'datatype')));
+                        object = RDF.Literal(o, null, RDF.Symbol(getAttributeNS(p, rdfNs, 'datatype')));
                     } else if (p.getElementsByTagName('*').length > 0) {
                         for (j = 0; j < p.childNodes.length; j += 1) {
                             o = p.childNodes[j];
@@ -235,7 +234,7 @@ define([
                         }
                     } else if (p.childNodes.length > 0) {
                         o = p.childNodes[0].nodeValue;
-                        object = Dictionary.Literal(literalOpts.lang ? o : '"' + o.replace(/"/g, '\\"') + '"', literalOpts.lang);
+                        object = RDF.Literal(literalOpts.lang ? o : '"' + o.replace(/"/g, '\\"') + '"', literalOpts.lang);
                     } else {
                         tmpObject1 = Utils.last(graph.statements);
                         parseRdfXmlDescription(p, false, graph, base, lang);
@@ -244,15 +243,15 @@ define([
                         if (tmpObject1 && tmpObject1 !== tmpObject2) {
                             object = tmpObject2;
                         } else {
-                            object = Dictionary.BlankNode();
+                            object = RDF.BlankNode();
                         }
                     }
                     graph.add(subject, property, object);
                     if (hasAttributeNS(p, rdfNs, 'ID')) {
-                        reified = Dictionary.Symbol(RDF.resource('<#' + getAttributeNS(p, rdfNs, 'ID') + '>', { base: base }).value);
-                        graph.add(reified, Dictionary.Symbol(RDF.subject.value), subject);
-                        graph.add(reified, Dictionary.Symbol(RDF.property.value), property);
-                        graph.add(reified, Dictionary.Symbol(RDF.object.value), object);
+                        reified = RDF.Symbol(RDF.resource('<#' + getAttributeNS(p, rdfNs, 'ID') + '>', { base: base }).value);
+                        graph.add(reified, RDF.Symbol(RDF.subject.value), subject);
+                        graph.add(reified, RDF.Symbol(RDF.property.value), property);
+                        graph.add(reified, RDF.Symbol(RDF.object.value), object);
                     }
                 }
             }
@@ -262,7 +261,7 @@ define([
             options = options || {};
             var base,
                 lang,
-                graph = Dictionary.Formula(options.graph);
+                graph = RDF.Formula(options.graph);
             if (doc.documentElement.namespaceURI === rdfNs && getLocalName(doc.documentElement) === 'RDF') {
                 lang = getAttributeNS(doc.documentElement, 'http://www.w3.org/XML/1998/namespace', 'lang');
                 base = getAttributeNS(doc.documentElement, 'http://www.w3.org/XML/1998/namespace', 'base') || URI.base();

@@ -1,12 +1,12 @@
 /*global assert, buster, define, sinon */
 define([
     "src/graphite/rdfparser/rdfjson",
-    "src/graphite/dictionary",
+    "src/graphite/rdf",
     "src/graphite/graph",
     "src/graphite/utils",
     "src/graphite/promise",
     "../../utils"
-], function (parser, Dictionary, graph, Utils, Promise, TestUtils) {
+], function (parser, RDF, graph, Utils, Promise, TestUtils) {
     "use strict";
     buster.testCase("Graphite parser (RDF JSON)", {
         "Parser has proper setup": function () {

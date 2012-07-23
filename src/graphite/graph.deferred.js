@@ -1,12 +1,12 @@
 define([
-    "./dictionary",
+    "./rdf",
     "./../rdfstore/rdf-persistence/lexicon",
     "./../rdfstore/rdf-persistence/quad_backend",
     "./../rdfstore/query-engine/query_engine",
     "./serializer/sparql",
     "./utils",
     "./promise"
-], function (Dictionary, Lexicon, QuadBackend, QueryEngine, Serializer, Utils, Promise) {
+], function (RDF, Lexicon, QuadBackend, QueryEngine, Serializer, Utils, Promise) {
     "use strict";
     function bindVar (vars) {
         return Utils.map(vars, function (v) {
@@ -94,14 +94,14 @@ define([
         }
     }
     function getTriples (callback) {
-        var formula = Dictionary.Formula(),
+        var formula = RDF.Formula(),
             subject,
             predicate,
             object;
         this.execute("SELECT * WHERE { ?s ?p ?o }", function (s, p, o) {
-            subject = Dictionary.createSubject(s);
-            predicate = Dictionary.createPredicate(p);
-            object = Dictionary.createObject(o);
+            subject = RDF.createSubject(s);
+            predicate = RDF.createPredicate(p);
+            object = RDF.createObject(o);
             formula.add(subject, predicate, object);
         }, function () {
             callback(formula);

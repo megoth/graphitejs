@@ -1,8 +1,7 @@
 define([
-    "../../graphite/dictionary",
-    "../rdf",
+    "../../graphite/rdf",
     "../uri"
-], function(Dictionary, RDF, URI) {
+], function(RDF, URI) {
     var wsRegex = /^(\u0009|\u000A|\u000D|\u0020|#([^\u000A\u000D])*)+/,
         nameStartChars = 'A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD', // can't include \u10000-\uEFFFF
         nameChars = '-' + nameStartChars + '0-9\u00B7\u0300-\u036F\u203F-\u2040',
@@ -25,7 +24,7 @@ define([
             parsed = name(data);
             return {
                 remainder: parsed.remainder,
-                blank: Dictionary.BlankNode(parsed.name)
+                blank: RDF.BlankNode(parsed.name)
             }
         } else if (first === '(') {
             parsed = collection(data, graph, opts);
@@ -36,10 +35,10 @@ define([
         } else if (data.substring(0, 2) === '[]') {
             return {
                 remainder: data.substring(2),
-                blank: Dictionary.BlankNode()
+                blank: RDF.BlankNode()
             };
         } else {
-            bnode = Dictionary.BlankNode();
+            bnode = RDF.BlankNode();
             opts.subject.unshift(bnode);
             data = validate(data, '[');
             data = ws(data);
@@ -59,7 +58,7 @@ define([
             i,
             items,
             list,
-            rest = Dictionary.Symbol(RDF.nil.value);
+            rest = RDF.Symbol(RDF.nil.value);
         //log('collection: ' + data);
         data = validate(data, '(');
         data = ws(data);
@@ -67,9 +66,9 @@ define([
         data = parsed.remainder;
         items = parsed.items;
         for (i = items.length - 1; i >= 0; i -= 1) {
-            list = Dictionary.BlankNode();
-            graph.add(list, Dictionary.Symbol(RDF.first.value), items[i]);
-            graph.add(list, Dictionary.Symbol(RDF.rest.value), rest);
+            list = RDF.BlankNode();
+            graph.add(list, RDF.Symbol(RDF.first.value), items[i]);
+            graph.add(list, RDF.Symbol(RDF.rest.value), rest);
             rest = list;
         }
         data = ws(data);
@@ -143,25 +142,25 @@ define([
             str = booleanRegex.exec(data)[1];
             return {
                 remainder: data.substring(str.length),
-                literal: Dictionary.Literal(str, null, Dictionary.Symbol.XSDboolean)
+                literal: RDF.Literal(str, null, RDF.Symbol.XSDboolean)
             }
         } else if (doubleRegex.test(data)) {
             str = doubleRegex.exec(data)[0];
             return {
                 remainder: data.substring(str.length),
-                literal: Dictionary.Literal(str, null, Dictionary.Symbol.XSDfloat)
+                literal: RDF.Literal(str, null, RDF.Symbol.XSDfloat)
             };
         } else if (decimalRegex.test(data)) {
             str = decimalRegex.exec(data)[0];
             return {
                 remainder: data.substring(str.length),
-                literal: Dictionary.Literal(str, null, Dictionary.Symbol.XSDdecimal)
+                literal: RDF.Literal(str, null, RDF.Symbol.XSDdecimal)
             };
         } else if (integerRegex.test(data)) {
             str = integerRegex.exec(data)[0];
             return {
                 remainder: data.substring(str.length),
-                literal: Dictionary.Literal(str, null, Dictionary.Symbol.XSDinteger)
+                literal: RDF.Literal(str, null, RDF.Symbol.XSDinteger)
             };
         } else {
             parsed = quotedString(data);
@@ -175,7 +174,7 @@ define([
                 parsed = resource(data, opts);
                 return {
                     remainder: parsed.remainder,
-                    literal: Dictionary.Literal(str, null, parsed.resource)
+                    literal: RDF.Literal(str, null, parsed.resource)
                 };
             } else if (first === '@') {
                 data = validate(data, '@');
@@ -183,12 +182,12 @@ define([
                 parsed = language(data);
                 return {
                     remainder: parsed.remainder,
-                    literal: Dictionary.Literal(str, parsed.language)
+                    literal: RDF.Literal(str, parsed.language)
                 };
             } else {
                 return {
                     remainder: data,
-                    literal: Dictionary.Literal(str)
+                    literal: RDF.Literal(str)
                 };
             }
         }
@@ -259,7 +258,7 @@ define([
     }
     function parse(data, opts) {
         var parsed = {},
-            graph = Dictionary.Formula(opts.graph);
+            graph = RDF.Formula(opts.graph);
         opts = opts || {};
         opts.namespaces = {};
         opts.base = opts.base || URI.base();
@@ -364,7 +363,7 @@ define([
             resource = RDF.resource(parsed.uri, opts.base);
             return {
                 remainder: parsed.remainder,
-                resource: Dictionary.Symbol(resource.value)
+                resource: RDF.Symbol(resource.value)
             };
         } else {
             try {
@@ -380,7 +379,7 @@ define([
             resource = RDF.resource(prefix + ':' + local, { namespaces: opts.namespaces, base: opts.base });
             return {
                 remainder: parsed.remainder,
-                resource: Dictionary.Symbol(resource.value)
+                resource: RDF.Symbol(resource.value)
             };
         }
     }
@@ -469,7 +468,7 @@ define([
                 data = ws(data.substring(1), { required: true });
                 return {
                     remainder: data,
-                    verb: Dictionary.Symbol(RDF.type.value)
+                    verb: RDF.Symbol(RDF.type.value)
                 };
             } else {
                 throw e;

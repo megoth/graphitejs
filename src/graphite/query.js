@@ -208,8 +208,8 @@ define([
             this.projection = this.parser.projection(projection).projection;
             return this;
         },
-        Than: function (callback) {
-            this.deferred.Than(callback);
+        then: function (callback) {
+            this.deferred.then(callback);
             return this;
         },
         where: function (pattern) {

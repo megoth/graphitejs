@@ -1,7 +1,8 @@
 define([
+    "./../rdfquery/curie",
     "./../rdfquery/uri",
     "./utils"
-], function (Uri, Utils) {
+], function (CURIE, URI, Utils) {
     function getDataType(value) {
         if(Utils.isBoolean(value)) {
             return Symbol.XSDboolean;
@@ -20,11 +21,15 @@ define([
      * @param [options]
      * @return {*}
      */
-    var createObject = function (object, options) {
+    var uriRegex = /^<(([^>]|\\>)*)>$/,
+        xsdNs = "http://www.w3.org/2001/XMLSchema#",
+        rdfNs = "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        rdfsNs = "http://www.w3.org/2000/01/rdf-schema#",
+        createObject = function (object, options) {
             options = options || {};
             if (object && !Utils.isString(object)) {
                 if (options.base) {
-                    return Symbol(Uri('' + object, options.base));
+                    return Symbol(URI('' + object, options.base));
                 }
                 if (options["isBlankNode"]) {
                     return BlankNode(object);
@@ -33,7 +38,7 @@ define([
                 return Literal(object);
             }
             if (object && options.base) {
-                return Symbol(Uri(object, options.base));
+                return Symbol(URI(object, options.base));
             }
             if (object && Utils.isUri(object)) {
                 return Symbol(object);
@@ -51,7 +56,7 @@ define([
          * @return {*}
          */
         createPredicate = function (predicate, base) {
-            return Symbol(Uri(predicate, base));
+            return Symbol(URI(predicate, base));
         },
         /**
          *
@@ -75,7 +80,7 @@ define([
                 if (!Utils.isString(subject)) {
                     return BlankNode(subject);
                 }
-                return Symbol(Uri(subject, base).toString());
+                return Symbol(URI(subject, base).toString());
             }
             return BlankNode();
         },
@@ -416,6 +421,70 @@ define([
                 uri: { value: uri },
                 value: { value: uri }
             });
+        },
+        resource = function (value, options) {
+            var resource, m, prefix, uri, opts;
+            if (typeof value === 'string') {
+                m = uriRegex.exec(value);
+                opts = Utils.extend({}, {
+                    base: URI.base(),
+                    namespaces: {}
+                }, options);
+                if (m !== null) {
+                    this.value = URI.resolve(m[1].replace(/\\>/g, '>'), opts.base);
+                } else if (value.substring(0, 1) === ':') {
+                    uri = opts.namespaces[''];
+                    if (uri === undefined) {
+                        throw "Malformed Resource: No namespace binding for default namespace in " + value;
+                    } else {
+                        this.value = URI.resolve(uri + value.substring(1));
+                    }
+                } else if (value.substring(value.length - 1) === ':') {
+                    prefix = value.substring(0, value.length - 1);
+                    uri = opts.namespaces[prefix];
+                    if (uri === undefined) {
+                        throw "Malformed Resource: No namespace binding for prefix " + prefix + " in " + value;
+                    } else {
+                        this.value = URI.resolve(uri);
+                    }
+                } else {
+                    try {
+                        this.value = CURIE(value, { namespaces: opts.namespaces });
+                    } catch (e) {
+                        throw "Malformed Resource: Bad format for resource " + e;
+                    }
+                }
+            }
+            return Object.create({
+                /**
+                 * Returns a <a href="http://n2.talis.com/wiki/RDF_JSON_Specification">RDF/JSON</a> representation of this triple.
+                 * @returns {Object}
+                 */
+                dump: function () {
+                    return {
+                        type: 'uri',
+                        value: this.value.toString()
+                    };
+                },
+                /**
+                 * Returns a string representing this resource in Turtle format.
+                 * @returns {String}
+                 */
+                toString: function () {
+                    return '<' + this.value + '>';
+                }
+            }, {
+                /**
+                 * Always fixed to 'uri' for resources.
+                 * @type String
+                 */
+                type: { value: 'uri' },
+                /**
+                 * The URI for the resource.
+                 * @type jQuery.rdf.uri
+                 */
+                value: { value: value }
+            });
         };
     Symbol.XSDboolean = Symbol('http://www.w3.org/2001/XMLSchema#boolean');
     Symbol.XSDdecimal = Symbol('http://www.w3.org/2001/XMLSchema#decimal');
@@ -435,6 +504,71 @@ define([
         Formula: Formula,
         Literal: Literal,
         Statement: Statement,
-        Symbol: Symbol
+        Symbol: Symbol,
+        /**
+         * <p>Creates a new jQuery.rdf.resource object. This should be invoked as a method rather than constructed using new; indeed you will not usually want to generate these objects directly, since they are automatically created from strings where necessary, such as by {@link jQuery.rdf#add}.</p>
+         * @class Represents an RDF resource.
+         * @param {String|jQuery.uri} value The value of the resource. If it's a string it must be in the format <code>&lt;<var>uri</var>&gt;</code> or <code><var>curie</var></code>.
+         * @param {Object} [options] Initialisation of the resource.
+         * @param {Object} [options.namespaces] An object representing a set of namespace bindings used when interpreting the CURIE specifying the resource.
+         * @param {String|jQuery.uri} [options.base] The base URI used to interpret any relative URIs used within the URI specifying the resource.
+         * @returns {jQuery.rdf.resource} The newly-created resource.
+         * @throws {String} Errors if the string is not in a recognised format.
+         * @example thisPage = rdf.resource('<>');
+         * @example foaf.Person = rdf.resource('foaf:Person', { namespaces: ns });
+         * @see jQuery.rdf.pattern
+         * @see jQuery.rdf.triple
+         * @see jQuery.rdf.blank
+         * @see jQuery.rdf.literal
+         */
+        resource: resource,
+        /**
+         * A {@link jQuery.rdf.resource} for rdf:type
+         * @constant
+         * @type jQuery.rdf.resource
+         */
+        type: resource('<' + rdfNs + 'type>'),
+        /**
+         * A {@link jQuery.rdf.resource} for rdfs:label
+         * @constant
+         * @type jQuery.rdf.resource
+         */
+        label: resource('<' + rdfsNs + 'label>'),
+        /**
+         * A {@link jQuery.rdf.resource} for rdf:first
+         * @constant
+         * @type jQuery.rdf.resource
+         */
+        first: resource('<' + rdfNs + 'first>'),
+        /**
+         * A {@link jQuery.rdf.resource} for rdf:rest
+         * @constant
+         * @type jQuery.rdf.resource
+         */
+        rest: resource('<' + rdfNs + 'rest>'),
+        /**
+         * A {@link jQuery.rdf.resource} for rdf:nil
+         * @constant
+         * @type jQuery.rdf.resource
+         */
+        nil: resource('<' + rdfNs + 'nil>'),
+        /**
+         * A {@link jQuery.rdf.resource} for rdf:subject
+         * @constant
+         * @type jQuery.rdf.resource
+         */
+        subject: resource('<' + rdfNs + 'subject>'),
+        /**
+         * A {@link jQuery.rdf.resource} for rdf:property
+         * @constant
+         * @type jQuery.rdf.resource
+         */
+        property: resource('<' + rdfNs + 'property>'),
+        /**
+         * A {@link jQuery.rdf.resource} for rdf:object
+         * @constant
+         * @type jQuery.rdf.resource
+         */
+        object: resource('<' + rdfNs + 'object>')
     };
 });

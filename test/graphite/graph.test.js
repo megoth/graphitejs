@@ -6,22 +6,22 @@ if (typeof module === "object" && typeof require === "function") {
 
 define([
     "src/graphite/graph",
-    "src/graphite/dictionary",
+    "src/graphite/rdf",
     "src/graphite/query",
     "src/graphite/utils",
     "src/graphite/promise"
-], function (Graph, Dictionary, Query, Utils, Promise) {
+], function (Graph, RDF, Query, Utils, Promise) {
     "use strict";
-    var subJohn = Dictionary.Symbol("http://dbpedia.org/resource/John_Lennon"),
-        preName = Dictionary.Symbol("http://xmlns.com/foaf/0.1/name"),
-        objJohnName = Dictionary.Literal("John Lennon"),
-        subTim = Dictionary.Symbol("http://dbpedia.org/resource/Tim_B_Lee"),
-        preKnows = Dictionary.Symbol("http://xmlns.com/foaf/0.1/knows"),
-        blank1 = Dictionary.BlankNode(),
-        blank2 = Dictionary.BlankNode(),
-        graph1 = Dictionary.Formula(),
-        graph2 = Dictionary.Formula(),
-        graph3 = Dictionary.Formula();
+    var subJohn = RDF.Symbol("http://dbpedia.org/resource/John_Lennon"),
+        preName = RDF.Symbol("http://xmlns.com/foaf/0.1/name"),
+        objJohnName = RDF.Literal("John Lennon"),
+        subTim = RDF.Symbol("http://dbpedia.org/resource/Tim_B_Lee"),
+        preKnows = RDF.Symbol("http://xmlns.com/foaf/0.1/knows"),
+        blank1 = RDF.BlankNode(),
+        blank2 = RDF.BlankNode(),
+        graph1 = RDF.Formula(),
+        graph2 = RDF.Formula(),
+        graph3 = RDF.Formula();
     graph1.add(subJohn, preName, objJohnName);
     graph1.add(blank1, preName, subJohn);
     graph1.add(blank2, preName, 42);

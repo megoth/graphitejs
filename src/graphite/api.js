@@ -1,9 +1,9 @@
 define([
-    "./dictionary",
+    "./rdf",
     "./graph",
     "./query",
     "./utils"
-], function (Dictionary, Graph, Query, Utils) {
+], function (RDF, Graph, Query, Utils) {
     var ApiSubject = function (api, subjectName) {
             return Object.create({
                 execute: function (callback) {
@@ -28,7 +28,7 @@ define([
              * @return {*}
              */
             addStatement: function (subject, predicate, object, callback) {
-                this.q = Query("INSERT DATA {{0}}".format(Dictionary.createStatement({
+                this.q = Query("INSERT DATA {{0}}".format(RDF.createStatement({
                     subject: subject,
                     predicate: predicate,
                     object: object
@@ -62,9 +62,9 @@ define([
                     callback = options;
                     options = {};
                 }
-                var subject = options.subject ? Dictionary.createSubject(options.subject).toNT() : "?subject",
-                    predicate = options.predicate ? Dictionary.createPredicate(options.predicate).toNT() : "?predicate",
-                    object = options.object ? Dictionary.createObject(options.object).toNT() : "?object";
+                var subject = options.subject ? RDF.createSubject(options.subject).toNT() : "?subject",
+                    predicate = options.predicate ? RDF.createPredicate(options.predicate).toNT() : "?predicate",
+                    object = options.object ? RDF.createObject(options.object).toNT() : "?object";
                 this.q = Query("SELECT * WHERE { {0} {1} {2} }".format(subject, predicate, object));
                 return this.execute(callback);
             },
@@ -95,7 +95,7 @@ define([
                 return this;
             },
             removeStatement: function (subject, predicate, object) {
-                this.q = Query("DELETE DATA { {0} }".format(Dictionary.createStatement({
+                this.q = Query("DELETE DATA { {0} }".format(RDF.createStatement({
                     subject: subject,
                     predicate: predicate,
                     object: object
