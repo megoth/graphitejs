@@ -1,14 +1,13 @@
 define([
     "./abstract_query_tree",
     "../utils",
-    "../quad_index",
     "./query_plan_sync_dpsize",
     "./query_filters",
     "./rdf_js_interface",
     "./../../graphite/rdfloader",
     "./callbacks",
     "./../../graphite/utils"
-], function (AbstractQueryTree, TreeUtils, QuadIndex, QueryPlan, QueryFilters, RDFJSInterface, RDFLoader, Callbacks, Utils) {
+], function (AbstractQueryTree, TreeUtils, QueryPlan, QueryFilters, RDFJSInterface, RDFLoader, Callbacks, Utils) {
     var QueryEngine = function(params) {
         this.backend = params.backend;
         this.lexicon = params.lexicon;
@@ -1177,7 +1176,7 @@ define([
                 //console.log("RANGE QUERY:")
                 //console.log(key);
                 //console.log(new QuadIndexCommon.Pattern(key));
-                var quads = that.backend.range(new QuadIndex.Pattern(key));
+                var quads = that.backend.range(new TreeUtils.Pattern(key));
                 //console.log("retrieved");
                 //console.log(quads)
                 if(quads == null || quads.length == 0) {
@@ -1404,7 +1403,7 @@ define([
                     object: object,
                     graph: graph
                 };
-                key = new QuadIndex.NodeKey(quad);
+                key = new TreeUtils.NodeKey(quad);
                 var result = this.backend.search(key);
                 if(!result) {
                     result = this.backend.index(key);
@@ -1574,7 +1573,7 @@ define([
                 result,
                 key;
             if(normalized != null) {
-                key = new QuadIndex.NodeKey(normalized);
+                key = new TreeUtils.NodeKey(normalized);
                 result = that.backend.search(key);
                 if(result){
                     return(result);
@@ -1597,7 +1596,7 @@ define([
             var that = this;
             var normalized = this.normalizeQuad(quad, queryEnv, false);
             if(normalized != null) {
-                var key = new QuadIndex.NodeKey(normalized);
+                var key = new TreeUtils.NodeKey(normalized);
                 that.backend.delete(key);
                 var result = that.lexicon.unregister(quad, key);
                 if(result == true){

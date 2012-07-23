@@ -5,36 +5,36 @@ if (typeof module === "object" && typeof require === "function") {
 
 define([
     "src/rdfstore/rdf-persistence/quad_backend",
-    "src/rdfstore/quad_index"
-], function (QuadBackend, QuadIndex) {
+    "src/rdfstore/utils"
+], function (QuadBackend, TreeUtils) {
     buster.testCase("RDFStore QuadBackend", {
         "indexForPatternTest": function () {
             var comps,
                 pattern;
             new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
                 comps = {subject:1, predicate:'p', object:3, graph:4},
-                pattern = new QuadIndex.Pattern(comps);
+                pattern = new TreeUtils.Pattern(comps);
                 assert.equals(backend._indexForPattern(pattern), "OGS");
                 comps = {subject:1, predicate:'p', object:3, graph:'g'};
-                pattern = new QuadIndex.Pattern(comps);
+                pattern = new TreeUtils.Pattern(comps);
                 assert.equals(backend._indexForPattern(pattern), "OS");
                 comps = {subject:'s', predicate:'p', object:3, graph:3};
-                pattern = new QuadIndex.Pattern(comps);
+                pattern = new TreeUtils.Pattern(comps);
                 assert.equals(backend._indexForPattern(pattern), "OGS");
                 comps = {subject:1, predicate:3, object:3, graph:3};
-                pattern = new QuadIndex.Pattern(comps);
+                pattern = new TreeUtils.Pattern(comps);
                 assert.equals(backend._indexForPattern(pattern), "SPOG");
                 comps = {subject:'s', predicate:3, object:3, graph:3};
-                pattern = new QuadIndex.Pattern(comps);
+                pattern = new TreeUtils.Pattern(comps);
                 assert.equals(backend._indexForPattern(pattern), "POG");
                 comps = {subject:'s', predicate:3, object:'o', graph:4};
-                pattern = new QuadIndex.Pattern(comps);
+                pattern = new TreeUtils.Pattern(comps);
                 assert.equals(backend._indexForPattern(pattern), "GP");
                 comps = {subject:'s', predicate:'p', object:5, graph:6};
-                pattern = new QuadIndex.Pattern(comps);
+                pattern = new TreeUtils.Pattern(comps);
                 assert.equals(backend._indexForPattern(pattern), "OGS");
                 comps = {subject:0, predicate:'p', object:'o', graph:6};
-                pattern = new QuadIndex.Pattern(comps);
+                pattern = new TreeUtils.Pattern(comps);
                 assert.equals(backend._indexForPattern(pattern), "GSP");
             });
         },
@@ -44,7 +44,7 @@ define([
                 index,
                 pattern;
             new QuadBackend.QuadBackend({treeOrder: 2}, function(backend){
-                key = new QuadIndex.NodeKey({subject:1, predicate:2, object:3, graph:4})
+                key = new TreeUtils.NodeKey({subject:1, predicate:2, object:3, graph:4})
                 backend.index(key, function(result){
                     for(var i=0; i<backend.indices.length; i++) {
                         indexKey = backend.indices[i];
@@ -56,7 +56,7 @@ define([
                         assert.equals(index.root.keys[0].key.object ,  3);
                         assert.equals(index.root.keys[0].key.graph ,  4);
                     }
-                    pattern = new QuadIndex.Pattern({subject:null, object:2, predicate:3, graph:4});
+                    pattern = new TreeUtils.Pattern({subject:null, object:2, predicate:3, graph:4});
                     backend.range(pattern, function(results){
                         assert.equals(results.length, 1);
                         backend.delete(results[0]);
