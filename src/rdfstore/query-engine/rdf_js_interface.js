@@ -1,6 +1,6 @@
 define([
     "./query_filters",
-    "../trees/utils"
+    "../utils"
 ], function (QueryFilters, TreeUtils) {
     var RDFJSInterface = {};
 

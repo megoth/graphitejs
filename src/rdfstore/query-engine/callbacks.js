@@ -1,10 +1,10 @@
 
 define([
     "./abstract_query_tree",
-    "./quad_index_common",
+    "../quad_index",
     "./rdf_js_interface",
-    "../trees/utils"
-], function (AbstractQueryTree, QuadIndexCommon, RDFJSInterface, TreeUtils) {
+    "../utils"
+], function (AbstractQueryTree, QuadIndex, RDFJSInterface, TreeUtils) {
     var Callbacks = {};
     Callbacks.ANYTHING = {'token': 'var',
         'value': '_'};
@@ -184,7 +184,7 @@ define([
         this.engine.registerNsInEnvironment(null, queryEnv);
         var that = this;
         var normalized = this.engine.normalizeQuad(quad, queryEnv, true);
-        var pattern =  new QuadIndexCommon.Pattern(normalized);
+        var pattern =  new QuadIndex.Pattern(normalized);
         var indexKey = that._indexForPattern(pattern);
         var indexOrder = that.componentOrders[indexKey];
         var index = that.indexMap[indexKey];
@@ -379,7 +379,7 @@ define([
             }
 
             var normalized = that.engine.normalizeQuad(quad, queryEnv, true);
-            pattern =  new QuadIndexCommon.Pattern(normalized);
+            pattern =  new QuadIndex.Pattern(normalized);
             indexKey = that._indexForPattern(pattern);
             indexOrder = that.componentOrders[indexKey];
             index = that.queriesIndexMap[indexKey];

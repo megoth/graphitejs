@@ -1,6 +1,6 @@
 define([
-    "./../../graphite/utils",
-    "./../trees/utils"
+    "../../graphite/utils",
+    "../utils"
 ], function (Utils, TreeUtils) {
     var QueryFilters = {};
     QueryFilters.checkFilters = function(pattern, bindings, nullifyErrors, dataset, queryEnv, queryEngine) {

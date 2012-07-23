@@ -1,5 +1,5 @@
 /*global assert, buster, define */
-define(["src/rdfstore/trees/utils"], function (utils) {
+define(["src/rdfstore/utils"], function (utils) {
     "use strict";
     buster.testCase("RDFStore Utils", {
         "testSeq": function (done) {

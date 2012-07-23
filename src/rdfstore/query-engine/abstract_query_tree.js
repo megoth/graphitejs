@@ -1,7 +1,7 @@
 define([
-    "./../../graphite/queryparser",
-    "./../trees/utils",
-    "./../../graphite/utils"
+    "../../graphite/queryparser",
+    "../utils",
+    "../../graphite/utils"
 ], function (QueryParser, TreeUtils, Utils) {
     function _buildGroupGraphPattern(node, env) {
         var f = (node.filters || []),

@@ -1,7 +1,77 @@
-
-define(["./in_memory_b_tree", "../trees/utils"], function (BaseTree, Utils) {
+/*global define */
+define(["./rdf-persistence/in_memory_b_tree", "./utils"], function (BaseTree, Utils) {
     var QuadIndex = {};
+    /**
+     * NodeKey
+     *
+     * Implements the interface of BinarySearchTree.Node
+     *
+     * A Tree node augmented with BPlusTree
+     * node structures
+     *
+     * @param components
+     * @param [order]
+     * @constructor
+     */
+    QuadIndex.NodeKey = function(components, order) {
+        this.subject = components.subject;
+        this.predicate = components.predicate;
+        this.object = components.object;
+        this.graph = components.graph;
+        this.order = order;
+    };
+    QuadIndex.NodeKey.prototype.comparator = function(keyPattern) {
+        for(var i=0; i<this.order.length; i++) {
+            var component = this.order[i];
+            if(keyPattern[component] == null) {
+                return 0;
+            } else {
+                if(this[component] < keyPattern[component] ) {
+                    return -1
+                } else if(this[component] > keyPattern[component]) {
+                    return 1
+                }
+            }
+        }
 
+        return 0;
+    };
+    /**
+     * Pattern
+     *
+     * A pattern with some variable components
+     */
+    QuadIndex.Pattern = function (components) {
+        this.subject = components.subject;
+        this.predicate = components.predicate;
+        this.object = components.object;
+        this.graph = components.graph;
+        this.indexKey = [];
+
+        this.keyComponents = {};
+
+        var order = [];
+        var indif = [];
+        components = ['subject', 'predicate', 'object', 'graph'];
+
+        // components must have been already normalized and
+        // inserted in the lexicon.
+        // OIDs retrieved from the lexicon *are* numbers so
+        // they can be told apart from variables (strings)
+        for (var i = 0; i < components.length; i++) {
+            if (typeof(this[components[i]]) === 'string') {
+                indif.push(components[i]);
+                this.keyComponents[components[i]] = null;
+            } else {
+                order.push(components[i]);
+                this.keyComponents[components[i]] = this[components[i]];
+                this.indexKey.push(components[i]);
+            }
+        }
+
+        this.order = order.concat(indif);
+        this.key = new QuadIndex.NodeKey(this.keyComponents, this.order);
+    };
     QuadIndex.Tree = function(params,callback) {
         if(arguments != 0) {
             this.componentOrder = params.componentOrder;
@@ -46,9 +116,7 @@ define(["./in_memory_b_tree", "../trees/utils"], function (BaseTree, Utils) {
             }
         }
     };
-
     Utils.extends(BaseTree.Tree, QuadIndex.Tree);
-
     QuadIndex.Tree.prototype.insert = function(quad, callback) {
         BaseTree.Tree.prototype.insert.call(this, quad, null);
         if(callback)
@@ -56,7 +124,6 @@ define(["./in_memory_b_tree", "../trees/utils"], function (BaseTree, Utils) {
 
         return true
     };
-
     QuadIndex.Tree.prototype.search = function(quad, callback) {
         var result = BaseTree.Tree.prototype.search.call(this, quad, true); // true -> check exists : not present in all the b-tree implementations, check first.
         if(callback)
@@ -64,7 +131,6 @@ define(["./in_memory_b_tree", "../trees/utils"], function (BaseTree, Utils) {
 
         return result;
     };
-
     QuadIndex.Tree.prototype.range = function (pattern, callback) {
         var result = null;
         if (typeof(this.root) === 'string') {
@@ -78,7 +144,6 @@ define(["./in_memory_b_tree", "../trees/utils"], function (BaseTree, Utils) {
 
         return result;
     };
-
     QuadIndex.Tree.prototype._rangeTraverse = function(tree,node, pattern) {
         var patternKey  = pattern.key;
         var acum = [];
@@ -120,4 +185,4 @@ define(["./in_memory_b_tree", "../trees/utils"], function (BaseTree, Utils) {
         return acum;
     };
     return QuadIndex;
-})
+});

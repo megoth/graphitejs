@@ -1,5 +1,5 @@
 
-define(["../trees/utils", "./quad_index"], function (TreeUtils, QuadIndex) {
+define(["../utils", "../quad_index"], function (TreeUtils, QuadIndex) {
     var QuadBackend = {};
     /*
      * "perfect" indices for RDF indexing
