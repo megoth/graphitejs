@@ -16,103 +16,99 @@ define([
             return null;
         });
     }
-    function executeAsk (promise, options) {
-        return function (success, result) {
-            promise.resolve(options.graph);
-            if (options.callback) {
-                options.callback(result);
-            }
-        };
-    }
-    function executeConstruct (promise, options) {
-        return function (success, results) {
-            promise.resolve(options.graph);
-            if(options.callback) {
-                options.callback(Graph(results.triples));
-            }
-        }
-    }
-    function executeDeleteData (promise, options) {
-        //console.log("IN GRAPH, DELETE DATA", options.query);
-        if (options.callback) {
-            Graph().execute(options.query).then(function (g) {
-                options.callback(g);
-            });
-        }
-        return function () {
-            //console.log("IN GRAPH, EXECUTE DELETE DATA");
-            options.graph.clone().then(function(g) {
-                //console.log("IN GRAPH, DELETE CLONED");
-                promise.resolve(g);
-            });
-        };
-    }
-    function executeInsertData (promise, options) {
-        //console.log("IN GRAPH, INSERT DATA", options.query);
-        if (options.callback) {
-            Graph().execute(options.query).then(function (g) {
-                options.callback(g);
-            });
-        }
-        return function () {
-            promise.resolve(options.graph);
-        };
-    }
-    function executeLoad (promise, options) {
-        var query;
-        //console.log("BEFORE LOAD");
-        return function (success, results) {
-            //console.log("GRAPH LOAD, RESULTS", success, results);
-            query = "INSERT DATA " + results.toNT();
-            Graph(options.graph).execute(query).then(function (g) {
-                if(options.callback) {
-                    Graph().then(function (g) {
-                        //console.log("ONCALLBACK QUERY", query);
-                        g.execute(query, function (g) {
-                            options.callback(g);
-                        });
-                    });
+    var executes = {
+        ask: function (promise, options) {
+            return function (success, result) {
+                promise.resolve(options.graph);
+                if (options.callback) {
+                    options.callback(result);
                 }
-                promise.resolve(g);
-            });
-        };
-    }
-    function executeSelect(promise, options) {
-        return function (success, results) {
-            var vars, lvars;
-            if (options.callback && options.callback.length > 0) {
-                vars = Utils.extractArgumentMap(options.callback);
-                Utils.each(results, function (args) {
-                    //console.debug("IN GRAPH, SELECT", args);
-                    try {
-                        lvars = Utils.mapArgs(vars, args);
-                    } catch (e) {
-                        lvars = args;
-                    }
-                    //console.debug("IN GRAPH, SELECT", lvars);
-                    options.callback.apply(options.graph, bindVar(lvars));
+            };
+        },
+        construct: function (promise, options) {
+            return function (success, results) {
+                promise.resolve(options.graph);
+                if(options.callback) {
+                    options.callback(Graph(results.triples));
+                }
+            }
+        },
+        deletedata: function (promise, options) {
+            //console.log("IN GRAPH, DELETE DATA", options.query);
+            if (options.callback) {
+                Graph().execute(options.query).then(function (g) {
+                    options.callback(g);
                 });
-            } else if (options.callback) {
-                Utils.each(results, options.callback);
             }
-            if(options.onsuccess) {
-                options.onsuccess();
+            return function () {
+                //console.log("IN GRAPH, EXECUTE DELETE DATA");
+                options.graph.clone().then(function(g) {
+                    //console.log("IN GRAPH, DELETE CLONED");
+                    promise.resolve(g);
+                });
+            };
+        },
+        insertdata: function (promise, options) {
+            //console.log("IN GRAPH, INSERT DATA", options.query);
+            if (options.callback) {
+                Graph().execute(options.query).then(function (g) {
+                    options.callback(g);
+                });
             }
-            promise.resolve(options.graph);
-        };
-    }
+            return function () {
+                promise.resolve(options.graph);
+            };
+        },
+        load: function (promise, options) {
+            var query;
+            //console.log("BEFORE LOAD");
+            return function (success, results) {
+                //console.log("GRAPH LOAD, RESULTS", success, results);
+                query = "INSERT DATA " + results.toNT();
+                Graph(options.graph).execute(query).then(function (g) {
+                    if(options.callback) {
+                        Graph().then(function (g) {
+                            //console.log("ONCALLBACK QUERY", query);
+                            g.execute(query, function (g) {
+                                options.callback(g);
+                            });
+                        });
+                    }
+                    promise.resolve(g);
+                });
+            };
+        },
+        select: function executeSelect(promise, options) {
+            return function (success, results) {
+                var vars, lvars;
+                if (options.callback && options.callback.length > 0) {
+                    vars = Utils.extractArgumentMap(options.callback);
+                    Utils.each(results, function (args) {
+                        //console.debug("IN GRAPH, SELECT", args);
+                        try {
+                            lvars = Utils.mapArgs(vars, args);
+                        } catch (e) {
+                            lvars = args;
+                        }
+                        //console.debug("IN GRAPH, SELECT", lvars);
+                        options.callback.apply(options.graph, bindVar(lvars));
+                    });
+                } else if (options.callback) {
+                    Utils.each(results, options.callback);
+                }
+                if(options.onsuccess) {
+                    options.onsuccess();
+                }
+                promise.resolve(options.graph);
+            };
+        }
+    };
     function getExecuteFunction(query) {
         var queryKind = getQueryKind(query);
-        //console.log("IN GRAPH, GET EXECUTE FUNCTION", queryKind);
-        switch (queryKind) {
-            case "ask": return executeAsk;
-            case "construct": return executeConstruct;
-            case "deletedata": return executeDeleteData;
-            case "insertdata": return executeInsertData;
-            case "load": return executeLoad;
-            case "select": return executeSelect;
-            default: throw new Error("Query not supported!");
+        if (!executes[queryKind]) {
+            throw new Error("Query not supported!");
         }
+        return executes[queryKind];
     }
     function getTriples (graph) {
         var deferred = Promise.defer(),
