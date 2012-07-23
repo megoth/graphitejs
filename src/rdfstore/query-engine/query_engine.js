@@ -17,8 +17,6 @@ define([
         // list of namespaces that will be automatically added to every query
         this.defaultPrefixes = {};
         this.abstractQueryTree = new AbstractQueryTree();
-        this.rdfLoader = new RDFLoader.RDFLoader();
-        //this.rdfLoader = new RDFLoader.RDFLoader(params['communication']);
         this.callbacksBackend = new Callbacks.CallbacksBackend(this);
     };
     // Utils
@@ -1238,7 +1236,7 @@ define([
                         };
                     }
                     //console.log("IN ENGINE, LOAD", aqt.sourceGraph, graph);
-                    this.rdfLoader.load(aqt.sourceGraph.value, graph, function(success, result){
+                    RDFLoader(aqt.sourceGraph.value, graph, function(success, result){
                         //console.log("IN ENGINE, LOAD SUCCESS", success, result);
                         if(success == false) {
                             //console.log("Error loading graph");
