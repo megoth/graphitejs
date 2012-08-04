@@ -419,7 +419,7 @@ define([
                     context[key] = obj["@id"];
                 }
             });
-            return Utils.getUri(curie, context);
+            return RDF.getUri(curie, context);
         }
     };
     Node.prototype.init.prototype = Node.prototype;

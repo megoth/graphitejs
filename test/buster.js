@@ -14,24 +14,6 @@ config["Graphite tests - browser"] = {
         "test/*/*.test.js",
         "test/*/*/*.test.js"
     ],
-//    tests: [
-//        "test/utils.js",
-//        "test/graphite/*.test.js",
-//        "test/graphite/*/*.test.js"
-//    ],
-//    tests: [
-//        "test/utils.js",
-//        "test/rdfquery/*.test.js",
-//        "test/rdfquery/*/*.test.js"
-//    ],
-//    tests: [
-//        "test/utils.js",
-//        "test/rdfstore/*/*.test.js"
-//    ],
-//    tests: [
-//        "test/utils.js",
-//        "test/rdfstore/trees/in_memory_b_tree.test.js"
-//    ],
     libs: [
         "lib/*.js"
     ],

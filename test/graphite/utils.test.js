@@ -7,21 +7,6 @@ define([
     "src/graphite/utils"
 ], function (Utils) {
     "use strict";
-    var subJohn = "http://dbpedia.org/resource/John_Lennon",
-        preName = "http://xmlns.com/foaf/0.1/name",
-        objJohnName = "John Lennon",
-        subTim = "http://dbpedia.org/resource/Tim_B_Lee",
-        objTimName = "Tim Berners-Lee",
-        preKnows = "http://xmlns.com/foaf/0.1/knows",
-        graph1 = [
-            Utils.createTriple(subJohn, preName, objJohnName).statement,
-            Utils.createTriple(null, preName, objTimName).statement,
-            Utils.createTriple(null, preName, 42).statement,
-            Utils.createTriple(subTim, preName, 42).statement
-        ],
-        triple2 = [
-            Utils.createTriple(subJohn, preKnows, subTim).statement
-        ];
     buster.testCase("Graphite utils", {
         "Function .any": function () {
             var nativeSome = Array.prototype.some;
@@ -136,71 +121,6 @@ define([
                 refute.equals(a, c);
             }
         },
-        "Function .createLiteral": function () {
-            var literalBoolean = Utils.createLiteral(true),
-                literalDouble = Utils.createLiteral(1.3),
-                literalInteger = Utils.createLiteral(1),
-                literalString = Utils.createLiteral("test"),
-                literalLanguageString = Utils.createLiteral({
-                    value: "test",
-                    lang: "jp"
-                });
-            assert.equals(literalBoolean, '"true"^^<http://www.w3.org/2001/XMLSchema#boolean>');
-            assert.equals(literalDouble, '"1.3"^^<http://www.w3.org/2001/XMLSchema#double>');
-            assert.equals(literalInteger, '"1"^^<http://www.w3.org/2001/XMLSchema#integer>');
-            assert.equals(literalString, '"test"');
-            assert.equals(literalLanguageString, '"test"@jp');
-        },
-        "Function .createTriple": function () {
-            var triple1 = Utils.createTriple("http://e.org/a", "http://e.org/b", "http://e.org/c"),
-                triple2 = Utils.createTriple("http://e.org/a", "http://e.org/b", "Test"),
-                triple3 = Utils.createTriple("http://e.org/a", "http://e.org/b", 42),
-                triple4 = Utils.createTriple(null, "http://e.org/b", "http://e.org/c"),
-                triple5 = Utils.createTriple(null, "http://e.org/b", '"Test"@jp'),
-                triple6 = Utils.createTriple("http://e.org/a", "http://e.org/b", '"42"^^<http://www.w3.org/2001/XMLSchema#integer>');
-            assert.equals(triple1.statement, '<http://e.org/a> <http://e.org/b> <http://e.org/c> .');
-            assert.equals(triple1.subject, {
-                value: 'http://e.org/a',
-                token: 'uri'
-            });
-            assert.equals(triple1.predicate, {
-                value: 'http://e.org/b',
-                token: 'uri'
-            });
-            assert.equals(triple1.object, {
-                value: "http://e.org/c",
-                token: 'uri'
-            });
-            assert.equals(triple2.statement, '<http://e.org/a> <http://e.org/b> "Test" .');
-            assert.equals(triple2.object, {
-                value: "Test",
-                token: "literal"
-            });
-            assert.equals(triple3.statement, '<http://e.org/a> <http://e.org/b> "42"^^<http://www.w3.org/2001/XMLSchema#integer> .');
-            assert.equals(triple3.object, {
-                value: 42,
-                token: "literal",
-                datatype: "http://www.w3.org/2001/XMLSchema#integer"
-            });
-            assert.equals(triple4.statement, '<' + triple4.subject.value + '> <http://e.org/b> <http://e.org/c> .');
-            assert.equals(triple4.subject.token, "uri");
-            assert.equals(triple5.statement, '<' + triple5.subject.value + '> <http://e.org/b> "Test"@jp .');
-            assert.equals(triple5.object, {
-                value: "Test",
-                token: "literal",
-                lang: "jp"
-            });
-            assert.equals(triple6.statement, '<http://e.org/a> <http://e.org/b> "42"^^<http://www.w3.org/2001/XMLSchema#integer> .');
-            assert.equals(triple6.object, {
-                value: 42,
-                token: "literal",
-                datatype: "http://www.w3.org/2001/XMLSchema#integer"
-            });
-        },
-        "Function .createResource": function () {
-            var uri = Utils.createResource("http://e.org/a");
-            assert.equals(uri, "<http://e.org/a>");
-        },
         "Function .difference": function () {
             var result = Utils.difference([1, 2, 3], [2, 30, 40]);
             assert.equals(result.join(' '), '1 3', 'takes the difference of two arrays');
@@ -288,14 +208,6 @@ define([
                 return str + " A";
             });
             assert.equals(str, "TEST A");
-        },
-        "Function .getTriples": function () {
-            var triples = Utils.getTriples("");
-            assert.equals(triples, []);
-            triples = Utils.getTriples("INSERT DATA { " + graph1.join("") + " }");
-            assert.equals(triples, graph1);
-            triples = Utils.getTriples("DELETE DATA { " + triple2.join("") + " }");
-            assert.equals(triples, triple2);
         },
         "Function .indexOf": function () {
             var arr = [1, 2, 3],

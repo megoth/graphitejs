@@ -1,8 +1,10 @@
 define([
     "./../rdfquery/curie",
+    "./../rdfstore/rdf-persistence/lexicon",
+    "./rdf",
     "./../rdfquery/uri",
     "./utils"
-], function (CURIE, URI, Utils) {
+], function (CURIE, Lexicon, RDF, URI, Utils) {
     function getDataType(value) {
         if(Utils.isBoolean(value)) {
             return Symbol.XSDboolean;
@@ -21,10 +23,46 @@ define([
      * @param [options]
      * @return {*}
      */
-    var uriRegex = /^<(([^>]|\\>)*)>$/,
+    var lexicon = new Lexicon.Lexicon(),
+        uriRegex = /^<(([^>]|\\>)*)>$/,
         xsdNs = "http://www.w3.org/2001/XMLSchema#",
         rdfNs = "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
         rdfsNs = "http://www.w3.org/2000/01/rdf-schema#",
+        /**
+         * Takes a value and converts it to a literal accordingly to the Turtle-format
+         *
+         * @param literal {String|Integer} The value to check
+         * @param options {Object} Looks for one of two properties, ie. lang or datatype
+         * @return {String} The converted literal
+         */
+        createLiteral = function (literal) {
+            var tmp,
+                lang,
+                type;
+            if (Utils.isObject(literal)) {
+                lang = literal.lang;
+                type = literal.datatype;
+                literal = '"' + literal.value + '"';
+            }
+            if (Utils.isString(literal)) {
+                tmp = literal[0] === '"' ? literal : '"' + literal + '"';
+            } else {
+                tmp = '"' + literal + '"';
+            }
+            if (lang) {
+                tmp += "@" + lang;
+            } else if (type && Utils.isUri(type)) {
+                tmp += "^^<" + type + ">";
+            } else if (type) {
+                tmp += "^^" + type;
+            } else {
+                type = getDatatype(literal);
+                if (type) {
+                    tmp += "^^<" + type + ">";
+                }
+            }
+            return tmp;
+        },
         createObject = function (object, options) {
             options = options || {};
             if (object && !Utils.isString(object)) {
@@ -57,6 +95,13 @@ define([
          */
         createPredicate = function (predicate, base) {
             return Symbol(URI(predicate, base));
+        },
+        createResource = function (resource) {
+            resource = Utils.isObject(resource) ? resource : {
+                value: resource,
+                token: getToken(resource)
+            };
+            return resource.token === "uri" ? '<' + resource.value + '>' : createLiteral(resource);
         },
         /**
          *
@@ -130,6 +175,123 @@ define([
                 return undefined;
             }
             throw ("Can't make term from " + val + " of type " + typeof val);
+        },
+        createTriple = function (subject, predicate, object) {
+            var lang,
+                datatype;
+            subject = subject || {
+                value: '_:' + lexicon.registerBlank(),
+                token: "uri"
+            };
+            subject = Utils.isObject(subject) ? subject : {
+                value: subject,
+                token: "uri"
+            };
+            predicate = Utils.isObject(predicate) ? predicate : {
+                value: predicate,
+                token: "uri"
+            };
+            object = Utils.isObject(object) ? object : {
+                value: object,
+                token: getToken(object)
+            };
+            if (object.token === "literal") {
+                datatype = getDatatype(object.value);
+                if (datatype) {
+                    object.datatype = datatype;
+                }
+                lang = getLang(object.value);
+                if (lang) {
+                    object.lang = lang;
+                }
+                object.value = getValue(object.value, datatype, lang);
+            }
+            return {
+                subject: subject,
+                predicate: predicate,
+                object: object,
+                statement: createResource(subject) + ' ' + createResource(predicate) + ' ' + createResource(object) + ' .'
+            };
+        },
+        /**
+         *
+         * @param literal
+         * @return {*}
+         */
+        getDatatype = function (literal) {
+            var datatypeAt;
+            if (Utils.isString(literal)) {
+                datatypeAt = literal.indexOf('"^^');
+                if (datatypeAt > 0) {
+                    return literal.substring(datatypeAt + 4, literal.length - 1);
+                }
+                return undefined;
+            } else if (Utils.isBoolean(literal)) {
+                return "http://www.w3.org/2001/XMLSchema#boolean";
+            } else if (Utils.isInteger(literal)) {
+                return "http://www.w3.org/2001/XMLSchema#integer";
+            } else if (Utils.isDouble(literal)) {
+                return "http://www.w3.org/2001/XMLSchema#double";
+            }
+            return undefined;
+        },
+        getLang = function (literal) {
+            var langAt;
+            if (Utils.isString(literal)) {
+                langAt = literal.indexOf('"@');
+                if (langAt > 0) {
+                    return literal.substring(langAt + 2);
+                }
+            }
+            return undefined;
+        },
+        /**
+         * Figures whether or not the given object is a uri or a literal
+         * @param object {Varies} The object to check whether is a uri or a literal
+         * @returns {String} Either uri or literal
+         */
+        getToken = function (object) {
+            return Utils.isUri(object) ? "uri" : "literal";
+        },
+        getTriples = function (query) {
+            var tripleRegex = /<(_:[0-9]+|http:\/\/[a-zA-Z0-9#_\-.\/]+)>\s+<http:\/\/[a-zA-Z0-9#_\-.\/]+>\s+("[a-zA-Z0-9\s\-_\/]+"\^\^<http:\/\/[a-zA-Z0-9#_\-.\/]+>|"[a-zA-Z0-9\s\-_\/]+"|<(_:[0-9]+|http:\/\/[a-zA-Z0-9#_\-.\/]+|)>)\s*[.]?/g,
+                triples = query.match(tripleRegex);
+            return triples !== null ? triples : [];
+        },
+        /**
+         * Get a URI from a CURIE and given prefixes
+         *
+         * @param curie The CURIE that will be processed to a URI
+         * @param prefixes A given map of prefixes
+         * @returns {String} A processed string
+         */
+        getUri = function (curie, prefixes) {
+            if (!curie) {
+                return undefined;
+            }
+            curie = Utils.isString(prefixes[curie]) ? prefixes[curie] : curie;
+            var isCurie = curie.match(/^[a-zA-Z]+:/),
+                prefix,
+                suffix;
+            if (!isCurie || Utils.isUri(curie)) {
+                return curie;
+            }
+            prefix = isCurie[0].replace(":", "");
+            prefix = prefixes[prefix] || prefix + ":";
+            suffix = curie.match(/^[a-zA-Z]+:([a-zA-Z]+)/);
+            suffix = suffix ? suffix[1] : "";
+            return prefix + suffix;
+        },
+        getValue = function (literal, datatype, lang) {
+            if (!Utils.isString(literal)) {
+                return literal;
+            }
+            if (datatype) {
+                return literal.substring(1, literal.length - datatype.length - 5);
+            } else if (lang) {
+                return literal.substring(1, literal.length - lang.length - 2);
+            }
+            return literal;
         },
         NextId = 0, // Global genid
         NTAnonymousNodePrefix = "_:",
@@ -493,11 +655,15 @@ define([
     Symbol.XSDdateTime = Symbol('http://www.w3.org/2001/XMLSchema#dateTime');
     Symbol.integer = Symbol('http://www.w3.org/2001/XMLSchema#integer');
     return {
+        createLiteral: createLiteral,
         createObject: createObject,
         createPredicate: createPredicate,
+        createResource: createResource,
         createStatement: createStatement,
         createSubject: createSubject,
         createTerm: createTerm,
+        createTriple: createTriple,
+        getUri: getUri,
         BlankNode: BlankNode,
         Collection: Collection,
         Empty: Empty,

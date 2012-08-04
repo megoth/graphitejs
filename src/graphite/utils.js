@@ -1,6 +1,4 @@
-define([
-    "./../rdfstore/rdf-persistence/lexicon"
-], function (Lexicon) {
+define([], function () {
     var breaker          = {},
         ArrayProto       = Array.prototype,
         ObjProto         = Object.prototype,
@@ -16,8 +14,7 @@ define([
         toString         = ObjProto.toString,
         hasOwnProperty   = ObjProto.hasOwnProperty,
         nativeTrim       = String.prototype.trim,
-        Utils = {},
-        lexicon = new Lexicon.Lexicon();
+        Utils = {};
     if (!Object.create) {
         var F;
         Object.prototype.create = function (obj) {
@@ -150,85 +147,6 @@ define([
         return obj;
     };
     /**
-     * Takes a value and converts it to a literal accordingly to the Turtle-format
-     *
-     * @param literal {String|Integer} The value to check
-     * @param options {Object} Looks for one of two properties, ie. lang or datatype
-     * @return {String} The converted literal
-     */
-    Utils.createLiteral = function (literal) {
-        var tmp,
-            lang,
-            type;
-        if (Utils.isObject(literal)) {
-            lang = literal.lang;
-            type = literal.datatype;
-            literal = '"' + literal.value + '"';
-        }
-        if (Utils.isString(literal)) {
-            tmp = literal[0] === '"' ? literal : '"' + literal + '"';
-        } else {
-            tmp = '"' + literal + '"';
-        }
-        if (lang) {
-            tmp += "@" + lang;
-        } else if (type && Utils.isUri(type)) {
-            tmp += "^^<" + type + ">";
-        } else if (type) {
-            tmp += "^^" + type;
-        } else {
-            type = this.getDatatype(literal);
-            if (type) {
-                tmp += "^^<" + type + ">";
-            }
-        }
-        return tmp;
-    };
-    Utils.createResource = function (resource) {
-        resource = Utils.isObject(resource) ? resource : {
-            value: resource,
-            token: this.getToken(resource)
-        };
-        return resource.token === "uri" ? '<' + resource.value + '>' : Utils.createLiteral(resource);
-    };
-    Utils.createTriple = function (subject, predicate, object) {
-        var lang,
-            datatype;
-        subject = subject || {
-            value: '_:' + lexicon.registerBlank(),
-            token: "uri"
-        };
-        subject = Utils.isObject(subject) ? subject : {
-            value: subject,
-            token: "uri"
-        };
-        predicate = Utils.isObject(predicate) ? predicate : {
-            value: predicate,
-            token: "uri"
-        };
-        object = Utils.isObject(object) ? object : {
-            value: object,
-            token: Utils.getToken(object)
-        };
-        if (object.token === "literal") {
-            datatype = Utils.getDatatype(object.value);
-            if (datatype) {
-                object.datatype = datatype;
-            }
-            lang = Utils.getLang(object.value);
-            if (lang) {
-                object.lang = lang;
-            }
-            object.value = Utils.getValue(object.value, datatype, lang);
-        }
-        return {
-            subject: subject,
-            predicate: predicate,
-            object: object,
-            statement: Utils.createResource(subject) + ' ' + Utils.createResource(predicate) + ' ' + Utils.createResource(object) + ' .'
-        };
-    };
-    /**
      * Taken from underscore
      *
      * Take the difference between one array and a number of other arrays.
@@ -325,86 +243,6 @@ define([
             memo[memo.length] = value;
             return memo;
         }, []);
-    };
-    /**
-     *
-     * @param literal
-     * @return {*}
-     */
-    Utils.getDatatype = function (literal) {
-        var datatypeAt;
-        if (Utils.isString(literal)) {
-            datatypeAt = literal.indexOf('"^^');
-            if (datatypeAt > 0) {
-                return literal.substring(datatypeAt + 4, literal.length - 1);
-            }
-            return undefined;
-        } else if (Utils.isBoolean(literal)) {
-            return "http://www.w3.org/2001/XMLSchema#boolean";
-        } else if (Utils.isInteger(literal)) {
-            return "http://www.w3.org/2001/XMLSchema#integer";
-        } else if (Utils.isDouble(literal)) {
-            return "http://www.w3.org/2001/XMLSchema#double";
-        }
-        return undefined;
-    };
-    Utils.getLang = function (literal) {
-        var langAt;
-        if (Utils.isString(literal)) {
-            langAt = literal.indexOf('"@');
-            if (langAt > 0) {
-                return literal.substring(langAt + 2);
-            }
-        }
-        return undefined;
-    };
-    /**
-     * Figures whether or not the given object is a uri or a literal
-     * @param object {Varies} The object to check whether is a uri or a literal
-     * @returns {String} Either uri or literal
-     */
-    Utils.getToken = function (object) {
-        return Utils.isUri(object) ? "uri" : "literal";
-    };
-    Utils.getTriples = function (query) {
-        var tripleRegex = /<(_:[0-9]+|http:\/\/[a-zA-Z0-9#_\-.\/]+)>\s+<http:\/\/[a-zA-Z0-9#_\-.\/]+>\s+("[a-zA-Z0-9\s\-_\/]+"\^\^<http:\/\/[a-zA-Z0-9#_\-.\/]+>|"[a-zA-Z0-9\s\-_\/]+"|<(_:[0-9]+|http:\/\/[a-zA-Z0-9#_\-.\/]+|)>)\s*[.]?/g,
-            triples = query.match(tripleRegex);
-        return triples !== null ? triples : [];
-    };
-    /**
-     * Get a URI from a CURIE and given prefixes
-     *
-     * @param curie The CURIE that will be processed to a URI
-     * @param prefixes A given map of prefixes
-     * @returns {String} A processed string
-     */
-    Utils.getUri = function (curie, prefixes) {
-        if (!curie) {
-            return undefined;
-        }
-        curie = Utils.isString(prefixes[curie]) ? prefixes[curie] : curie;
-        var isCurie = curie.match(/^[a-zA-Z]+:/),
-            prefix,
-            suffix;
-        if (!isCurie || Utils.isUri(curie)) {
-            return curie;
-        }
-        prefix = isCurie[0].replace(":", "");
-        prefix = prefixes[prefix] || prefix + ":";
-        suffix = curie.match(/^[a-zA-Z]+:([a-zA-Z]+)/);
-        suffix = suffix ? suffix[1] : "";
-        return prefix + suffix;
-    };
-    Utils.getValue = function (literal, datatype, lang) {
-        if (!Utils.isString(literal)) {
-            return literal;
-        }
-        if (datatype) {
-            return literal.substring(1, literal.length - datatype.length - 5);
-        } else if (lang) {
-            return literal.substring(1, literal.length - lang.length - 2);
-        }
-        return literal;
     };
     /**
      * Has own property?

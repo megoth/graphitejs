@@ -1,8 +1,7 @@
 /*global assert, buster, define, refute, sinon*/
 define([
-    "src/graphite/rdfparser/jsonld",
-    "src/graphite/utils"
-], function (parser, Utils) {
+    "src/graphite/rdfparser/jsonld"
+], function (parser) {
     "use strict";
     buster.testCase("Graphite parser (JSON-LD)", {
         setUp: function () {
@@ -289,10 +288,6 @@ define([
                     "@list": [ "joe", "bob", "jaybee" ]
                 }
             }, {}, function (graph) {
-                //console.log(graph);
-                Utils.each(graph.statements, function (s, i) {
-                    //console.log(i, s);
-                });
                 assert.equals(graph.statements.length, 10);
                 assert.equals(graph.statements[0].predicate.value, "http://www.w3.org/1999/02/22-rdf-syntax-ns#first");
                 assert.equals(graph.statements[0].object.value, "jaybee");
