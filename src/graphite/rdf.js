@@ -1,9 +1,8 @@
 define([
     "./../rdfquery/curie",
-    "./rdf",
     "./../rdfquery/uri",
     "./utils"
-], function (CURIE, RDF, URI, Utils) {
+], function (CURIE, URI, Utils) {
     function getDataType(value) {
         if(Utils.isBoolean(value)) {
             return Symbol.XSDboolean;

@@ -10,7 +10,7 @@ define([
         uri2 = "http://dbpedia.org/resource/John_Lennon",
         uriHomepage = "http://xmlns.com/foaf/0.1/homepage";
     buster.testCase("Graphite RDF", {
-        "//Function .createLiteral": function () {
+        "Function .createLiteral": function () {
             var literalBoolean = RDF.createLiteral(true),
                 literalDouble = RDF.createLiteral(1.3),
                 literalInteger = RDF.createLiteral(1),
@@ -25,7 +25,7 @@ define([
             assert.equals(literalString, '"test"');
             assert.equals(literalLanguageString, '"test"@jp');
         },
-        "//Function .createObject": {
+        "Function .createObject": {
             "Blank nodes": function () {
                 var object = RDF.createObject(),
                     blankNodeId = parseInt(object.id);
@@ -42,13 +42,13 @@ define([
                 assert.equals(RDF.createObject(integerValue1, { base: uri1 }), RDF.Symbol(uri1 + integerValue1));
             }
         },
-        "//Function .createPredicate": function () {
+        "Function .createPredicate": function () {
             var predicate = RDF.createPredicate(uriHomepage);
             assert.equals(predicate, RDF.Symbol(uriHomepage));
             predicate = RDF.createPredicate(stringValue1, uri1);
             assert.equals(predicate, RDF.Symbol(uri1 + stringValue1));
         },
-        "//Function .createStatement": function () {
+        "Function .createStatement": function () {
             var subject,
                 subjectBN,
                 object,
@@ -77,7 +77,7 @@ define([
             }), "_:{0} <{1}> _:{2} .".format(subjectBN + 2, uriHomepage, objectBN + 2));
 
         },
-        "//Function .createSubject": {
+        "Function .createSubject": {
             "Blank nodes": function () {
                 var subject = RDF.createSubject(),
                     blankNodeId;
