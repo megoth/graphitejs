@@ -1,10 +1,9 @@
 define([
     "./../rdfquery/curie",
-    "./../rdfstore/rdf-persistence/lexicon",
     "./rdf",
     "./../rdfquery/uri",
     "./utils"
-], function (CURIE, Lexicon, RDF, URI, Utils) {
+], function (CURIE, RDF, URI, Utils) {
     function getDataType(value) {
         if(Utils.isBoolean(value)) {
             return Symbol.XSDboolean;
@@ -23,8 +22,7 @@ define([
      * @param [options]
      * @return {*}
      */
-    var lexicon = new Lexicon.Lexicon(),
-        uriRegex = /^<(([^>]|\\>)*)>$/,
+    var uriRegex = /^<(([^>]|\\>)*)>$/,
         xsdNs = "http://www.w3.org/2001/XMLSchema#",
         rdfNs = "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
         rdfsNs = "http://www.w3.org/2000/01/rdf-schema#",
@@ -175,43 +173,6 @@ define([
                 return undefined;
             }
             throw ("Can't make term from " + val + " of type " + typeof val);
-        },
-        createTriple = function (subject, predicate, object) {
-            var lang,
-                datatype;
-            subject = subject || {
-                value: '_:' + lexicon.registerBlank(),
-                token: "uri"
-            };
-            subject = Utils.isObject(subject) ? subject : {
-                value: subject,
-                token: "uri"
-            };
-            predicate = Utils.isObject(predicate) ? predicate : {
-                value: predicate,
-                token: "uri"
-            };
-            object = Utils.isObject(object) ? object : {
-                value: object,
-                token: getToken(object)
-            };
-            if (object.token === "literal") {
-                datatype = getDatatype(object.value);
-                if (datatype) {
-                    object.datatype = datatype;
-                }
-                lang = getLang(object.value);
-                if (lang) {
-                    object.lang = lang;
-                }
-                object.value = getValue(object.value, datatype, lang);
-            }
-            return {
-                subject: subject,
-                predicate: predicate,
-                object: object,
-                statement: createResource(subject) + ' ' + createResource(predicate) + ' ' + createResource(object) + ' .'
-            };
         },
         /**
          *
@@ -658,11 +619,8 @@ define([
         createLiteral: createLiteral,
         createObject: createObject,
         createPredicate: createPredicate,
-        createResource: createResource,
         createStatement: createStatement,
         createSubject: createSubject,
-        createTerm: createTerm,
-        createTriple: createTriple,
         getUri: getUri,
         BlankNode: BlankNode,
         Collection: Collection,
